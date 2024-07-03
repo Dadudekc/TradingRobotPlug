@@ -1,4 +1,4 @@
-# C:\TheTradingRobotPlug\Scripts\Data_Fetch\alpha_vantage_df
+# C:\TheTradingRobotPlug\Scripts\Data_Fetch\alpha_vantage_df.py
 # Scripts\Data_Fetch\alpha_vantage_df
 
 import os
@@ -10,8 +10,13 @@ from typing import List, Optional
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
-from Utilities.data_store import DataStore
-from Utilities.data_fetch_utils import setup_logger, load_config, load_paths, ensure_directory_exists
+# Add project root to the Python path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
+sys.path.append(project_root)
+
+from Scripts.Utilities.data_store import DataStore
+from Scripts.Utilities.data_fetch_utils import setup_logger, load_config, load_paths, ensure_directory_exists
 
 # Load environment variables from .env file
 load_dotenv()

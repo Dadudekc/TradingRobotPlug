@@ -1,59 +1,62 @@
-# C:\TheTradingRobotPlug\Scripts\Utilities\data_fetch_utils.py
-
 import os
 import logging
-import pandas as pd
-from sqlalchemy import create_engine
-from config_handling import load_config, load_paths
+from configparser import ConfigParser
+from pathlib import Path
+from typing import Dict
 
-def setup_logger(logger_name: str, log_file: str) -> logging.Logger:
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s [%(levelname)s] - %(message)s")
+# Conditional import based on script execution context
+if __name__ == "__main__":
+    import sys
+    from pathlib import Path
+    script_dir = Path(__file__).resolve().parent
+    project_root = script_dir.parent.parent
+    sys.path.append(str(project_root))
+    from Scripts.Utilities.config_handling import ConfigManager
+else:
+    from .config_handling import ConfigManager
 
-    logs_dir = os.path.dirname(log_file)
-    os.makedirs(logs_dir, exist_ok=True)
-
+def setup_logger(name: str, log_file: str, level=logging.INFO) -> logging.Logger:
+    """Function to set up a logger."""
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
+    logger = logging.getLogger(name)
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
     file_handler = logging.FileHandler(log_file)
     file_handler.setFormatter(formatter)
+    logger.setLevel(level)
     logger.addHandler(file_handler)
-
     return logger
 
-def ensure_directory_exists(directory: str):
+def ensure_directory_exists(directory: str) -> None:
+    """Ensure that a directory exists."""
     os.makedirs(directory, exist_ok=True)
 
-def save_data_to_csv(data, file_path, overwrite=False):
+def save_data_to_csv(df, file_path: str, overwrite: bool = False) -> None:
+    """Save DataFrame to CSV."""
     if not overwrite and os.path.exists(file_path):
-        logger = logging.getLogger("DataFetchUtility")
-        logger.warning(f"File {file_path} already exists and overwrite is set to False.")
-        return
+        raise FileExistsError(f"File {file_path} already exists.")
+    df.to_csv(file_path, index=False)
+
+def save_data_to_sql(df, table_name: str, db_path: str, if_exists: str = 'replace') -> None:
+    """Save DataFrame to SQL database."""
+    from sqlalchemy import create_engine
+    engine = create_engine(f'sqlite:///{db_path}')
+    df.to_sql(table_name, con=engine, if_exists=if_exists, index=False)
+
+def fetch_data_from_sql(table_name: str, db_path: str):
+    """Fetch data from SQL database."""
+    from sqlalchemy import create_engine
+    import pandas as pd
     
-    try:
-        data.to_csv(file_path, index=False)
-        logger = logging.getLogger("DataFetchUtility")
-        logger.info(f"Data saved to {file_path}")
-    except Exception as e:
-        logger = logging.getLogger("DataFetchUtility")
-        logger.error(f"Error saving data to CSV: {e}")
-
-def save_data_to_sql(df, table_name, db_path='data/trading_data.db', if_exists='replace'):
-    ensure_directory_exists(os.path.dirname(db_path))
     engine = create_engine(f'sqlite:///{db_path}')
-    try:
-        df.to_sql(table_name, engine, if_exists=if_exists, index=False)
-        logger = logging.getLogger("DataFetchUtility")
-        logger.info(f"Data saved to SQL table {table_name} in {db_path}")
-    except Exception as e:
-        logger = logging.getLogger("DataFetchUtility")
-        logger.error(f"Error saving data to SQL: {e}")
+    return pd.read_sql(table_name, con=engine)
 
-def fetch_data_from_sql(table_name, db_path='data/trading_data.db'):
-    engine = create_engine(f'sqlite:///{db_path}')
-    try:
-        df = pd.read_sql_table(table_name, engine)
-        return df
-    except Exception as e:
-        logger = logging.getLogger("DataFetchUtility")
-        logger.error(f"Error fetching data from SQL: {e}")
-        return None
+if __name__ == "__main__":
+    # Example usage when running the script independently
+    config_manager = ConfigManager()  # Initialize ConfigManager
+    config = config_manager.load_config()  # Load configuration
+    paths = config_manager.get_paths()  # Get paths from configuration
+    user_settings = config_manager.get_user_settings()  # Get user settings
+    
+    print("Configuration loaded:", config)
+    print("Paths loaded:", paths)
+    print("User settings loaded:", user_settings)
