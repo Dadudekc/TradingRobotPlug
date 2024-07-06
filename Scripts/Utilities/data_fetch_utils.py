@@ -1,62 +1,58 @@
-import os
+# C:\TheTradingRobotPlug\Scripts\Utilities\data_fetch_utils.py
+
 import logging
-from configparser import ConfigParser
-from pathlib import Path
-from typing import Dict
+import os
+import pandas as pd
+import sqlite3
 
-# Conditional import based on script execution context
+class DataFetchUtils:
+    def __init__(self, log_file='logs/data_fetch_utils.log'):
+        log_dir = os.path.dirname(log_file)
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        self.logger = self.setup_logger("DataFetchUtils", log_file)
+        
+    def setup_logger(self, name, log_file, level=logging.INFO):
+        """Function to setup a logger"""
+        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        handler = logging.FileHandler(log_file)        
+        handler.setFormatter(formatter)
+
+        logger = logging.getLogger(name)
+        logger.setLevel(level)
+        logger.addHandler(handler)
+
+        return logger
+
+    def ensure_directory_exists(self, directory):
+        """Ensure that a directory exists"""
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+    def save_data_to_csv(self, df, file_path, overwrite=False):
+        """Save DataFrame to a CSV file"""
+        if not overwrite and os.path.exists(file_path):
+            raise FileExistsError(f"{file_path} already exists. Set overwrite=True to overwrite it.")
+        df.to_csv(file_path, index=False)
+        self.logger.info(f"Data saved to CSV at {file_path}")
+
+    def save_data_to_sql(self, df, table_name, db_path, if_exists='replace'):
+        """Save DataFrame to a SQL database"""
+        conn = sqlite3.connect(db_path)
+        df.to_sql(table_name, conn, if_exists=if_exists, index=False)
+        conn.close()
+        self.logger.info(f"Data saved to SQL table {table_name} in database {db_path}")
+
+    def fetch_data_from_sql(self, table_name, db_path):
+        """Fetch data from a SQL database"""
+        conn = sqlite3.connect(db_path)
+        df = pd.read_sql(f"SELECT * FROM {table_name}", conn)
+        conn.close()
+        self.logger.info(f"Data fetched from SQL table {table_name} in database {db_path}")
+        return df
+
+# Example of how to use the DataFetchUtils class
 if __name__ == "__main__":
-    import sys
-    from pathlib import Path
-    script_dir = Path(__file__).resolve().parent
-    project_root = script_dir.parent.parent
-    sys.path.append(str(project_root))
-    from Scripts.Utilities.config_handling import ConfigManager
-else:
-    from .config_handling import ConfigManager
-
-def setup_logger(name: str, log_file: str, level=logging.INFO) -> logging.Logger:
-    """Function to set up a logger."""
-    os.makedirs(os.path.dirname(log_file), exist_ok=True)
-    logger = logging.getLogger(name)
-    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setFormatter(formatter)
-    logger.setLevel(level)
-    logger.addHandler(file_handler)
-    return logger
-
-def ensure_directory_exists(directory: str) -> None:
-    """Ensure that a directory exists."""
-    os.makedirs(directory, exist_ok=True)
-
-def save_data_to_csv(df, file_path: str, overwrite: bool = False) -> None:
-    """Save DataFrame to CSV."""
-    if not overwrite and os.path.exists(file_path):
-        raise FileExistsError(f"File {file_path} already exists.")
-    df.to_csv(file_path, index=False)
-
-def save_data_to_sql(df, table_name: str, db_path: str, if_exists: str = 'replace') -> None:
-    """Save DataFrame to SQL database."""
-    from sqlalchemy import create_engine
-    engine = create_engine(f'sqlite:///{db_path}')
-    df.to_sql(table_name, con=engine, if_exists=if_exists, index=False)
-
-def fetch_data_from_sql(table_name: str, db_path: str):
-    """Fetch data from SQL database."""
-    from sqlalchemy import create_engine
-    import pandas as pd
-    
-    engine = create_engine(f'sqlite:///{db_path}')
-    return pd.read_sql(table_name, con=engine)
-
-if __name__ == "__main__":
-    # Example usage when running the script independently
-    config_manager = ConfigManager()  # Initialize ConfigManager
-    config = config_manager.load_config()  # Load configuration
-    paths = config_manager.get_paths()  # Get paths from configuration
-    user_settings = config_manager.get_user_settings()  # Get user settings
-    
-    print("Configuration loaded:", config)
-    print("Paths loaded:", paths)
-    print("User settings loaded:", user_settings)
+    utils = DataFetchUtils()
+    utils.ensure_directory_exists('data/csv')
+    print("Logger and utility functions initialized.")

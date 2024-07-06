@@ -1,0 +1,92 @@
+### Journal Entry
+
+**Date:** July 6, 2024
+
+**Summary:**
+Today, I focused on getting the original files in my TradingRobotPlug project to work correctly. I encountered a major setback when the data fetching utility (`data_fetch_utils.py`) got deleted, so I had to recreate it from scratch. This involved setting up a `DataFetchUtils` class with functions for logging, ensuring directory existence, and handling data operations with CSV and SQL files.
+
+**Progress:**
+1. **Recreated DataFetchUtils:**
+   - Implemented a new `DataFetchUtils` class with methods to set up a logger, ensure directory existence, save data to CSV, save data to SQL, and fetch data from SQL.
+
+2. **Updated DataStore:**
+   - Modified the `DataStore` class to use the new `DataFetchUtils` class for all data operations.
+   - Ensured that all methods in `DataStore` properly utilize the utility functions provided by `DataFetchUtils`.
+
+3. **Test Files:**
+   - Created initial versions of test files for both `DataFetchUtils` and `DataStore`.
+   - Encountered and fixed several syntax errors, though the test files still need more work to ensure comprehensive coverage and error-free execution.
+
+4. **Realization About Config Handling:**
+   - I just realized that the `config_handling.py` file is currently empty. This will need to be addressed to manage configuration settings effectively in the project.
+
+**Challenges:**
+- Multitasking between my day job and working on this project was tricky. It's funny because it reminded me of sneaking off to smoke weed in the past. Now, I'm sneaking in project work instead.
+- Recreating `data_fetch_utils.py` from scratch was time-consuming but necessary to get the project back on track.
+
+**Next Steps:**
+- Complete and debug the test files for `DataFetchUtils` and `DataStore` to ensure all functionalities are thoroughly tested and working correctly.
+- Run the tests to validate the implementations and make any necessary adjustments based on the test results.
+- Address the empty `config_handling.py` file to manage configuration settings properly.
+- Continue modularizing and refining the project for better organization and maintainability.
+
+**Reflection:**
+Despite the challenges, I'm making steady progress. Rebuilding the data fetching utility was a significant step forward, and once the test files are complete, I’ll have more confidence in the robustness of my code. The multitasking aspect adds a layer of complexity, but it's also a reminder of how far I've come in terms of prioritizing productive and meaningful work.
+
+**Opportunity:**
+Additionally, I have a job opportunity to train models with the company Outlier AI. This is an exciting prospect that aligns well with my current work and career goals.
+
+**Project Structure:**
+Here's the current structure of my project:
+
+```
+C:\TheTradingRobotPlug
+├── data
+│   └── csv
+├── Documents
+│   ├── Explanations
+│   ├── Journal
+│   │   ├── entry 1- 07-3-2024
+│   │   └── entry 2 07-6-2024
+│   └── Resume Stuff
+│       └── data_fetch_skills
+├── logs
+│   ├── data_fetch_utils.log
+│   └── data_store.log
+├── Scripts
+│   ├── __pycache__
+│   ├── Data_Fetch
+│   │   ├── __pycache__
+│   │   ├── data
+│   │   ├── __init__.py
+│   │   ├── alpha_vantage_df.py
+│   │   └── nasdaq.py
+│   │   └── polygon_io.py
+│   ├── powershells
+│   └── Utilities
+│       ├── __pycache__
+│       ├── __init__.py
+│       ├── config_handling.py
+│       ├── data_fetch_utils.py
+│       └── data_store.py
+│   ├── __init__.py
+├── Tests
+│   ├── Data_Fetch
+│   │   ├── __pycache__
+│   │   ├── __init__.py
+│   │   ├── test_alpha_vantage_df.py
+│   │   └── test_polygon_io.py
+│   ├── mock_csv_dir
+│   └── Utilities
+│       ├── test_config_handling.py
+│       ├── test_data_fetch_utils.py
+│       └── test_data_store.py
+│   ├── __init__.py
+│   └── run_tests.py
+├── .env
+├── .gitignore
+└── config.ini
+```
+
+------- 3:27 am------
+
