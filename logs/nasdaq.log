@@ -1,0 +1,28 @@
+2024-07-06 16:29:23,895 ERROR Unexpected error for symbol AAPL: 'date'
+2024-07-06 16:29:23,903 ERROR Unexpected error for symbol AAPL: 'date'
+2024-07-06 16:38:29,209 ERROR Unexpected error for symbol AAPL: 'Value based partial slicing on non-monotonic DatetimeIndexes with non-existing keys is not allowed.'
+2024-07-06 16:38:50,319 ERROR Error fetching data for symbol AAPL: HTTPSConnectionPool(host='dataondemand.nasdaq.com', port=443): Max retries exceeded with url: /api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31 (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x000001B80C60EF50>, 'Connection to dataondemand.nasdaq.com timed out. (connect timeout=None)'))
+2024-07-06 16:38:51,643 INFO Data saved to CSV at C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv
+2024-07-06 16:38:51,680 INFO Data saved to SQL table AAPL_data in database C:/TheTradingRobotPlug/data/trading_data.db
+2024-07-06 16:51:00,806 ERROR Unexpected error for symbol AAPL: 'Value based partial slicing on non-monotonic DatetimeIndexes with non-existing keys is not allowed.'
+2024-07-06 16:51:08,234 ERROR Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31
+2024-07-06 16:51:18,346 INFO Data saved to CSV at C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv
+2024-07-06 16:51:18,370 INFO Data saved to SQL table AAPL_data in database C:/TheTradingRobotPlug/data/trading_data.db
+2024-07-06 16:57:28,900 ERROR Unexpected error for symbol AAPL: 'Value based partial slicing on non-monotonic DatetimeIndexes with non-existing keys is not allowed.'
+2024-07-06 16:57:29,175 ERROR Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31
+2024-07-06 16:57:29,501 INFO Data saved to CSV at C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv
+2024-07-06 16:57:29,521 INFO Data saved to SQL table AAPL_data in database C:/TheTradingRobotPlug/data/trading_data.db
+2024-07-06 16:58:21,477 ERROR Unexpected error for symbol AAPL: 'Value based partial slicing on non-monotonic DatetimeIndexes with non-existing keys is not allowed.'
+2024-07-06 16:58:21,773 ERROR Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31
+2024-07-06 16:59:26,356 ERROR Unexpected error for symbol AAPL: 'Value based partial slicing on non-monotonic DatetimeIndexes with non-existing keys is not allowed.'
+2024-07-06 16:59:26,576 ERROR Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31
+2024-07-06 17:04:19,899 ERROR Unexpected error for symbol AAPL: name 'logging' is not defined
+2024-07-06 17:04:19,900 ERROR Unexpected error for symbol AAPL: name 'logging' is not defined
+2024-07-06 17:04:19,900 ERROR Unexpected error for symbol AAPL: name 'logging' is not defined
+2024-07-06 17:09:04,893 ERROR Unexpected error for symbol AAPL: 'Value based partial slicing on non-monotonic DatetimeIndexes with non-existing keys is not allowed.'
+2024-07-06 17:09:05,379 ERROR Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31
+2024-07-06 17:11:37,199 ERROR Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31
+2024-07-06 17:14:58,492 ERROR Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31
+2024-07-06 17:24:39,064 ERROR Nasdaq: Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31
+2024-07-06 17:26:59,767 ERROR Nasdaq: Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31
+2024-07-06 17:29:08,463 ERROR Nasdaq: 404 Client Error - The requested URL was not found on the server.

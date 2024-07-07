@@ -53,7 +53,7 @@ Documentation:
 Maintained a journal to document daily progress, key accomplishments, and next steps.
 Project Directory Structure:
 markdown
-Copy code
+
 C:\TheTradingRobotPlug
 ├── .env
 ├── .gitignore

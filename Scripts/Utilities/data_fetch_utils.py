@@ -1,5 +1,3 @@
-# C:\TheTradingRobotPlug\Scripts\Utilities\data_fetch_utils.py
-
 import logging
 import os
 import pandas as pd
@@ -11,11 +9,11 @@ class DataFetchUtils:
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
         self.logger = self.setup_logger("DataFetchUtils", log_file)
-        
-    def setup_logger(self, name, log_file, level=logging.INFO):
+
+    def setup_logger(self, name, log_file, level=logging.WARNING):  # By setting the logging level to DEBUG, you can enable detailed logging. If you want to disable debug prints, you can change the logging level to INFO or WARNING.
         """Function to setup a logger"""
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        handler = logging.FileHandler(log_file)        
+        handler = logging.FileHandler(log_file)
         handler.setFormatter(formatter)
 
         logger = logging.getLogger(name)

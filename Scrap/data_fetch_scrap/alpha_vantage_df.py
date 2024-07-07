@@ -1,6 +1,3 @@
-# C:\TheTradingRobotPlug\Scripts\Data_Fetch\alpha_vantage_df.py
-# Scripts\Data_Fetch\alpha_vantage_df
-
 import os
 import sys
 import requests
@@ -16,30 +13,26 @@ project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
 from Scripts.Utilities.data_store import DataStore
-from Scripts.Utilities.data_fetch_utils import setup_logger, load_config, load_paths, ensure_directory_exists
+from Scripts.Utilities.data_fetch_utils import DataFetchUtils
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Load configuration from config.ini
-config = load_config()
-paths = load_paths(config)
-
 class AlphaVantageDataFetcher:
     def __init__(self, csv_dir: Optional[str] = None, db_path: Optional[str] = None):
-        self.logger = setup_logger("AlphaVantageDataFetcher", os.path.join(paths['data_folder'], "logs/alpha_vantage.log"))
+        self.utils = DataFetchUtils("C:/TheTradingRobotPlug/logs/alpha_vantage.log")
         self.api_key = os.getenv('ALPHAVANTAGE_API_KEY')
         self.base_url = "https://www.alphavantage.co/query"
 
         if csv_dir is None:
-            csv_dir = paths['data_folder']
+            csv_dir = 'C:/TheTradingRobotPlug/data/csv'
         if db_path is None:
-            db_path = os.path.join(paths['data_folder'], "trading_data.db")
+            db_path = 'C:/TheTradingRobotPlug/data/trading_data.db'
 
         self.data_store = DataStore(csv_dir, db_path)
 
         if not self.api_key:
-            self.logger.error("API key not found in environment variables.")
+            self.utils.logger.error("API key not found in environment variables.")
             raise ValueError("API key not found in environment variables.")
 
     def fetch_data(self, ticker_symbols: List[str], start_date: str = None, end_date: str = None) -> dict:
@@ -70,7 +63,7 @@ class AlphaVantageDataFetcher:
 
             data = response.json()
             if "Time Series (Daily)" not in data:
-                self.logger.warning(f"No data found for symbol: {symbol}")
+                self.utils.logger.warning(f"No data found for symbol: {symbol}")
                 return None
 
             df = pd.DataFrame.from_dict(data["Time Series (Daily)"], orient="index")
@@ -85,10 +78,10 @@ class AlphaVantageDataFetcher:
 
             return filtered_df
         except requests.RequestException as e:
-            self.logger.error(f"Error fetching data for symbol {symbol}: {e}")
+            self.utils.logger.error(f"Error fetching data for symbol {symbol}: {e}")
             return None
         except Exception as e:
-            self.logger.error(f"Unexpected error for symbol {symbol}: {e}")
+            self.utils.logger.error(f"Unexpected error for symbol {symbol}: {e}")
             return None
 
     def validate_date_range(self, df: pd.DataFrame, start_date: str, end_date: str) -> bool:
@@ -96,13 +89,13 @@ class AlphaVantageDataFetcher:
         end_date = pd.to_datetime(end_date)
 
         if df.index.min() > start_date or df.index.max() < end_date:
-            self.logger.warning(f"Requested date range {start_date} to {end_date} is out of available data range for {df['symbol'].iloc[0]}")
+            self.utils.logger.warning(f"Requested date range {start_date} to {end_date} is out of available data range for {df['symbol'].iloc[0]}")
             return False
         return True
 
     def save_data(self, data: pd.DataFrame, symbol: str, overwrite=False) -> None:
         if data.empty:
-            self.logger.warning(f"No data to save for symbol: {symbol}")
+            self.utils.logger.warning(f"No data to save for symbol: {symbol}")
             return
 
         file_name = f"{symbol}_data.csv"

@@ -1,0 +1,34 @@
+from Scripts.DataFetchers.alpha_vantage_fetcher import AlphaVantageDataFetcher
+from Scripts.DataFetchers.nasdaq_fetcher import NasdaqDataFetcher
+from Scripts.DataFetchers.polygon_fetcher import PolygonDataFetcher
+
+if __name__ == "__main__":
+    data_fetchers = [
+        AlphaVantageDataFetcher(),
+        NasdaqDataFetcher(),
+        PolygonDataFetcher()
+    ]
+    
+    ticker_symbols = ["AAPL"]
+    start_date = "2022-01-01"
+    end_date = "2022-12-31"
+
+    for fetcher in data_fetchers:
+        fetched_data = fetcher.fetch_data(ticker_symbols, start_date, end_date)
+
+        if fetched_data:
+            for symbol, data in fetched_data.items():
+                fetcher.save_data(data, symbol, overwrite=True)
+            print(f"Data fetched and saved for {ticker_symbols} from {fetcher.source}")
+        else:
+            print(f"No data fetched for {ticker_symbols} from {fetcher.source}.")
+
+    # Fetch and print real-time data
+    for fetcher in data_fetchers:
+        for symbol in ticker_symbols:
+            real_time_data = fetcher.fetch_real_time_data(symbol)
+            if real_time_data is not None:
+                print(f"Real-time data for {symbol} from {fetcher.source}:")
+                print(real_time_data)
+            else:
+                print(f"No real-time data fetched for {symbol} from {fetcher.source}.")

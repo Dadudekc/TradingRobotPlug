@@ -1,9 +1,11 @@
-# Import necessary libraries at the top of the file
+# C:\TheTradingRobotPlug\Scripts\Data_Fetch\polygon_io.py
+
 import os
 import pandas as pd
 import requests
 from datetime import datetime
 from dotenv import load_dotenv
+from Scripts.Utilities.data_fetch_utils import DataFetchUtils
 
 # Load environment variables from .env file
 load_dotenv()
@@ -13,6 +15,8 @@ class PolygonDataFetcher:
         self.api_key = api_key
         self.csv_dir = csv_dir
         os.makedirs(self.csv_dir, exist_ok=True)
+        self.utils = DataFetchUtils("C:/TheTradingRobotPlug/logs/polygon_data_fetcher.log")
+        self.logger = self.utils.logger
 
     def fetch_data_from_polygon(self, ticker_symbols, start_date=None, end_date=None):
         """
@@ -37,12 +41,13 @@ class PolygonDataFetcher:
             if os.path.exists(csv_file_path):
                 df = pd.read_csv(csv_file_path, index_col=0, parse_dates=['date'])
                 data_frames[symbol] = df
-                print(f"Loaded data for {symbol} from the CSV file.")
+                self.logger.info(f"Loaded data for {symbol} from the CSV file.")
             else:
                 df = self.fetch_data_for_symbol(symbol, start_date, end_date)
                 if df is not None:
                     df.to_csv(csv_file_path, index=True)
                     data_frames[symbol] = df
+                    self.logger.info(f"Fetched and saved data for {symbol} to CSV file.")
 
         return data_frames
 
@@ -73,10 +78,10 @@ class PolygonDataFetcher:
                 df.drop(['t'], axis=1, inplace=True)
                 return df
             else:
-                print(f"Fetched data for {symbol} is not in the expected format.")
+                self.logger.warning(f"Fetched data for {symbol} is not in the expected format.")
                 return None
         except requests.exceptions.RequestException as e:
-            print(f"Failed to fetch data for {symbol}. Error: {str(e)}")
+            self.logger.error(f"Failed to fetch data for {symbol}. Error: {str(e)}")
             return None
 
 if __name__ == "__main__":

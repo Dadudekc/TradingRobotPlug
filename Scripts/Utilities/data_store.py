@@ -1,5 +1,3 @@
-# C:\TheTradingRobotPlug\Scripts\Utilities\data_store.py
-
 import os
 import pandas as pd
 import pickle
@@ -16,11 +14,11 @@ from Scripts.Utilities.data_fetch_utils import DataFetchUtils
 from Scripts.Utilities.config_handling import ConfigManager
 
 class DataStore:
-    def __init__(self, csv_dir='data/csv', db_path='data/trading_data.db'):
+    def __init__(self, csv_dir='C:/TheTradingRobotPlug/data/csv', db_path='C:/TheTradingRobotPlug/data/trading_data.db'):
         self.csv_dir = csv_dir
         self.db_path = db_path
         self.data = {}
-        self.utils = DataFetchUtils("logs/data_store.log")
+        self.utils = DataFetchUtils("C:/TheTradingRobotPlug/logs/data_store.log")
         self.utils.ensure_directory_exists(self.csv_dir)
         self.config_manager = ConfigManager()  # Assuming you will use this for some configuration settings
 
