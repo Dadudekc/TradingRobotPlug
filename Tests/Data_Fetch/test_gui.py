@@ -1,6 +1,14 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import tkinter as tk
+import os
+import sys
+
+# Add project root to the Python path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
+sys.path.append(project_root)
+
 from Scripts.GUI.fetcher_gui import FetcherGUI
 
 class TestFetcherGUI(unittest.TestCase):
@@ -43,3 +51,4 @@ class TestFetcherGUI(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

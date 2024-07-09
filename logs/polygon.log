@@ -1,0 +1,3 @@
+2024-07-08 21:27:19,034 ERROR AlphaVantage: Unexpected error for symbol AAPL: Cannot connect to host www.alphavantage.co:443 ssl:default [getaddrinfo failed]
+2024-07-08 21:27:30,236 ERROR Nasdaq: Unexpected error for symbol AAPL: Cannot connect to host dataondemand.nasdaq.com:443 ssl:default [getaddrinfo failed]
+2024-07-08 21:27:30,236 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [getaddrinfo failed]

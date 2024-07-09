@@ -28,3 +28,202 @@
 2024-07-06 17:24:39,064 ERROR Nasdaq: Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31
 2024-07-06 17:26:59,767 ERROR Nasdaq: Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31
 2024-07-06 17:29:08,463 ERROR Nasdaq: 404 Client Error - The requested URL was not found on the server.
+2024-07-07 18:20:19,892 WARNING AlphaVantage: No data fetched for symbol AAPL
+2024-07-07 18:20:19,892 WARNING AlphaVantage: No data fetched for symbol AAPL
+2024-07-07 19:54:00,889 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 19:54:00,889 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 19:54:00,889 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 19:54:00,889 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 19:54:00,901 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 19:54:00,901 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 19:54:00,901 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 19:54:00,901 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 19:54:00,901 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 19:54:00,901 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 19:55:39,885 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 19:55:39,885 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 19:55:39,885 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 19:55:39,885 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 19:55:39,895 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 19:55:39,895 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 19:55:39,895 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 19:55:39,895 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 19:55:39,895 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 19:55:39,895 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:05:22,131 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:05:22,131 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:05:22,131 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:05:22,131 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:05:22,141 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:05:22,141 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:05:22,141 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:05:22,141 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:05:22,141 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:05:22,141 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:07:26,567 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:07:26,567 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:07:26,567 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:07:26,567 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:07:26,582 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:07:26,582 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:07:26,582 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:07:26,582 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:07:26,582 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:07:26,582 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:32:20,592 ERROR Nasdaq: 404 Client Error - The requested URL was not found on the server.
+2024-07-07 20:32:51,430 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:32:51,430 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:32:51,430 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:32:51,430 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:32:51,438 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:32:51,438 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:32:51,438 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:32:51,438 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:32:51,438 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:32:51,438 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:36:51,762 ERROR Nasdaq: 404 Client Error - The requested URL was not found on the server.
+2024-07-07 20:37:00,200 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:37:00,200 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:37:00,200 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:37:00,200 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:37:00,208 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:37:00,208 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:37:00,208 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:37:00,208 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:37:00,208 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:37:00,208 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:40:19,467 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:40:19,467 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:40:19,467 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:40:19,467 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:40:19,479 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:40:19,479 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:40:19,479 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:40:19,479 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:40:19,479 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:40:19,479 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:45:17,257 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,257 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,257 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,257 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,271 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:45:17,271 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:45:17,271 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:45:17,271 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:45:17,271 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:45:17,271 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:45:17,292 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,292 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,292 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,292 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,292 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,292 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,312 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,312 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,312 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,312 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,312 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:45:17,312 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:22,951 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:22,951 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:22,951 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:22,951 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:22,964 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:48:22,964 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:48:22,964 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:48:22,964 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:48:22,964 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:48:22,964 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:48:22,989 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:22,989 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:22,989 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:22,989 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:22,989 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:22,989 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:23,013 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:23,013 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:23,013 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:23,013 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:23,013 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:48:23,013 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,336 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,336 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,336 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,336 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,347 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:53:33,347 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:53:33,347 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:53:33,347 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:53:33,347 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:53:33,347 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 20:53:33,388 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,388 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,388 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,388 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,388 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,388 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,435 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,435 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,435 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,435 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,435 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 20:53:33,435 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,418 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,418 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,418 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,418 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,434 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 21:03:12,434 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 21:03:12,434 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 21:03:12,434 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 21:03:12,434 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 21:03:12,434 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 21:03:12,478 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,478 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,478 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,478 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,478 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,478 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,528 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,528 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,528 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,528 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,528 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 21:03:12,528 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:03:42,882 WARNING AlphaVantage: No data fetched for symbol AAPL
+2024-07-07 23:03:42,882 WARNING AlphaVantage: No data fetched for symbol AAPL
+2024-07-07 23:14:43,436 WARNING AlphaVantage: No data fetched for symbol AAPL
+2024-07-07 23:14:43,436 WARNING AlphaVantage: No data fetched for symbol AAPL
+2024-07-07 23:16:01,387 WARNING AlphaVantage: No data fetched for symbol AAPL
+2024-07-07 23:16:01,387 WARNING AlphaVantage: No data fetched for symbol AAPL
+2024-07-07 23:16:19,908 WARNING AlphaVantage: No data fetched for symbol AAPL
+2024-07-07 23:16:19,908 WARNING AlphaVantage: No data fetched for symbol AAPL
+2024-07-07 23:19:40,421 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,421 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,421 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,421 ERROR AlphaVantage: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,440 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 23:19:40,440 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 23:19:40,440 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 23:19:40,440 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 23:19:40,440 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 23:19:40,440 WARNING AlphaVantage: No data to save for symbol: AAPL
+2024-07-07 23:19:40,478 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,478 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,478 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,478 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,478 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,478 ERROR Nasdaq: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,516 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,516 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,516 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,516 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,516 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-07 23:19:40,516 ERROR Polygon: Unexpected error for symbol AAPL: Test Exception
+2024-07-08 20:24:05,967 ERROR Nasdaq: 404 Client Error - The requested URL was not found on the server.
+2024-07-08 20:26:27,157 ERROR Nasdaq: 404 Client Error - The requested URL was not found on the server.
+2024-07-08 20:34:41,895 ERROR Nasdaq: 404 Client Error - The requested URL was not found on the server.
+2024-07-08 21:17:51,770 ERROR Nasdaq: 404 Client Error - The requested URL was not found on the server.
+2024-07-08 21:27:19,034 ERROR AlphaVantage: Unexpected error for symbol AAPL: Cannot connect to host www.alphavantage.co:443 ssl:default [getaddrinfo failed]
+2024-07-08 21:27:30,236 ERROR Nasdaq: Unexpected error for symbol AAPL: Cannot connect to host dataondemand.nasdaq.com:443 ssl:default [getaddrinfo failed]
+2024-07-08 21:27:30,236 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [getaddrinfo failed]

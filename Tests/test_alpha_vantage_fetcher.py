@@ -1,69 +1,77 @@
-import os
-import json
+# C:\TheTradingRobotPlug\Tests\test_alpha_vantage_fetcher.py
+
 import unittest
-from unittest.mock import patch, Mock
-from datetime import datetime
+from unittest.mock import patch, MagicMock
 from Scripts.DataFetchers.alpha_vantage_fetcher import AlphaVantageDataFetcher
 
 class TestAlphaVantageDataFetcher(unittest.TestCase):
+
     def setUp(self):
-        os.environ['ALPHAVANTAGE_API_KEY'] = 'test_api_key'
-        os.environ['CSV_DIR'] = '/tmp'
-        os.environ['DB_PATH'] = '/tmp/test.db'
-        os.environ['ALPHA_LOG_FILE'] = '/tmp/alpha.log'
-        
         self.fetcher = AlphaVantageDataFetcher()
-
-        self.mock_requests_get = patch('requests.get').start()
-        self.addCleanup(patch.stopall)
-
-    def test_fetch_data(self):
-        symbol = "AAPL"
-        start_date = "2022-01-01"
-        end_date = "2022-12-31"
-
-        response_data = {
+        self.sample_data = {
             "Time Series (Daily)": {
-                "2022-01-03": {
-                    "1. open": "177.83",
-                    "2. high": "182.88",
-                    "3. low": "177.71",
-                    "4. close": "182.01",
-                    "5. volume": "104487900"
+                "2023-07-01": {
+                    "1. open": "150.00",
+                    "2. high": "155.00",
+                    "3. low": "148.00",
+                    "4. close": "152.00",
+                    "5. volume": "1000000"
                 }
             }
         }
 
-        self.mock_requests_get.return_value = Mock(status_code=200)
-        self.mock_requests_get.return_value.json.return_value = response_data
+    def test_construct_api_url(self):
+        url = self.fetcher.construct_api_url("AAPL", "2023-01-01", "2023-12-31")
+        expected_url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&apikey=ALPHAVANTAGE_API_KEY&outputsize=full&datatype=json"
+        self.assertEqual(url, expected_url)
 
-        fetched_data = self.fetcher.fetch_data([symbol], start_date, end_date)
+    def test_extract_results(self):
+        results = self.fetcher.extract_results(self.sample_data)
+        expected_results = [{
+            'date': '2023-07-01',
+            'open': 150.0,
+            'high': 155.0,
+            'low': 148.0,
+            'close': 152.0,
+            'volume': 1000000
+        }]
+        self.assertEqual(results, expected_results)
 
-        self.assertIsNotNone(fetched_data)
-        self.assertIn(symbol, fetched_data)
-        self.assertFalse(fetched_data[symbol].empty)
+    @patch('requests.get')
+    def test_fetch_data_for_symbol(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = self.sample_data
+        mock_get.return_value = mock_response
 
-    def test_fetch_real_time_data(self):
-        symbol = "AAPL"
-        response_data = {
-            "Time Series (1min)": {
-                "2022-01-03 09:30:00": {
-                    "1. open": "177.83",
-                    "2. high": "177.88",
-                    "3. low": "177.71",
-                    "4. close": "177.01",
-                    "5. volume": "487900"
+        data = self.fetcher.fetch_data_for_symbol('AAPL', '2023-01-01', '2023-12-31')
+        self.assertIsInstance(data, pd.DataFrame)
+        self.assertFalse(data.empty)
+        self.assertEqual(data.index.name, 'date')
+
+    @patch('requests.get')
+    def test_fetch_data_for_symbol_error(self, mock_get):
+        mock_get.side_effect = Exception("Test Exception")
+        data = self.fetcher.fetch_data_for_symbol('AAPL', '2023-01-01', '2023-12-31')
+        self.assertIsNone(data)
+
+    @patch('Scripts.DataFetchers.alpha_vantage_fetcher.AlphaVantageDataFetcher.utils', new_callable=MagicMock)
+    def test_logging_in_extract_results(self, mock_utils):
+        sample_data = {
+            "Time Series (Daily)": {
+                "2023-07-01": {
+                    "1. open": "150.00",
+                    "2. high": "155.00",
+                    "3. low": "148.00",
+                    "4. close": "152.00",
+                    "5. volume": "1000000"
                 }
             }
         }
-
-        self.mock_requests_get.return_value = Mock(status_code=200)
-        self.mock_requests_get.return_value.json.return_value = response_data
-
-        fetched_data = self.fetcher.fetch_real_time_data(symbol)
-
-        self.assertIsNotNone(fetched_data)
-        self.assertFalse(fetched_data.empty)
+        self.fetcher.utils = mock_utils
+        self.fetcher.extract_results(sample_data)
+        expected_log_message = "AlphaVantage: Extracted results: [{'date': '2023-07-01', 'open': 150.0, 'high': 155.0, 'low': 148.0, 'close': 152.0, 'volume': 1000000}]"
+        self.fetcher.utils.logger.debug.assert_called_once_with(expected_log_message)
 
 if __name__ == '__main__':
     unittest.main()

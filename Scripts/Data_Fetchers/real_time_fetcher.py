@@ -1,4 +1,20 @@
-class RealTimeDataFetcher(DataFetcher):
+# C:\TheTradingRobotPlug\Scripts\Data_Fetchers\real_time_fetcher.py
+
+import os
+import sys
+import requests
+import pandas as pd
+from typing import Optional
+from datetime import datetime
+
+# Ensure the project root is in the Python path for module imports
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
+sys.path.append(project_root)
+
+from Scripts.Data_Fetchers.data_fetcher import DataFetcher
+
+class RealTimeDataFetcherMixin:
     def fetch_real_time_data(self, ticker_symbol: str) -> Optional[pd.DataFrame]:
         url = self.construct_real_time_api_url(ticker_symbol)
         

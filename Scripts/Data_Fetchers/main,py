@@ -1,3 +1,5 @@
+# C:\TheTradingRobotPlug\Scripts\Data_Fetch\main,py
+
 from Scripts.DataFetchers.alpha_vantage_fetcher import AlphaVantageDataFetcher
 from Scripts.DataFetchers.nasdaq_fetcher import NasdaqDataFetcher
 from Scripts.DataFetchers.polygon_fetcher import PolygonDataFetcher
@@ -32,3 +34,4 @@ if __name__ == "__main__":
                 print(real_time_data)
             else:
                 print(f"No real-time data fetched for {symbol} from {fetcher.source}.")
+

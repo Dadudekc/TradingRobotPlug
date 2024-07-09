@@ -1,3 +1,5 @@
+# C:\TheTradingRobotPlug\Scripts\Data_Fetch\fetcher_gui.py
+
 from Scripts.GUI.base_gui import BaseGUI
 from tkinter import ttk
 from tkinter import messagebox
