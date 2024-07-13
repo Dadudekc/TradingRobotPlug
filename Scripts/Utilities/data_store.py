@@ -1,5 +1,3 @@
-# C:\TheTradingRobotPlug\Scripts\Utilities\data_store.py
-
 import os
 import pandas as pd
 import pickle
@@ -61,6 +59,41 @@ class DataStore:
 
     def list_csv_files(self):
         return [f for f in os.listdir(self.csv_dir) if f.endswith('.csv')]
+
+    def load_data(self, symbol):
+        file_path = os.path.join(self.csv_dir, f'{symbol}_data.csv')
+        if os.path.exists(file_path):
+            return pd.read_csv(file_path)
+        else:
+            return None
+
+    def save_data(self, data, symbol, processed=True, overwrite=False, versioning=False, archive=False):
+        if not isinstance(data, pd.DataFrame):
+            raise TypeError("Data must be a pandas DataFrame")
+        
+        file_name = f'{symbol}_data.csv'
+        if versioning:
+            version = 1
+            base_name = file_name
+            while os.path.exists(os.path.join(self.csv_dir, file_name)):
+                file_name = f'{base_name}_v{version}.csv'
+                version += 1
+        
+        if processed:
+            self.save_to_csv(data, file_name, overwrite)
+        else:
+            raw_dir = os.path.join(self.csv_dir, 'raw')
+            self.utils.ensure_directory_exists(raw_dir)
+            raw_path = os.path.join(raw_dir, file_name)
+            data.to_csv(raw_path, index=False)
+        
+        if archive:
+            archive_dir = os.path.join(self.csv_dir, 'archive')
+            self.utils.ensure_directory_exists(archive_dir)
+            archive_path = os.path.join(archive_dir, file_name)
+            data.to_csv(archive_path, index=False)
+        
+        self.utils.logger.info(f"Saved data for {symbol} to {file_name}")
 
 # Example usage when running the script independently
 if __name__ == "__main__":

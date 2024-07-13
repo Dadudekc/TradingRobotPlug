@@ -1,0 +1,7 @@
+https://api.polygon.io/v2/aggs/ticker/tsla/range/1/day/2020-01-01/2024-01-01?adjusted=true&apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4,2024-07-12T22:03:48.092989,200,127,tsla,2020-01-01 to 2024-01-01
+https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/day/2023-01-01/2023-12-31?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4,2024-07-12T22:12:47.925279,200,26828,AAPL,2023-01-01 to 2023-12-31
+https://api.polygon.io/v2/aggs/ticker/MSFT/range/1/day/2023-01-01/2023-12-31?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4,2024-07-12T22:12:48.255050,200,26769,MSFT,2023-01-01 to 2023-12-31
+https://api.polygon.io/v2/aggs/ticker/GOOG/range/1/day/2023-01-01/2023-12-31?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4,2024-07-12T22:12:48.430303,200,26616,GOOG,2023-01-01 to 2023-12-31
+https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/day/2023-01-01/2023-12-31?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4,2024-07-12T22:13:41.222453,200,26828,AAPL,2023-01-01 to 2023-12-31
+https://api.polygon.io/v2/aggs/ticker/MSFT/range/1/day/2023-01-01/2023-12-31?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4,2024-07-12T22:13:41.505359,200,26769,MSFT,2023-01-01 to 2023-12-31
+https://api.polygon.io/v2/aggs/ticker/GOOG/range/1/day/2023-01-01/2023-12-31?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4,2024-07-12T22:13:41.687434,200,26616,GOOG,2023-01-01 to 2023-12-31

@@ -1,33 +1,43 @@
-# C:\TheTradingRobotPlug\Scripts\Data_Fetch\base_gui.py
-
 import tkinter as tk
 from tkinter import ttk
+from data_fetch_tab import DataFetchTab
 
-class BaseGUI:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Trading Robot GUI")
-        self.root.geometry("800x600")
+class BaseApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
 
-        # Setup main frame
-        self.main_frame = ttk.Frame(self.root, padding="10")
-        self.main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.title("Trading Robot Application")
+        self.geometry("800x600")
 
-        # Setup tabs
-        self.tab_control = ttk.Notebook(self.main_frame)
-        self.tab_control.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        # Set the Azure theme
+        self.tk.call("source", "Scripts/GUI/azure.tcl")
+        self.tk.call("set_theme", "light")
 
-        # Add default tabs
-        self.setup_tabs()
+        self.create_widgets()
 
-    def setup_tabs(self):
-        self.add_tab("Home", self.create_home_tab)
-        # Additional tabs can be added here by default
+    def create_widgets(self):
+        # Create a notebook (tabbed interface)
+        self.notebook = ttk.Notebook(self)
+        self.notebook.pack(fill='both', expand=True)
 
-    def add_tab(self, title, create_tab_func):
-        tab = ttk.Frame(self.tab_control)
-        self.tab_control.add(tab, text=title)
-        create_tab_func(tab)
+        # Create frames for each tab
+        self.create_tabs()
 
-    def create_home_tab(self, tab):
-        ttk.Label(tab, text="Welcome to the Trading Robot GUI!").grid(row=0, column=0, padx=10, pady=10)
+    def create_tabs(self):
+        # Adding Data Fetch tab
+        self.data_fetch_tab = DataFetchTab(self.notebook)
+        self.notebook.add(self.data_fetch_tab, text='Data Fetch')
+
+        # Example additional tabs
+        self.backtest_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.backtest_tab, text='Backtest')
+
+        self.model_train_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.model_train_tab, text='Model Train')
+
+        self.deploy_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.deploy_tab, text='Deploy')
+
+if __name__ == "__main__":
+    app = BaseApp()
+    app.mainloop()

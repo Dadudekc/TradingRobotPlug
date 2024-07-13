@@ -1,10 +1,11 @@
-#C:\TheTradingRobotPlug\Scripts\Data_Fetchers\alpha_vantage_fetcher.py#
-
 import os
 import sys
 import asyncio
 import pandas as pd
 import aiohttp
+import logging
+from datetime import datetime
+from typing import Optional
 
 # Add project root to the Python path
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -12,6 +13,7 @@ project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
 from Scripts.Data_Fetchers.base_fetcher import DataFetcher
+from Scripts.Utilities.data_store import DataStore
 
 class AlphaVantageDataFetcher(DataFetcher):
     def __init__(self):
@@ -22,6 +24,7 @@ class AlphaVantageDataFetcher(DataFetcher):
                          'C:/TheTradingRobotPlug/data/trading_data.db', 
                          'C:/TheTradingRobotPlug/logs/alpha_vantage.log', 
                          'AlphaVantage')
+        self.data_store = DataStore()
 
     def construct_api_url(self, symbol: str, start_date: str, end_date: str) -> str:
         return f"{self.base_url}?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={self.api_key}&outputsize=full&datatype=json"
@@ -112,11 +115,59 @@ class AlphaVantageDataFetcher(DataFetcher):
         self.logger.debug(f"AlphaVantage: Extracted real-time results: {results}")
         return results
 
+    async def fetch_data(self, symbols, start_date, end_date) -> dict:
+        metadata = []
+        results = {}
+        async with aiohttp.ClientSession() as session:
+            for symbol in symbols:
+                url = self.construct_api_url(symbol, start_date, end_date)
+                try:
+                    self.logger.debug(f"{self.source}: Request URL: {url}")
+                    async with session.get(url) as response:
+                        fetch_time = datetime.now().isoformat()
+                        status = response.status
+                        data_size = len(await response.text())
+                        
+                        if response.status == 429:
+                            await asyncio.sleep(60)
+                            continue
+                        
+                        response.raise_for_status()
+                        data = await response.json()
+                        results[symbol] = self.extract_results(data)
+                        
+                        # Collect metadata
+                        metadata.append({
+                            'source_url': url,
+                            'fetch_time': fetch_time,
+                            'status': status,
+                            'data_size': data_size,
+                            'symbol': symbol,
+                            'date_range': f"{start_date} to {end_date}"
+                        })
+                        
+                        self.logger.info(f"Data successfully fetched from AlphaVantage for {symbol}")
+                except aiohttp.ClientError as err:
+                    self.logger.error(f"An error occurred: {err}")
+        self.save_metadata(metadata)
+        return results
+
+    def save_metadata(self, metadata):
+        metadata_file = 'metadata_alpha_vantage.csv'
+        with open(metadata_file, 'a') as f:
+            for entry in metadata:
+                f.write(f"{entry['source_url']},{entry['fetch_time']},{entry['status']},{entry['data_size']},{entry['symbol']},{entry['date_range']}\n")
+
 async def main():
     fetcher = AlphaVantageDataFetcher()
-    data = await fetcher.async_fetch_data("AAPL")
-    if not data.empty and fetcher.validate_data(data):
-        fetcher.save_data(data, "AAPL", processed=True, overwrite=True, versioning=True, archive=True)
+    symbols = ["AAPL", "MSFT", "GOOG"]
+    start_date = "2023-01-01"
+    end_date = "2023-12-31"
+    
+    data = await fetcher.fetch_data(symbols, start_date, end_date)
+    for symbol, df in data.items():
+        if not df.empty and fetcher.validate_data(df):
+            fetcher.save_data(df, symbol, processed=True, overwrite=True, versioning=True, archive=True)
     
     real_time_data = await fetcher.fetch_real_time_data("AAPL")
     if not real_time_data.empty and fetcher.validate_data(real_time_data):
