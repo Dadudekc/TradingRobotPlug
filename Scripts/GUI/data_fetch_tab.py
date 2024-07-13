@@ -5,6 +5,14 @@ import asyncio
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import os
+import sys
+
+# Add project root to the Python path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
+sys.path.append(project_root)
+
 from Scripts.Data_Fetchers.data_fetch_main import main as fetch_data_main
 from Scripts.Utilities.data_store import DataStore
 
@@ -112,3 +120,9 @@ class DataFetchTab(ttk.Frame):
 
         fig.update_layout(title=f'Candlestick Chart for {symbol}', xaxis_title='Date', yaxis_title='Price')
         fig.show()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = DataFetchTab(root)
+    app.pack(expand=True, fill='both')
+    root.mainloop()

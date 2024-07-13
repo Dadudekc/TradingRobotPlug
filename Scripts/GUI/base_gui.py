@@ -1,6 +1,14 @@
+import os
+import sys
 import tkinter as tk
 from tkinter import ttk
-from data_fetch_tab import DataFetchTab
+
+# Add project root to the Python path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
+sys.path.append(project_root)
+
+from Scripts.GUI.data_fetch_tab import DataFetchTab
 
 class BaseApp(tk.Tk):
     def __init__(self):
@@ -9,9 +17,13 @@ class BaseApp(tk.Tk):
         self.title("Trading Robot Application")
         self.geometry("800x600")
 
-        # Set the Azure theme
-        self.tk.call("source", "Scripts/GUI/azure.tcl")
-        self.tk.call("set_theme", "light")
+        # Commented out Azure theme configuration for now
+        # azure_theme_path = os.path.join(script_dir, "azure.tcl")
+        # if os.path.exists(azure_theme_path):
+        #     self.tk.call("source", azure_theme_path)
+        #     self.tk.call("set_theme", "light")
+        # else:
+        #     print(f"Azure theme file not found at: {azure_theme_path}")
 
         self.create_widgets()
 
