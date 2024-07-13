@@ -14,16 +14,18 @@ sys.path.append(project_root)
 
 from Scripts.Utilities.data_store import DataStore
 from Scripts.Utilities.data_fetch_utils import DataFetchUtils
+from Scripts.Utilities.DataLakeHandler import DataLakeHandler
 
 # Load environment variables from .env file
 load_dotenv()
 
 class DataFetcher:
-    def __init__(self, api_key_env_var: str, base_url: str, csv_dir: str, db_path: str, log_file: str, source: str):
+    def __init__(self, api_key_env_var: str, base_url: str, csv_dir: str, db_path: str, log_file: str, source: str, data_lake_handler: DataLakeHandler):
         self.utils = DataFetchUtils(log_file)
         self.api_key = os.getenv(api_key_env_var)
         self.base_url = base_url
         self.source = source
+        self.data_lake_handler = data_lake_handler
 
         self.csv_dir = csv_dir
         self.db_path = db_path
@@ -42,10 +44,10 @@ class DataFetcher:
             end_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
         all_data = {}
+        tasks = [self.fetch_data_for_symbol(symbol, start_date, end_date) for symbol in ticker_symbols]
+        results = await asyncio.gather(*tasks)
 
-        for symbol in ticker_symbols:
-            self.utils.logger.info(f"{self.source}: Fetching data for {symbol} from {start_date} to {end_date}")
-            data = await self.fetch_data_for_symbol(symbol, start_date, end_date)
+        for symbol, data in zip(ticker_symbols, results):
             if data is not None:
                 all_data[symbol] = data
 
@@ -108,7 +110,8 @@ class DataFetcher:
 
         self.data_store.save_to_csv(data, file_path, overwrite)
         self.data_store.save_to_sql(data, f"{symbol}_data")
-        self.utils.logger.info(f"{self.source}: Data saved to CSV and SQL for symbol: {symbol}")
+        self.data_lake_handler.upload_file(file_path, f"{symbol}/{file_name}")
+        self.utils.logger.info(f"{self.source}: Data saved to CSV, SQL, and uploaded to S3 for symbol: {symbol}")
 
     def validate_data(self, data: pd.DataFrame) -> bool:
         required_columns = ["open", "high", "low", "close", "volume"]
@@ -132,8 +135,8 @@ class DataFetcher:
         raise NotImplementedError("This method should be implemented by subclasses.")
 
 class AlphaVantageDataFetcher(DataFetcher):
-    def __init__(self):
-        super().__init__('ALPHAVANTAGE_API_KEY', 'https://www.alphavantage.co/query', 'C:/TheTradingRobotPlug/data/alpha_vantage', 'C:/TheTradingRobotPlug/data/trading_data.db', 'C:/TheTradingRobotPlug/logs/alpha_vantage.log', 'AlphaVantage')
+    def __init__(self, data_lake_handler):
+        super().__init__('ALPHAVANTAGE_API_KEY', 'https://www.alphavantage.co/query', 'C:/TheTradingRobotPlug/data/alpha_vantage', 'C:/TheTradingRobotPlug/data/trading_data.db', 'C:/TheTradingRobotPlug/logs/alpha_vantage.log', 'AlphaVantage', data_lake_handler)
 
     def construct_api_url(self, symbol: str, start_date: str, end_date: str) -> str:
         return f"{self.base_url}?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={self.api_key}&outputsize=full&datatype=json"
@@ -198,78 +201,9 @@ class AlphaVantageDataFetcher(DataFetcher):
         self.utils.logger.debug(f"AlphaVantage: Extracted real-time results: {results}")
         return results
 
-class NasdaqDataFetcher(DataFetcher):
-    def __init__(self):
-        super().__init__('NASDAQ_API_KEY', 'https://dataondemand.nasdaq.com/api/v1/historical', 'C:/TheTradingRobotPlug/data/nasdaq', 'C:/TheTradingRobotPlug/data/trading_data.db', 'C:/TheTradingRobotPlug/logs/nasdaq.log', 'Nasdaq')
-
-    def construct_api_url(self, symbol: str, start_date: str, end_date: str) -> str:
-        url = f"{self.base_url}/{symbol}?apiKey={self.api_key}"
-        if start_date:
-            url += f"&startDate={start_date}"
-        if end_date:
-            url += f"&endDate={end_date}"
-        return url
-
-    def extract_results(self, data: dict) -> list:
-        results = data.get('data', [])
-        self.utils.logger.debug(f"Nasdaq: Extracted results: {results}")
-        return [
-            {
-                'date': datetime.utcfromtimestamp(result['t'] / 1000).strftime('%Y-%m-%d'),
-                'open': result['o'],
-                'high': result['h'],
-                'low': result['l'],
-                'close': result['c'],
-                'volume': result['v']
-            }
-            for result in results
-        ]
-
-    async def fetch_real_time_data(self, symbol: str) -> pd.DataFrame:
-        url = f"https://dataondemand.nasdaq.com/api/v1/historical/{symbol}/real-time?apiKey={self.api_key}"
-        
-        try:
-            self.utils.logger.debug(f"{self.source}: Real-time request URL: {url}")
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    response.raise_for_status()
-                    data = await response.json()
-                    results = self.extract_real_time_results(data)
-                    
-                    if results:
-                        df = pd.DataFrame(results)
-                        df['timestamp'] = pd.to_datetime(df['timestamp'])
-                        df.set_index('timestamp', inplace=True)
-                        df['symbol'] = symbol
-                        self.utils.logger.debug(f"{self.source}: Fetched real-time data for {symbol}: {df}")
-                        return df
-                    else:
-                        self.utils.logger.warning(f"{self.source}: Real-time data for {symbol} is not in the expected format.")
-                        return pd.DataFrame()
-        except aiohttp.ClientResponseError as e:
-            self.utils.logger.error(f"{self.source}: Error fetching real-time data for symbol {symbol}: {e}")
-            return pd.DataFrame()
-        except Exception as e:
-            self.utils.logger.error(f"{self.source}: Unexpected error for symbol {symbol}: {e}")
-            return pd.DataFrame()
-
-    def extract_real_time_results(self, data: dict) -> list:
-        results = data.get('data', [])
-        return [
-            {
-                'timestamp': datetime.utcfromtimestamp(result['t'] / 1000).strftime('%Y-%m-%d %H:%M:%S'),
-                'open': result['o'],
-                'high': result['h'],
-                'low': result['l'],
-                'close': result['c'],
-                'volume': result['v']
-            }
-            for result in results
-        ]
-
 class PolygonDataFetcher(DataFetcher):
-    def __init__(self):
-        super().__init__('POLYGON_API_KEY', 'https://api.polygon.io/v2/aggs/ticker', 'C:/TheTradingRobotPlug/data/polygon', 'C:/TheTradingRobotPlug/data/trading_data.db', 'C:/TheTradingRobotPlug/logs/polygon.log', 'Polygon')
+    def __init__(self, data_lake_handler):
+        super().__init__('POLYGON_API_KEY', 'https://api.polygon.io/v2/aggs/ticker', 'C:/TheTradingRobotPlug/data/polygon', 'C:/TheTradingRobotPlug/data/trading_data.db', 'C:/TheTradingRobotPlug/logs/polygon.log', 'Polygon', data_lake_handler)
 
     def construct_api_url(self, symbol: str, start_date: str, end_date: str) -> str:
         return f"{self.base_url}/{symbol}/range/1/day/{start_date}/{end_date}?apiKey={self.api_key}"
@@ -331,28 +265,24 @@ class PolygonDataFetcher(DataFetcher):
             for result in results
         ]
 
-if __name__ == "__main__":
-    data_fetchers = [
-        AlphaVantageDataFetcher(),
-        NasdaqDataFetcher(),
-        PolygonDataFetcher()
-    ]
+# Usage example
+async def main():
+    data_lake_handler = DataLakeHandler(bucket_name='your-s3-bucket-name')
     
-    ticker_symbols = ["AAPL"]
+    fetchers = [
+        AlphaVantageDataFetcher(data_lake_handler),
+        PolygonDataFetcher(data_lake_handler)
+    ]
+    symbols = ["AAPL", "MSFT", "GOOG"]
     start_date = "2022-01-01"
     end_date = "2022-12-31"
 
-    async def fetch_and_save():
-        for fetcher in data_fetchers:
-            fetched_data = await fetcher.fetch_data(ticker_symbols, start_date, end_date)
-            if fetched_data:
-                for symbol, data in fetched_data.items():
-                    if fetcher.validate_data(data):
-                        fetcher.save_data(data, symbol, overwrite=True)
-                print(f"Data fetched and saved for {ticker_symbols} from {fetcher.source}")
-            else:
-                print(f"No data fetched for {ticker_symbols} from {fetcher.source}.")
+    for fetcher in fetchers:
+        data = await fetcher.fetch_data(symbols, start_date, end_date)
+        for symbol, df in data.items():
+            if df is not None and not df.empty and fetcher.validate_data(df):
+                fetcher.save_data(df, symbol)
+                print(f"Data for {symbol} from {fetcher.source}:\n{df}")
 
-    asyncio.run(fetch_and_save())
-
-
+if __name__ == "__main__":
+    asyncio.run(main())
