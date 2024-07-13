@@ -10,7 +10,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
-from Scripts.Data_Fetchers.nasdaq_fetcher import NasdaqDataFetcher
+from Scrap.data_fetch_scrap.nasdaq_fetcher import NasdaqDataFetcher
 
 class TestNasdaqDataFetcher(unittest.TestCase):
 

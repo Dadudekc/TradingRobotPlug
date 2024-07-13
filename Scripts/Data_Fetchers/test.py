@@ -4,6 +4,10 @@ import os
 import sys
 import asyncio
 import aiohttp
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(dotenv_path="C:/TheTradingRobotPlug/.env")
 
 # Add project root to the Python path
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -12,21 +16,27 @@ sys.path.append(project_root)
 
 from Scripts.Data_Fetchers.base_fetcher import DataFetcher
 
-class PolygonDataFetcher(DataFetcher):
+class NasdaqDataFetcher(DataFetcher):
     def __init__(self):
-        super().__init__('POLYGON_API_KEY', 
-                         'https://api.polygon.io/v2/aggs/ticker', 
-                         'C:/TheTradingRobotPlug/data/raw/polygon', 
-                         'C:/TheTradingRobotPlug/data/processed/polygon', 
+        super().__init__('NASDAQ_API_KEY', 
+                         'https://dataondemand.nasdaq.com/api/v1/historical', 
+                         'C:/TheTradingRobotPlug/data/raw/nasdaq', 
+                         'C:/TheTradingRobotPlug/data/processed/nasdaq', 
                          'C:/TheTradingRobotPlug/data/trading_data.db', 
-                         'C:/TheTradingRobotPlug/logs/polygon.log', 
-                         'Polygon')
+                         'C:/TheTradingRobotPlug/logs/nasdaq.log', 
+                         'Nasdaq')
 
-    def construct_api_url(self, symbol: str, start_date: str, end_date: str) -> str:
-        return f"{self.base_url}/{symbol}/range/1/day/{start_date}/{end_date}?apiKey={self.api_key}"
+    def construct_api_url(self, symbol: str, start_date: str = None, end_date: str = None) -> str:
+        url = f"{self.base_url}/{symbol}?apiKey={self.api_key}"
+        if start_date:
+            url += f"&startDate={start_date}"
+        if end_date:
+            url += f"&endDate={end_date}"
+        print(f"Constructed URL: {url}")  # Debugging step
+        return url
 
     def extract_results(self, data: dict) -> list:
-        results = data.get('results', [])
+        results = data.get('data', [])
         return [
             {
                 'date': datetime.utcfromtimestamp(result['t'] / 1000).strftime('%Y-%m-%d'),
@@ -40,12 +50,20 @@ class PolygonDataFetcher(DataFetcher):
         ]
 
     async def fetch_real_time_data(self, symbol: str) -> pd.DataFrame:
-        url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/prev?apiKey={self.api_key}"
-        
+        # Use the appropriate real-time data endpoint
+        url = f"https://dataondemand.nasdaq.com/api/v1/last-trade/{symbol}?apiKey={self.api_key}"
+        print(f"Real-time data URL: {url}")  # Debugging step
+
         try:
             self.utils.logger.debug(f"{self.source}: Real-time request URL: {url}")
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as response:
+                    if response.status == 404:
+                        self.utils.logger.error(f"404 Error for URL: {url}. Check if the endpoint is correct.")
+                        print(f"404 Error for URL: {url}. Check if the endpoint is correct.")  # Debugging step
+                    elif response.status != 200:
+                        self.utils.logger.error(f"Error {response.status} for URL: {url}. Response: {await response.text()}")
+                        print(f"Error {response.status} for URL: {url}. Response: {await response.text()}")  # Debugging step
                     response.raise_for_status()
                     data = await response.json()
                     results = self.extract_real_time_results(data)
@@ -68,22 +86,21 @@ class PolygonDataFetcher(DataFetcher):
             return pd.DataFrame()
 
     def extract_real_time_results(self, data: dict) -> list:
-        results = data.get('results', [])
+        results = data.get('data', [])
         return [
             {
                 'timestamp': datetime.utcfromtimestamp(result['t'] / 1000).strftime('%Y-%m-%d %H:%M:%S'),
-                'open': result['o'],
-                'high': result['h'],
-                'low': result['l'],
-                'close': result['c'],
-                'volume': result['v']
+                'price': result['price'],
+                'volume': result['size']
             }
             for result in results
         ]
 
 async def main():
-    fetcher = PolygonDataFetcher()
-    data = fetcher.fetch_data(["AAPL"])  # fetch_data is not async
+    fetcher = NasdaqDataFetcher()
+    
+    # Fetch historical data
+    data = fetcher.fetch_data(["AAPL"], start_date="2022-01-01", end_date="2022-12-31")  # fetch_data is not async
     for symbol, df in data.items():
         if fetcher.validate_data(df):
             fetcher.save_data(df, symbol, overwrite=True, versioning=True, archive=True)

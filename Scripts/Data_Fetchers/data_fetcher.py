@@ -354,3 +354,5 @@ if __name__ == "__main__":
                 print(f"No data fetched for {ticker_symbols} from {fetcher.source}.")
 
     asyncio.run(fetch_and_save())
+
+

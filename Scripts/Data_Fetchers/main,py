@@ -1,37 +1,27 @@
-# C:\TheTradingRobotPlug\Scripts\Data_Fetch\main,py
+# data_fetch_main.py
+import os
+import sys
+from pathlib import Path
+import asyncio
 
-from Scripts.DataFetchers.alpha_vantage_fetcher import AlphaVantageDataFetcher
-from Scripts.DataFetchers.nasdaq_fetcher import NasdaqDataFetcher
-from Scripts.DataFetchers.polygon_fetcher import PolygonDataFetcher
+# Add project root to the Python path for module imports
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parent.parent
+sys.path.append(str(project_root))
+
+from Scripts.Data_Fetchers.alpha_vantage_fetcher import AlphaVantageDataFetcher
+
+async def main():
+    fetcher = AlphaVantageDataFetcher()
+    data = await fetcher.async_fetch_data("AAPL")
+    if not data.empty and fetcher.validate_data(data):
+        fetcher.save_data(data, "AAPL", processed=True, overwrite=True, versioning=True, archive=True)
+    
+    real_time_data = await fetcher.fetch_real_time_data("AAPL")
+    if not real_time_data.empty and fetcher.validate_data(real_time_data):
+        fetcher.save_data(real_time_data, "AAPL", processed=True, overwrite=True, versioning=True, archive=True)
+    
+    print("Data fetching completed.")
 
 if __name__ == "__main__":
-    data_fetchers = [
-        AlphaVantageDataFetcher(),
-        NasdaqDataFetcher(),
-        PolygonDataFetcher()
-    ]
-    
-    ticker_symbols = ["AAPL"]
-    start_date = "2022-01-01"
-    end_date = "2022-12-31"
-
-    for fetcher in data_fetchers:
-        fetched_data = fetcher.fetch_data(ticker_symbols, start_date, end_date)
-
-        if fetched_data:
-            for symbol, data in fetched_data.items():
-                fetcher.save_data(data, symbol, overwrite=True)
-            print(f"Data fetched and saved for {ticker_symbols} from {fetcher.source}")
-        else:
-            print(f"No data fetched for {ticker_symbols} from {fetcher.source}.")
-
-    # Fetch and print real-time data
-    for fetcher in data_fetchers:
-        for symbol in ticker_symbols:
-            real_time_data = fetcher.fetch_real_time_data(symbol)
-            if real_time_data is not None:
-                print(f"Real-time data for {symbol} from {fetcher.source}:")
-                print(real_time_data)
-            else:
-                print(f"No real-time data fetched for {symbol} from {fetcher.source}.")
-
+    asyncio.run(main())

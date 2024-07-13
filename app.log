@@ -1,1 +1,12 @@
+DataFetchUtils - ERROR - Nasdaq: Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2023-01-01&endDate=2023-12-31
+DataFetchUtils - ERROR - Nasdaq: Error fetching data for symbol MSFT: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/MSFT?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2023-01-01&endDate=2023-12-31
+DataFetchUtils - ERROR - Nasdaq: Error fetching data for symbol GOOG: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/GOOG?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2023-01-01&endDate=2023-12-31
+NASDAQAPI - INFO - Fetching data from Nasdaq for AAPL using URL: https://api.nasdaq.com/api/quote/AAPL/chart?assetclass=stocks&fromdate=daily&limit=1&apikey=5hSXmst5GSPX2F2VauxN
+NASDAQAPI - INFO - Fetching data from Nasdaq for MSFT using URL: https://api.nasdaq.com/api/quote/MSFT/chart?assetclass=stocks&fromdate=daily&limit=1&apikey=5hSXmst5GSPX2F2VauxN
+NASDAQAPI - INFO - Fetching data from Nasdaq for GOOG using URL: https://api.nasdaq.com/api/quote/GOOG/chart?assetclass=stocks&fromdate=daily&limit=1&apikey=5hSXmst5GSPX2F2VauxN
+AlphaVantageAPI - INFO - Data successfully fetched from AlphaVantage for MSFT
+PolygonIOAPI - ERROR - An error occurred: 404, message='Not Found', url=URL('https://api.polygon.io/v2/aggs/ticker/MSFT/range/1/day/daily?adjusted=true&apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4')
+AlphaVantageAPI - INFO - Data successfully fetched from AlphaVantage for GOOG
 AlphaVantageAPI - INFO - Data successfully fetched from AlphaVantage for AAPL
+PolygonIOAPI - ERROR - An error occurred: 404, message='Not Found', url=URL('https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/day/daily?adjusted=true&apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4')
+PolygonIOAPI - ERROR - An error occurred: 404, message='Not Found', url=URL('https://api.polygon.io/v2/aggs/ticker/GOOG/range/1/day/daily?adjusted=true&apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4')

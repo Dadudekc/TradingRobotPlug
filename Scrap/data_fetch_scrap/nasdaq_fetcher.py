@@ -14,7 +14,13 @@ from Scripts.Data_Fetchers.base_fetcher import DataFetcher
 
 class NasdaqDataFetcher(DataFetcher):
     def __init__(self):
-        super().__init__('NASDAQ_API_KEY', 'https://dataondemand.nasdaq.com/api/v1/historical', 'C:/TheTradingRobotPlug/data/nasdaq', 'C:/TheTradingRobotPlug/data/trading_data.db', 'C:/TheTradingRobotPlug/logs/nasdaq.log', 'Nasdaq')
+        super().__init__('NASDAQ_API_KEY', 
+                         'https://dataondemand.nasdaq.com/api/v1/historical', 
+                         'C:/TheTradingRobotPlug/data/raw/nasdaq', 
+                         'C:/TheTradingRobotPlug/data/processed/nasdaq', 
+                         'C:/TheTradingRobotPlug/data/trading_data.db', 
+                         'C:/TheTradingRobotPlug/logs/nasdaq.log', 
+                         'Nasdaq')
 
     def construct_api_url(self, symbol: str, start_date: str, end_date: str) -> str:
         url = f"{self.base_url}/{symbol}?apiKey={self.api_key}"
@@ -82,10 +88,17 @@ class NasdaqDataFetcher(DataFetcher):
 
 async def main():
     fetcher = NasdaqDataFetcher()
-    data = await fetcher.fetch_data(["AAPL"])
+    # Fetch historical data
+    data = fetcher.fetch_data(["AAPL"])  # fetch_data is not async
     for symbol, df in data.items():
         if fetcher.validate_data(df):
-            fetcher.save_data(df, symbol, overwrite=True, versioning=True, archive=True)  # Use versioning and archiving
+            fetcher.save_data(df, symbol, overwrite=True, versioning=True, archive=True)
+    
+    # Fetch real-time data
+    real_time_data = await fetcher.fetch_real_time_data("AAPL")  # fetch_real_time_data is async
+    if not real_time_data.empty:
+        fetcher.save_data(real_time_data, "AAPL", overwrite=True, versioning=True, archive=True)
+    
     print("Data fetching completed.")
 
 if __name__ == "__main__":

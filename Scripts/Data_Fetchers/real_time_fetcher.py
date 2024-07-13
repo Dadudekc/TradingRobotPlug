@@ -14,37 +14,29 @@ sys.path.append(project_root)
 
 from Scripts.Data_Fetchers.data_fetcher import DataFetcher
 
-class RealTimeDataFetcherMixin:
-    def fetch_real_time_data(self, ticker_symbol: str) -> Optional[pd.DataFrame]:
-        url = self.construct_real_time_api_url(ticker_symbol)
-        
-        try:
-            self.utils.logger.debug(f"{self.source}: Real-time request URL: {url}")
-            response = requests.get(url)
-            response.raise_for_status()
-            
-            data = response.json()
-            results = self.extract_real_time_results(data)
-            
-            if results:
-                df = pd.DataFrame(results)
-                df['timestamp'] = pd.to_datetime(df['timestamp'])
-                df.set_index('timestamp', inplace=True)
-                df['symbol'] = ticker_symbol
-                self.utils.logger.debug(f"{self.source}: Fetched real-time data for {ticker_symbol}: {df}")
-                return df
-            else:
-                self.utils.logger.warning(f"{self.source}: Real-time data for {ticker_symbol} is not in the expected format.")
-                return None
-        except requests.RequestException as e:
-            self.utils.logger.error(f"{self.source}: Error fetching real-time data for symbol {ticker_symbol}: {e}")
-            return None
-        except Exception as e:
-            self.utils.logger.error(f"{self.source}: Unexpected error for symbol {ticker_symbol}: {e}")
-            return None
+class RealTimeDataFetcher(DataFetcher, RealTimeDataFetcherMixin):
+    BASE_URL = "https://www.alphavantage.co/query"
+
+    def __init__(self, api_key):
+        self.api_key = api_key
+        self.utils = None  # Assuming there's a utils module with a logger
 
     def construct_real_time_api_url(self, symbol: str) -> str:
-        raise NotImplementedError("This method should be implemented by subclasses.")
+        return (
+            f"{self.BASE_URL}?function=TIME_SERIES_INTRADAY"
+            f"&symbol={symbol}&interval=1min&apikey={self.api_key}"
+        )
 
     def extract_real_time_results(self, data: dict) -> list:
-        raise NotImplementedError("This method should be implemented by subclasses.")
+        if "Time Series (1min)" in data:
+            return [
+                {"timestamp": timestamp, **values}
+                for timestamp, values in data["Time Series (1min)"].items()
+            ]
+        else:
+            raise ValueError("Unexpected data format or error in response")
+
+# Example usage
+# fetcher = RealTimeDataFetcher(api_key="your_api_key_here")
+# df = fetcher.fetch_real_time_data("AAPL")
+# print(df)

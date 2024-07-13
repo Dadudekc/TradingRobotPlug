@@ -1,5 +1,3 @@
-# C:\TheTradingRobotPlug\Scripts\Data_Fetch\data_fetch_main.py
-
 import os
 import sys
 from pathlib import Path
@@ -11,12 +9,12 @@ from dotenv import load_dotenv
 
 # Add project root to the Python path for module imports
 script_dir = Path(__file__).resolve().parent
-project_root = script_dir.parent
+project_root = script_dir.parent.parent
 sys.path.append(str(project_root))
 
-from Scripts.DataFetchers.alpha_vantage_fetcher import AlphaVantageDataFetcher
-from Scripts.DataFetchers.nasdaq_fetcher import NasdaqDataFetcher
-from Scripts.DataFetchers.polygon_fetcher import PolygonDataFetcher
+from Scripts.Data_Fetchers.alpha_vantage_fetcher import AlphaVantageDataFetcher
+from Scrap.data_fetch_scrap.nasdaq_fetcher import NasdaqDataFetcher
+from Scripts.Data_Fetchers.polygon_fetcher import PolygonDataFetcher
 from Scripts.Utilities.config_handling import ConfigManager
 from Scripts.Utilities.data_fetch_utils import DataFetchUtils
 from Scripts.Utilities.data_store import DataStore
@@ -50,7 +48,7 @@ class BaseAPI:
 
 class AlphaVantageAPI(BaseAPI):
     def _construct_url(self, symbol: str, interval: str) -> str:
-        return f"{self.base_url}/time_series/{interval}/{symbol}?apikey={self.api_key}"
+        return f"{self.base_url}/query?function=TIME_SERIES_{interval.upper()}&symbol={symbol}&apikey={self.api_key}"
 
     async def async_fetch_data(self, symbol: str, interval: str) -> Optional[dict]:
         url = self._construct_url(symbol, interval)
@@ -70,7 +68,7 @@ class AlphaVantageAPI(BaseAPI):
 
 class PolygonIOAPI(BaseAPI):
     def _construct_url(self, symbol: str, interval: str) -> str:
-        return f"{self.base_url}/open-close/{symbol}/{interval}?apiKey={self.api_key}"
+        return f"{self.base_url}/v2/aggs/ticker/{symbol}/range/1/day/{interval}?adjusted=true&apiKey={self.api_key}"
 
     async def async_fetch_data(self, symbol: str, interval: str) -> Optional[dict]:
         url = self._construct_url(symbol, interval)
@@ -90,22 +88,24 @@ class PolygonIOAPI(BaseAPI):
 
 class NASDAQAPI(BaseAPI):
     def _construct_url(self, symbol: str, interval: str) -> str:
-        return f"{self.base_url}/data/{symbol}/{interval}?apikey={self.api_key}"
+        return f"{self.base_url}/quote/{symbol}/chart?assetclass=stocks&fromdate={interval}&limit=1&apikey={self.api_key}"
 
     async def async_fetch_data(self, symbol: str, interval: str) -> Optional[dict]:
         url = self._construct_url(symbol, interval)
+        self.logger.info(f"Fetching data from Nasdaq for {symbol} using URL: {url}")
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(url) as response:
+                    self.logger.info(f"Nasdaq API response status for {symbol}: {response.status}")
                     if response.status == 429:
                         return await self.handle_rate_limit()
 
                     response.raise_for_status()
                     data = await response.json()
-                    self.logger.info(f"Data successfully fetched from NASDAQ for {symbol}")
+                    self.logger.info(f"Data successfully fetched from Nasdaq for {symbol}")
                     return data
             except aiohttp.ClientError as err:
-                self.logger.error(f"An error occurred: {err}")
+                self.logger.error(f"An error occurred while fetching data from Nasdaq: {err}")
             return None
 
 # Define API keys and base URLs using environment variables
@@ -113,8 +113,8 @@ alpha_vantage_api_key = os.getenv('ALPHAVANTAGE_API_KEY')
 polygon_io_api_key = os.getenv('POLYGON_API_KEY')
 nasdaq_api_key = os.getenv('NASDAQ_API_KEY')
 
-alpha_vantage_base_url = 'https://www.alphavantage.co/query'
-polygon_io_base_url = 'https://api.polygon.io/v2'
+alpha_vantage_base_url = 'https://www.alphavantage.co'
+polygon_io_base_url = 'https://api.polygon.io'
 nasdaq_base_url = 'https://api.nasdaq.com/api'
 
 async def fetch_async_data():
@@ -145,10 +145,10 @@ def main():
     # Initialize configuration manager
     config = ConfigManager(config_file='config.ini')
 
-    # Fetch API keys from configuration
-    alpha_vantage_api_key = config.get('API_KEYS', 'ALPHAVANTAGE_API_KEY', fallback=None)
-    nasdaq_api_key = config.get('API_KEYS', 'NASDAQ_API_KEY', fallback=None)
-    polygon_api_key = config.get('API_KEYS', 'POLYGON_API_KEY', fallback=None)
+    # Fetch API keys from environment variables
+    alpha_vantage_api_key = os.getenv('ALPHAVANTAGE_API_KEY')
+    nasdaq_api_key = os.getenv('NASDAQ_API_KEY')
+    polygon_api_key = os.getenv('POLYGON_API_KEY')
 
     # Initialize data fetchers
     alpha_vantage_fetcher = AlphaVantageDataFetcher()
@@ -198,4 +198,3 @@ def main():
 if __name__ == "__main__":
     main()
     asyncio.run(fetch_async_data())
-
