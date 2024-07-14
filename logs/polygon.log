@@ -73,3 +73,10 @@
 2024-07-12 19:14:03,185 ERROR Nasdaq: Error fetching data for symbol AAPL: 404 Client Error:  for url: https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31
 2024-07-12 19:14:04,184 ERROR Nasdaq: Error fetching real-time data for symbol AAPL: 404, message='', url=URL('https://dataondemand.nasdaq.com/api/v1/historical/AAPL/real-time?apiKey=5hSXmst5GSPX2F2VauxN')
 2024-07-12 19:18:29,546 ERROR Nasdaq: Error fetching data for symbol AAPL: 404, message='', url=URL('https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=5hSXmst5GSPX2F2VauxN&startDate=2022-01-01&endDate=2022-12-31')
+2024-07-14 18:10:59,005 WARNING AlphaVantage: Data for  is not in the expected format.
+2024-07-14 18:23:33,018 WARNING AlphaVantage: Data for  tsla is not in the expected format.
+2024-07-14 18:23:33,430 ERROR Polygon: Error fetching data for symbol sq: 400, message='Bad Request', url=URL('https://api.polygon.io/v2/aggs/ticker/sq/range/1/day/1900-01-01/2024-07-14?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4')
+2024-07-14 18:23:33,627 ERROR Polygon: Error fetching data for symbol  tsla: 400, message='Bad Request', url=URL('https://api.polygon.io/v2/aggs/ticker/%20tsla/range/1/day/1900-01-01/2024-07-14?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4')
+2024-07-14 18:30:18,154 WARNING Polygon: Data for sq is not in the expected format.
+2024-07-14 18:31:50,972 ERROR Polygon: Error fetching data for symbol sq: 400, message='Bad Request', url=URL('https://api.polygon.io/v2/aggs/ticker/sq/range/1/day/1900-01-01/2024-07-14?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4')
+2024-07-14 18:31:50,972 ERROR Polygon: Error fetching data for symbol sq: 400, message='Bad Request', url=URL('https://api.polygon.io/v2/aggs/ticker/sq/range/1/day/1900-01-01/2024-07-14?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4')

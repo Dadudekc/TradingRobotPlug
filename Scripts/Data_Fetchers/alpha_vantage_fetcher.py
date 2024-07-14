@@ -6,11 +6,12 @@ import aiohttp
 import logging
 from datetime import datetime
 from typing import Optional
+from pathlib import Path
 
 # Add project root to the Python path
-script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
-sys.path.append(project_root)
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parent.parent
+sys.path.append(str(project_root))
 
 from Scripts.Data_Fetchers.base_fetcher import DataFetcher
 from Scripts.Utilities.data_store import DataStore
@@ -26,7 +27,7 @@ class AlphaVantageDataFetcher(DataFetcher):
                          'AlphaVantage')
         self.data_store = DataStore()
 
-    def construct_api_url(self, symbol: str, start_date: str, end_date: str) -> str:
+    def construct_api_url(self, symbol: str) -> str:
         return f"{self.base_url}?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={self.api_key}&outputsize=full&datatype=json"
 
     def extract_results(self, data: dict) -> list:
@@ -46,7 +47,7 @@ class AlphaVantageDataFetcher(DataFetcher):
         return results
 
     async def async_fetch_data(self, symbol: str) -> pd.DataFrame:
-        url = self.construct_api_url(symbol, "2023-01-01", "2023-12-31")
+        url = self.construct_api_url(symbol)
         try:
             self.logger.debug(f"{self.source}: Request URL: {url}")
             async with aiohttp.ClientSession() as session:
@@ -120,7 +121,7 @@ class AlphaVantageDataFetcher(DataFetcher):
         results = {}
         async with aiohttp.ClientSession() as session:
             for symbol in symbols:
-                url = self.construct_api_url(symbol, start_date, end_date)
+                url = self.construct_api_url(symbol)
                 try:
                     self.logger.debug(f"{self.source}: Request URL: {url}")
                     async with session.get(url) as response:
@@ -158,16 +159,17 @@ class AlphaVantageDataFetcher(DataFetcher):
             for entry in metadata:
                 f.write(f"{entry['source_url']},{entry['fetch_time']},{entry['status']},{entry['data_size']},{entry['symbol']},{entry['date_range']}\n")
 
-async def main():
+async def main(symbols, start_date, end_date):
     fetcher = AlphaVantageDataFetcher()
-    symbols = ["AAPL", "MSFT", "GOOG"]
-    start_date = "2023-01-01"
-    end_date = "2023-12-31"
     
     data = await fetcher.fetch_data(symbols, start_date, end_date)
-    for symbol, df in data.items():
-        if not df.empty and fetcher.validate_data(df):
-            fetcher.save_data(df, symbol, processed=True, overwrite=True, versioning=True, archive=True)
+    for symbol, results in data.items():
+        if results:
+            df = pd.DataFrame(results)
+            df['date'] = pd.to_datetime(df['date'])
+            df.set_index('date', inplace=True)
+            if fetcher.validate_data(df):
+                fetcher.save_data(df, symbol, processed=True, overwrite=True, versioning=True, archive=True)
     
     real_time_data = await fetcher.fetch_real_time_data("AAPL")
     if not real_time_data.empty and fetcher.validate_data(real_time_data):
@@ -176,4 +178,7 @@ async def main():
     print("Data fetching completed.")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    symbols = ["AAPL", "MSFT", "GOOG"]
+    start_date = "2023-01-01"
+    end_date = "2023-12-31"
+    asyncio.run(main(symbols, start_date, end_date))
