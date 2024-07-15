@@ -10,7 +10,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
-from Scripts.Data_Fetchers.data_fetcher import AlphaVantageDataFetcher, NasdaqDataFetcher, PolygonDataFetcher
+from Scrap.data_fetch_scrap.data_fetcher import AlphaVantageDataFetcher, NasdaqDataFetcher, PolygonDataFetcher
 
 class TestAlphaVantageDataFetcher(unittest.TestCase):
 

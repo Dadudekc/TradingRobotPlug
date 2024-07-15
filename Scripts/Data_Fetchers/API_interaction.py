@@ -25,6 +25,7 @@ class BaseAPI:
 
     async def handle_rate_limit(self, retry_after=60, max_retries=5):
         for attempt in range(max_retries):
+            self.logger.warning(f"Rate limit reached. Retrying after {retry_after} seconds... (Attempt {attempt+1}/{max_retries})")
             await asyncio.sleep(retry_after)
             result = await self.async_fetch_data()
             if result is not None:

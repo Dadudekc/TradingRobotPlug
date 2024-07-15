@@ -13,13 +13,16 @@ sys.path.append(str(project_root))
 from Scripts.Data_Fetchers.alpha_vantage_fetcher import AlphaVantageDataFetcher
 from Scripts.Data_Fetchers.polygon_fetcher import PolygonDataFetcher
 from Scripts.Utilities.data_store import DataStore
+# from Scripts.Utilities.DataLakeHandler import DataLakeHandler  # Commented out for now
 
 # Load environment variables from .env file
 load_dotenv()
 
 async def fetch_data(symbols, start_date, end_date):
-    alpha_vantage_fetcher = AlphaVantageDataFetcher()
-    polygon_fetcher = PolygonDataFetcher()
+    # data_lake_handler = DataLakeHandler(bucket_name='your-s3-bucket-name')  # Commented out for now
+
+    alpha_vantage_fetcher = AlphaVantageDataFetcher()  # data_lake_handler commented out for now
+    polygon_fetcher = PolygonDataFetcher()  # data_lake_handler commented out for now
     data_store = DataStore()
     fetched_files = []
 
@@ -27,10 +30,10 @@ async def fetch_data(symbols, start_date, end_date):
     print("Fetching data from Alpha Vantage...")
     alpha_data = {}
     for symbol in symbols:
-        df = await alpha_vantage_fetcher.async_fetch_data(symbol)
-        if not df.empty:
+        df = await alpha_vantage_fetcher.fetch_data_for_symbol(symbol, start_date, end_date)
+        if df is not None and not df.empty:
             filename = f"{symbol}_alpha_vantage_data_{start_date}_to_{end_date}.csv"
-            alpha_vantage_fetcher.save_data(df, filename, overwrite=True)
+            alpha_vantage_fetcher.save_data(df, symbol, processed=False, overwrite=True)
             alpha_data[symbol] = df
             fetched_files.append(filename)
             print(f"Alpha Vantage data fetched and saved for {symbol} as {filename}")
@@ -41,10 +44,10 @@ async def fetch_data(symbols, start_date, end_date):
         print("Fetching data from Polygon...")
         polygon_data = {}
         for symbol in symbols:
-            df = await polygon_fetcher.async_fetch_data(symbol, start_date, end_date)
-            if not df.empty:
+            df = await polygon_fetcher.fetch_data_for_symbol(symbol, start_date, end_date)
+            if df is not None and not df.empty:
                 filename = f"{symbol}_polygon_data_{start_date}_to_{end_date}.csv"
-                polygon_fetcher.save_data(df, filename, overwrite=True)
+                polygon_fetcher.save_data(df, symbol, processed=False, overwrite=True)
                 polygon_data[symbol] = df
                 fetched_files.append(filename)
                 print(f"Polygon data fetched and saved for {symbol} as {filename}")

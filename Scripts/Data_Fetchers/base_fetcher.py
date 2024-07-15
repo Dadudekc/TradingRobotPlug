@@ -1,8 +1,7 @@
-#C:\TheTradingRobotPlug\Scripts\Data_Fetchers\base_fetcher.py
-
 import os
 import sys
-import requests
+import asyncio
+import aiohttp
 import pandas as pd
 from typing import List, Optional
 from datetime import datetime, timedelta
@@ -15,17 +14,19 @@ sys.path.append(project_root)
 
 from Scripts.Utilities.data_store import DataStore
 from Scripts.Utilities.data_fetch_utils import DataFetchUtils
+from Scripts.Utilities.DataLakeHandler import DataLakeHandler
 
 # Load environment variables from .env file
 load_dotenv(dotenv_path="C:/TheTradingRobotPlug/.env")
 
 class DataFetcher:
-    def __init__(self, api_key_env_var: str, base_url: str, raw_csv_dir: str, processed_csv_dir: str, db_path: str, log_file: str, source: str):
+    def __init__(self, api_key_env_var: str, base_url: str, raw_csv_dir: str, processed_csv_dir: str, db_path: str, log_file: str, source: str, data_lake_handler: Optional[DataLakeHandler] = None):
         self.utils = DataFetchUtils(log_file)
         self.logger = self.utils.logger  # Initialize the logger
         self.api_key = os.getenv(api_key_env_var)
         self.base_url = base_url
         self.source = source
+        self.data_lake_handler = data_lake_handler
 
         self.raw_csv_dir = raw_csv_dir
         self.processed_csv_dir = processed_csv_dir
@@ -39,51 +40,54 @@ class DataFetcher:
             self.logger.error(f"{self.source}: API key not found in environment variables.")
             raise ValueError("API key not found in environment variables.")
 
-    def fetch_data(self, ticker_symbols: List[str], start_date: str = None, end_date: str = None) -> dict:
+    async def fetch_data(self, ticker_symbols: List[str], start_date: str = None, end_date: str = None) -> dict:
         if start_date is None:
             start_date = "2023-01-01"  # default start date
         if end_date is None:
             end_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
         all_data = {}
+        tasks = [self.fetch_data_for_symbol(symbol, start_date, end_date) for symbol in ticker_symbols]
+        results = await asyncio.gather(*tasks)
 
-        for symbol in ticker_symbols:
-            self.logger.info(f"{self.source}: Fetching data for {symbol} from {start_date} to {end_date}")
-            data = self.fetch_data_for_symbol(symbol, start_date, end_date)
+        for symbol, data in zip(ticker_symbols, results):
             if data is not None:
                 all_data[symbol] = data
 
         return all_data
 
-    def fetch_data_for_symbol(self, symbol: str, start_date: str, end_date: str) -> Optional[pd.DataFrame]:
+    async def fetch_data_for_symbol(self, symbol: str, start_date: str, end_date: str) -> Optional[pd.DataFrame]:
         url = self.construct_api_url(symbol, start_date, end_date)
 
         try:
             self.logger.debug(f"{self.source}: Request URL: {url}")
-            response = requests.get(url)
-            response.raise_for_status()
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    response.raise_for_status()
+                    data = await response.json()
+                    results = self.extract_results(data)
 
-            data = response.json()
-            results = self.extract_results(data)
-
-            if results:
-                df = pd.DataFrame(results)
-                df['date'] = pd.to_datetime(df['date'])
-                df.set_index('date', inplace=True)
-                df = df.sort_index()  # Ensure the index is sorted
-                df['symbol'] = symbol
-                filtered_df = df.loc[start_date:end_date]
-                self.logger.debug(f"{self.source}: Fetched data for {symbol}: {filtered_df}")
-                return filtered_df
-            else:
-                self.logger.warning(f"{self.source}: Fetched data for {symbol} is not in the expected format.")
-                return None
-        except requests.RequestException as e:
+                    if results:
+                        df = pd.DataFrame(results)
+                        df['date'] = pd.to_datetime(df['date'])
+                        df.set_index('date', inplace=True)
+                        df = df.sort_index()  # Ensure the index is sorted
+                        df['symbol'] = symbol
+                        filtered_df = df.loc[start_date:end_date]
+                        self.logger.debug(f"{self.source}: Fetched data for {symbol}: {filtered_df}")
+                        return filtered_df
+                    else:
+                        self.logger.warning(f"{self.source}: Fetched data for {symbol} is not in the expected format.")
+                        return None
+        except aiohttp.ClientResponseError as e:
             self.logger.error(f"{self.source}: Error fetching data for symbol {symbol}: {e}")
             return None
         except Exception as e:
             self.logger.error(f"{self.source}: Unexpected error for symbol {symbol}: {e}")
             return None
+
+    async def fetch_real_time_data(self, symbol: str) -> Optional[pd.DataFrame]:
+        raise NotImplementedError("This method should be implemented by subclasses.")
 
     def save_data(self, data: pd.DataFrame, symbol: str, processed=False, overwrite=False, versioning=False, archive=False) -> None:
         if data.empty:
@@ -114,10 +118,13 @@ class DataFetcher:
 
         self.data_store.save_to_csv(data, file_path, overwrite)
         self.data_store.save_to_sql(data, f"{symbol}_data")
-        self.logger.info(f"{self.source}: Data saved to CSV and SQL for symbol: {symbol}")
+        if self.data_lake_handler:
+            self.data_lake_handler.upload_file(file_path, f"{symbol}/{file_name}")
+            self.logger.info(f"{self.source}: Data saved to CSV, SQL, and uploaded to S3 for symbol: {symbol}")
+        else:
+            self.logger.info(f"{self.source}: Data saved to CSV and SQL for symbol: {symbol}")
 
     def validate_data(self, data: pd.DataFrame) -> bool:
-        # Example validation: Check if data is non-empty and has expected columns
         required_columns = ["open", "high", "low", "close", "volume"]
         if data.empty or not all(col in data.columns for col in required_columns):
             self.logger.error(f"{self.source}: Validation failed for data")

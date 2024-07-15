@@ -781,3 +781,153 @@
 2024-07-14 18:31:50,972 ERROR Polygon: Error fetching data for symbol sq: 400, message='Bad Request', url=URL('https://api.polygon.io/v2/aggs/ticker/sq/range/1/day/1900-01-01/2024-07-14?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4')
 2024-07-14 18:31:50,972 ERROR Polygon: Error fetching data for symbol sq: 400, message='Bad Request', url=URL('https://api.polygon.io/v2/aggs/ticker/sq/range/1/day/1900-01-01/2024-07-14?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4')
 2024-07-14 18:31:50,972 ERROR Polygon: Error fetching data for symbol sq: 400, message='Bad Request', url=URL('https://api.polygon.io/v2/aggs/ticker/sq/range/1/day/1900-01-01/2024-07-14?apiKey=ruqNOBWgLAXuiUM0ugL5WmxbkIdlELp4')
+2024-07-14 19:06:59,121 WARNING AlphaVantage: C:/TheTradingRobotPlug/data/alpha_vantage\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:06:59,121 WARNING AlphaVantage: C:/TheTradingRobotPlug/data/alpha_vantage\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:06:59,644 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:06:59,644 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:09:29,057 WARNING AlphaVantage: C:/TheTradingRobotPlug/data/alpha_vantage\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:09:29,057 WARNING AlphaVantage: C:/TheTradingRobotPlug/data/alpha_vantage\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:09:29,070 WARNING AlphaVantage: C:/TheTradingRobotPlug/data/alpha_vantage\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:09:29,070 WARNING AlphaVantage: C:/TheTradingRobotPlug/data/alpha_vantage\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:09:29,081 WARNING AlphaVantage: C:/TheTradingRobotPlug/data/alpha_vantage\GOOG_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:09:29,081 WARNING AlphaVantage: C:/TheTradingRobotPlug/data/alpha_vantage\GOOG_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:09:29,477 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:09:29,477 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:09:29,491 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:09:29,491 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:09:29,509 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\GOOG_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:09:29,509 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\GOOG_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:12:09,710 WARNING AlphaVantage: Real-time data for AAPL is not in the expected format.
+2024-07-14 19:12:09,710 WARNING AlphaVantage: Real-time data for AAPL is not in the expected format.
+2024-07-14 19:12:27,053 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:12:27,053 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:12:27,053 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:12:27,053 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:12:27,131 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:12:27,131 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:12:27,542 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:12:27,542 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:12:27,554 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:12:27,554 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:12:27,569 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\GOOG_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:12:27,569 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\GOOG_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:22:27,522 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:22:27,522 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:22:27,536 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:22:27,536 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:22:27,613 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:22:27,613 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:22:48,713 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:22:48,713 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:22:48,713 ERROR Polygon: Unexpected error for symbol MSFT: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:22:48,713 ERROR Polygon: Unexpected error for symbol MSFT: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:22:48,728 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:22:48,728 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:30:51,135 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:30:51,135 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:30:51,214 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:30:51,214 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:30:51,332 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:30:51,332 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:30:52,048 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:30:52,048 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:30:52,064 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:30:52,064 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:30:52,079 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\GOOG_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:30:52,079 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\GOOG_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:34:37,914 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:34:37,914 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:34:37,918 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:34:37,918 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:34:38,006 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:34:38,006 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:34:53,496 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:34:53,496 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:34:53,519 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:34:53,519 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:34:53,563 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\GOOG_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:34:53,563 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\GOOG_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:40:52,853 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:40:52,853 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:40:52,853 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:45:40,787 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:45:40,787 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:45:40,788 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:45:40,788 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:45:40,861 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:45:40,861 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:46:02,083 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:46:02,083 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:46:02,083 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:46:02,083 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:46:02,084 ERROR Polygon: Unexpected error for symbol MSFT: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:46:02,084 ERROR Polygon: Unexpected error for symbol MSFT: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:46:35,787 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:46:35,787 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:46:35,788 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:46:35,788 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:46:35,858 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:46:35,858 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:46:39,114 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:46:39,114 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\AAPL_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:46:39,128 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:46:39,128 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\MSFT_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:46:39,141 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\GOOG_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:46:39,141 WARNING Polygon: C:/TheTradingRobotPlug/data/polygon\GOOG_data.csv already exists. Skipping save. Set overwrite=True to overwrite it.
+2024-07-14 19:53:26,265 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:53:26,265 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:53:26,265 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:53:26,470 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:53:26,470 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:53:26,470 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:53:26,694 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:53:26,694 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:53:26,694 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:53:47,780 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:53:47,780 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:53:47,780 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:54:11,471 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:54:11,471 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:54:11,471 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:57:56,088 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:57:56,088 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:57:56,088 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 19:57:56,290 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:57:56,290 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:57:56,290 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 19:57:56,537 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:57:56,537 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:57:56,537 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 19:58:17,695 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:58:17,695 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:58:17,695 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:58:54,315 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:58:54,315 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 19:58:54,315 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 20:04:34,478 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 20:04:34,478 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 20:04:34,478 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 20:04:34,621 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 20:04:34,621 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 20:04:34,621 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 20:04:34,755 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 20:04:34,755 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 20:04:34,755 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 20:04:55,940 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 20:04:55,940 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 20:04:55,940 ERROR Polygon: Unexpected error for symbol AAPL: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 20:05:04,562 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 20:05:04,562 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 20:05:04,562 WARNING AlphaVantage: Fetched data for AAPL is not in the expected format.
+2024-07-14 20:05:04,703 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 20:05:04,703 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 20:05:04,703 WARNING AlphaVantage: Fetched data for MSFT is not in the expected format.
+2024-07-14 20:05:05,104 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 20:05:05,104 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 20:05:05,104 WARNING AlphaVantage: Fetched data for GOOG is not in the expected format.
+2024-07-14 20:05:43,471 ERROR Polygon: Unexpected error for symbol MSFT: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 20:05:43,471 ERROR Polygon: Unexpected error for symbol MSFT: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 20:05:43,471 ERROR Polygon: Unexpected error for symbol MSFT: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 20:06:04,714 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 20:06:04,714 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]
+2024-07-14 20:06:04,714 ERROR Polygon: Unexpected error for symbol GOOG: Cannot connect to host api.polygon.io:443 ssl:default [The semaphore timeout period has expired]

@@ -8,3 +8,9 @@ https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=GOOG&apikey=
 https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&apikey=C6AG9NZX6QIPYTX4&outputsize=full&datatype=json,2024-07-14T18:36:10.898691,200,1301970,AAPL,2023-01-01 to 2023-12-31
 https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=MSFT&apikey=C6AG9NZX6QIPYTX4&outputsize=full&datatype=json,2024-07-14T18:36:11.364807,200,1292882,MSFT,2023-01-01 to 2023-12-31
 https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=GOOG&apikey=C6AG9NZX6QIPYTX4&outputsize=full&datatype=json,2024-07-14T18:36:11.555265,200,548968,GOOG,2023-01-01 to 2023-12-31
+https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&apikey=C6AG9NZX6QIPYTX4&outputsize=full&datatype=json,2024-07-14T18:54:54.679772,200,1301970,AAPL,2023-01-01 to 2023-12-31
+https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=MSFT&apikey=C6AG9NZX6QIPYTX4&outputsize=full&datatype=json,2024-07-14T18:54:55.038746,200,1292882,MSFT,2023-01-01 to 2023-12-31
+https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=GOOG&apikey=C6AG9NZX6QIPYTX4&outputsize=full&datatype=json,2024-07-14T18:54:55.223403,200,548968,GOOG,2023-01-01 to 2023-12-31
+https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&apikey=C6AG9NZX6QIPYTX4&outputsize=full&datatype=json,2024-07-14T19:12:09.260438,200,239,AAPL,2023-01-01 to 2023-12-31
+https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=MSFT&apikey=C6AG9NZX6QIPYTX4&outputsize=full&datatype=json,2024-07-14T19:12:09.343459,200,239,MSFT,2023-01-01 to 2023-12-31
+https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=GOOG&apikey=C6AG9NZX6QIPYTX4&outputsize=full&datatype=json,2024-07-14T19:12:09.475579,200,239,GOOG,2023-01-01 to 2023-12-31
