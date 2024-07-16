@@ -1,71 +1,83 @@
-import os
-import json
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import patch, MagicMock
+import pandas as pd
 from datetime import datetime
-from Scripts.DataFetchers.nasdaq_fetcher import NasdaqDataFetcher
+import os
+import sys
+
+# Add project root to the Python path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
+sys.path.append(project_root)
+
+from Scrap.data_fetch_scrap.nasdaq_fetcher import NasdaqDataFetcher
 
 class TestNasdaqDataFetcher(unittest.TestCase):
+
     def setUp(self):
-        os.environ['NASDAQ_API_KEY'] = 'test_api_key'
-        os.environ['CSV_DIR'] = '/tmp'
-        os.environ['DB_PATH'] = '/tmp/test.db'
-        os.environ['NASDAQ_LOG_FILE'] = '/tmp/nasdaq.log'
-        
         self.fetcher = NasdaqDataFetcher()
-
-        self.mock_requests_get = patch('requests.get').start()
-        self.addCleanup(patch.stopall)
-
-    def test_fetch_data(self):
-        symbol = "AAPL"
-        start_date = "2022-01-01"
-        end_date = "2022-12-31"
-
-        response_data = {
+        self.sample_data = {
             "data": [
-                {
-                    "t": 1641205200000,
-                    "o": 177.83,
-                    "h": 182.88,
-                    "l": 177.71,
-                    "c": 182.01,
-                    "v": 104487900
-                }
+                {'t': 1625074800000, 'o': 150.0, 'h': 155.0, 'l': 148.0, 'c': 152.0, 'v': 1000000}
+            ]
+        }
+        self.sample_real_time_data = {
+            "data": [
+                {'t': 1625074800000, 'o': 150.0, 'h': 155.0, 'l': 148.0, 'c': 152.0, 'v': 1000000}
             ]
         }
 
-        self.mock_requests_get.return_value = Mock(status_code=200)
-        self.mock_requests_get.return_value.json.return_value = response_data
+    def test_construct_api_url(self):
+        url = self.fetcher.construct_api_url("AAPL", "2023-01-01", "2023-12-31")
+        expected_url = "https://dataondemand.nasdaq.com/api/v1/historical/AAPL?apiKey=NASDAQ_API_KEY&startDate=2023-01-01&endDate=2023-12-31"
+        self.assertEqual(url, expected_url)
 
-        fetched_data = self.fetcher.fetch_data([symbol], start_date, end_date)
+    def test_extract_results(self):
+        results = self.fetcher.extract_results(self.sample_data)
+        expected_results = [{
+            'date': '2021-06-30',
+            'open': 150.0,
+            'high': 155.0,
+            'low': 148.0,
+            'close': 152.0,
+            'volume': 1000000
+        }]
+        self.assertEqual(results, expected_results)
 
-        self.assertIsNotNone(fetched_data)
-        self.assertIn(symbol, fetched_data)
-        self.assertFalse(fetched_data[symbol].empty)
+    def test_construct_real_time_api_url(self):
+        url = self.fetcher.construct_real_time_api_url("AAPL")
+        expected_url = "https://dataondemand.nasdaq.com/api/v1/historical/real-time/AAPL?apiKey=NASDAQ_API_KEY"
+        self.assertEqual(url, expected_url)
 
-    def test_fetch_real_time_data(self):
-        symbol = "AAPL"
-        response_data = {
-            "data": [
-                {
-                    "t": 1641205200000,
-                    "o": 177.83,
-                    "h": 177.88,
-                    "l": 177.71,
-                    "c": 177.01,
-                    "v": 487900
-                }
-            ]
-        }
+    def test_extract_real_time_results(self):
+        results = self.fetcher.extract_real_time_results(self.sample_real_time_data)
+        expected_results = [{
+            'timestamp': '2021-06-30 00:00:00',
+            'open': 150.0,
+            'high': 155.0,
+            'low': 148.0,
+            'close': 152.0,
+            'volume': 1000000
+        }]
+        self.assertEqual(results, expected_results)
 
-        self.mock_requests_get.return_value = Mock(status_code=200)
-        self.mock_requests_get.return_value.json.return_value = response_data
+    @patch('requests.get')
+    def test_fetch_data_for_symbol(self, mock_get):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = self.sample_data
+        mock_get.return_value = mock_response
 
-        fetched_data = self.fetcher.fetch_real_time_data(symbol)
+        data = self.fetcher.fetch_data_for_symbol('AAPL', '2023-01-01', '2023-12-31')
+        self.assertIsInstance(data, pd.DataFrame)
+        self.assertFalse(data.empty)
+        self.assertEqual(data.index.name, 'date')
 
-        self.assertIsNotNone(fetched_data)
-        self.assertFalse(fetched_data.empty)
+    @patch('requests.get')
+    def test_fetch_data_for_symbol_error(self, mock_get):
+        mock_get.side_effect = Exception("Test Exception")
+        data = self.fetcher.fetch_data_for_symbol('AAPL', '2023-01-01', '2023-12-31')
+        self.assertIsNone(data)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,3 +1,5 @@
+# C:\TheTradingRobotPlug\Scripts\Data_Fetchers\API_interaction.py
+
 import asyncio
 import aiohttp
 import logging
@@ -12,9 +14,9 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 
 class BaseAPI:
-    def __init__(self, base_url: str, api_key: str):
+    def __init__(self, base_url: str):
         self.base_url = base_url
-        self.api_key = api_key
+        self.api_key = os.getenv('ALPHAVANTAGE_API_KEY')
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def _construct_url(self, symbol: str, interval: str) -> str:
@@ -25,7 +27,7 @@ class BaseAPI:
 
     async def handle_rate_limit(self, retry_after=60, max_retries=5):
         for attempt in range(max_retries):
-            self.logger.warning(f"Rate limit reached. Retrying after {retry_after} seconds... (Attempt {attempt+1}/{max_retries})")
+            self.logger.warning(f"Rate limit reached. Retrying after {retry_after} seconds... (Attempt {attempt + 1}/{max_retries})")
             await asyncio.sleep(retry_after)
             result = await self.async_fetch_data()
             if result is not None:
@@ -34,8 +36,8 @@ class BaseAPI:
         return None
 
 class AlphaVantageAPI(BaseAPI):
-    def __init__(self, base_url: str, api_key: str):
-        super().__init__(base_url, api_key)
+    def __init__(self, base_url: str):
+        super().__init__(base_url)
 
     def _construct_url(self, symbol: str, interval: str) -> str:
         return f"{self.base_url}?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={self.api_key}&outputsize=full&datatype=json"
@@ -51,16 +53,14 @@ class AlphaVantageAPI(BaseAPI):
                     response.raise_for_status()
                     data = await response.json()
                     self.logger.info(f"Data successfully fetched from AlphaVantage for {symbol}")
-                    print(f"Data fetched from AlphaVantage for {symbol}: {data}")
                     return data
             except aiohttp.ClientError as err:
                 self.logger.error(f"An error occurred: {err}")
-                print(f"An error occurred: {err}")
             return None
 
 # Test the AlphaVantageAPI separately
 async def test_alpha_vantage_api():
-    api = AlphaVantageAPI('https://www.alphavantage.co/query', 'test_api_key')
+    api = AlphaVantageAPI('https://www.alphavantage.co/query')
     data = await api.async_fetch_data("AAPL", "daily")
     print(data)
 

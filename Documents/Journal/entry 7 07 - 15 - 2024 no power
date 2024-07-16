@@ -1,0 +1,498 @@
+### Project Journal Entry
+
+**Date**: 2024-07-15
+
+**6:30 am - 7:45 am**
+- **Morning Routine**: Woke up at 6:30 am. Spent about an hour waking up and playing Marvel Snap, achieving a new rank.
+- **Market Observation**: Noted that Tesla (TSLA) was up significantly in the premarket. Decided to focus on coding to avoid impulsive trading decisions.
+
+**7:45 am - 9:30 am**
+
+**Objective**: Run all scripts in the `Data_Fetchers` directory, note any issues, and create unit tests for each file.
+
+**Scripts Directory**:
+- **Data_Fetchers**:
+  - `__pycache__`
+  - `data`
+  - `__init__.py`
+  - `alpha_vantage_fetcher.py`
+  - `API_interaction.py`
+  - `base_fetcher.py`
+  - `data_fetch_main.py`
+  - `main.py`
+  - `polygon_fetcher.py`
+  - `real_time_fetcher.py`
+
+### Project Journal Entry - July 15, 2024
+
+**Objective**: Planned to develop and refine unit tests for various components of the trading robot project. However, unexpected issues required immediate attention, leading to a focus on enhancing the functionality and robustness of data fetching modules.
+
+**Summary of Work Done**:
+
+**AlphaVantageDataFetcher Improvements**:
+- **Error Handling and Logging**:
+  - Enhanced error handling to better manage API response errors and unexpected data formats.
+  - Implemented a retry mechanism with exponential backoff for handling transient errors like rate limits and server issues.
+  - Added detailed logging for raw data received from the Alpha Vantage API to aid in debugging.
+- **Data Format Handling**: Improved handling of unexpected data formats by logging warnings and ensuring the system can gracefully handle such scenarios.
+
+**PolygonDataFetcher Improvements**:
+- **Consistency with AlphaVantageDataFetcher**: Updated the PolygonDataFetcher to match the functionality and robustness of the AlphaVantageDataFetcher, ensuring similar error handling, retry mechanisms, and logging.
+- **Real-Time Data Fetching**: Added methods to fetch real-time data with robust error handling and logging.
+- **Data Format Handling**: Improved handling of unexpected data formats, similar to the improvements made in the AlphaVantageDataFetcher.
+
+**Integration and Testing**:
+- **Verified Flexibility**: Ensured both fetchers can be used interchangeably within the project.
+- **Preliminary Testing**: Conducted preliminary tests to ensure changes work as expected and do not introduce new issues.
+
+**Challenges Encountered**:
+- **Unexpected Data Formats**: Encountered mismatched data formats from APIs, necessitating enhancements to the `extract_results` methods.
+- **API Rate Limits and Connection Issues**: Faced rate limits and connection issues, prompting robust retry mechanisms.
+
+**Next Steps**:
+- **Unit Testing**: Return to developing and refining unit tests for all components, including updated data fetchers. Ensure comprehensive test coverage to catch potential issues early and validate the robustness of improvements.
+- **Further Integration**: Continue integrating fetchers with other project parts and ensure seamless operation within the larger system.
+- **Live Environment Monitoring**: Monitor fetchers' performance and reliability in a live environment and make further adjustments as needed.
+
+**Reflection**:
+- **Importance of Flexibility**: Highlighted the need to address immediate issues impacting project progress.
+- **Balancing Tasks**: Ensure a balance between immediate problem-solving and planned development tasks to keep the project on track.
+
+**Conclusion**:
+- **Significant Enhancements**: The improvements to the data fetching modules are significant steps toward ensuring the trading robot's robustness and reliability. These enhancements provide a solid foundation for future testing and integration efforts.
+
+**9:30 am - 12:04 pm**
+- **Documentation**: Added a screenshot of the data fetch tab to the journal and planned to move it to documentation.
+- **Completed Debugging**: Debugged tests for:
+  - `test_alpha_vantage_fetcher.py`
+  - `test_api_interaction.py`
+- **Ongoing Debugging**: Worked on debugging:
+  - `test_base_fetcher.py`
+  - `test_gui.py`
+- **Pending Debugging**: Need to complete debugging:
+  - `test_polygon_fetcher.py`
+  - `test_real_time_fetcher.py`
+- **Next Steps**: Ensure all files are tested and working properly to move on to the data processing stage with a goal to complete this today.
+
+**Project Directory Structure**:
+
+C:\TheTradingRobotPlug
++-- data
+|   +-- alpha_vantage
+|   |   +-- archive
+|   |   |   +-- AAPL_data.csv
+|   |   +-- processed
+|   |   +-- raw
+|   |   +-- AAPL_data.csv
+|   |   +-- AAPL_data_v1.csv
+|   |   +-- GOOG_data.csv
+|   |   +-- MSFT_data.csv
+|   +-- csv
+|   |   +-- processed
+|   |   +-- raw
+|   |   +-- AAPL_data.csv
+|   +-- polygon
+|   |   +-- archive
+|   |   |   +-- AAPL_data.csv
+|   |   +-- processed
+|   |   +-- raw
+|   |   +-- AAPL_data.csv
+|   |   +-- AAPL_data_v1.csv
+|   |   +-- GOOG_data.csv
+|   |   +-- MSFT_data.csv
+|   +-- processed
+|   |   +-- alpha_vantage
+|   |   |   +-- archive
+|   |   |   |   +-- AAPL_data.csv
+|   |   |   |   +-- AAPL_data_20240709030829.csv
+|   |   |   |   +-- AAPL_data_20240709081549.csv
+|   |   |   |   +-- AAPL_data_20240709081554.csv
+|   |   |   |   +-- AAPL_data_20240709122346.csv
+|   |   |   |   +-- AAPL_data_20240709155936.csv
+|   |   |   |   +-- AAPL_data_20240709165014.csv
+|   |   |   |   +-- AAPL_data_20240712190306.csv
+|   |   |   |   +-- AAPL_data_20240712201119.csv
+|   |   |   |   +-- AAPL_data_20240712202335.csv
+|   |   |   |   +-- AAPL_data_20240714183612.csv
+|   |   |   |   +-- AAPL_data_20240714185455.csv
+|   |   |   |   +-- GOOG_data_20240714185455.csv
+|   |   |   |   +-- MSFT_data_20240714185455.csv
+|   |   |   +-- AAPL_data_v1.csv
+|   |   |   +-- AAPL_data_v10.csv
+|   |   |   +-- AAPL_data_v11.csv
+|   |   |   +-- AAPL_data_v2.csv
+|   |   |   +-- AAPL_data_v3.csv
+|   |   |   +-- AAPL_data_v4.csv
+|   |   |   +-- AAPL_data_v5.csv
+|   |   |   +-- AAPL_data_v6.csv
+|   |   |   +-- AAPL_data_v7.csv
+|   |   |   +-- AAPL_data_v8.csv
+|   |   |   +-- AAPL_data_v9.csv
+|   |   |   +-- GOOG_data_v1.csv
+|   |   |   +-- MSFT_data_v1.csv
+|   |   +-- nasdaq
+|   |   +-- polygon
+|   |   |   +-- archive
+|   |   |   |   +-- AAPL_data_20240712221342.csv
+|   |   |   +-- AAPL_data_v1.csv
+|   |   |   +-- GOOG_data.csv
+|   |   |   +-- MSFT_data.csv
+|   +-- processed_alpha_vantage
+|   +-- processed_polygon
+|   +-- processed_real_time
+|   +-- raw
+|   |   +-- alpha_vantage
+|   |   |   +-- AAPL_alpha_vantage_data_2023-07-15_to_2024-07-14.csv_data.csv
+|   |   |   +-- AAPL_data.csv
+|   |   |   +-- GOOG_alpha_vantage_data_2023-07-15_to_2024-07-14.csv_data.csv
+|   |   |   +-- GOOG_data.csv
+|   |   |   +-- MSFT_alpha_vantage_data_2023-07-15_to_2024-07-14.csv_data.csv
+|   |   |   +-- MSFT_data.csv
+|   |   |   +-- sq_alpha_vantage_data_1900-01-01_to_2024-07-14.csv_data.csv
+|   |   |   +-- sq_alpha_vantage_data_2023-07-15_to_2024-07-14.csv_data.csv
+|   |   |   +-- sq_data.csv
+|   |   |   +-- tsla_data.csv
+|   |   +-- nasdaq
+|   |   |   +-- processed
+|   |   |   +-- raw
+|   |   +-- polygon
+|   |   |   +-- archive
+|   |   |   |   +-- AAPL_data.csv
+|   |   |   |   +-- AAPL_data_20240709164920.csv
+|   |   |   |   +-- AAPL_data_20240709165645.csv
+|   |   |   |   +-- AAPL_data_20240709165717.csv
+|   |   |   +-- AAPL_data.csv
+|   |   |   +-- AAPL_data_v1.csv
+|   |   |   +-- AAPL_data_v2.csv
+|   |   |   +-- AAPL_data_v3.csv
+|   |   |   +-- AAPL_data_v4.csv
+|   |   |   +-- GOOG_data.csv
+|   |   |   +-- MSFT_data.csv
+|   +-- real_time
+|   +-- trading_data.db
++-- Documents
+|   +-- Explanations
+|   +-- Journal
+|   |   +-- data fetch tab (preview).png
+|   |   +-- entry 1- 07-3-2024
+|   |   +-- entry 2 07-6-2024
+|   |   +-- entry 3 07-7-2024
+|   |   +-- entry 4 -07-8-2024
+|   |   +-- entry 5 07-12-2024 no power start
+|   |   +-- entry 6 07-14-2024 no power
+|   |   +-- entry 7 -07-15-2024 no power
+|   +-- Project Documentation
+|   |   +-- project_documentation.md
+|   +-- Resume Stuff
+|   |   +-- data_fetch_skills
++-- logs
+|   +-- alpha_vantage.log
+|   +-- data_fetch_utils.log
+|   +-- data_store.log
+|   +-- nasdaq.log
+|   +-- polygon.log
+|   +-- polygon_data_fetcher.log
+|   +-- real_time.log
++-- Scrap
+|   +-- data_fetch_scrap
+|   |   +-- __pycache__
+|   |   |   +-- data_fetcher.cpython-310.pyc
+|   |   |   +-- nasdaq_fetcher.cpython-310.pyc
+|   |   +-- alpha_vantage_df.py
+|   |   +-- data_fetcher.py
+|   |   +-- nasdaq.log
+|   |   +-- nasdaq.py
+|   |   +-- nasdaq_fetcher.py
+|   |   +-- polygon_io.py
+|   |   +-- test.py
+|   |   +-- test_alpha_vantage_df.py
+|   |   +-- test_data_fetcher.py
+|   |   +-- test_nasdaq_fetcher.py
+|   |   +-- test_polygon_io.py
++-- Scripts
+|   +-- Data_Fetchers
+|   |   +-- data
+|   |   +-- __pycache__
+|   |   |   +-- alpha_vantage_df.cpython-310.pyc
+|   |   |   +-- alpha_vantage_fetcher.cpython-310.pyc
+|   |   |   +-- API_interaction.cpython-310.pyc
+|   |   |   +-- base_fetcher.cpython-310.pyc
+|   |   |   +-- data_fetcher.cpython-310.pyc
+|   |   |   +-- data_fetch_main.cpython-310.pyc
+|   |   |   +-- nasdaq_fetcher.cpython-310.pyc
+|   |   |   +-- polygon_fetcher.cpython-310.pyc
+|   |   |   +-- polygon_io.cpython-310.pyc
+|   |   |   +-- real_time_fetcher.cpython-310.pyc
+|   |   |   +-- __init__.cpython-310.pyc
+|   |   +-- alpha_vantage_fetcher.py
+|   |   +-- API_interaction.py
+|   |   +-- base_fetcher.py
+|   |   +-- data_fetch_main.py
+|   |   +-- polygon_fetcher.py
+|   |   +-- real_time_fetcher.py
+|   |   +-- __init__.py
+|   +-- GUI
+|   |   +-- __pycache__
+|   |   |   +-- base_gui.cpython-310.pyc
+|   |   |   +-- data_fetch_tab.cpython-310.pyc
+|   |   |   +-- fetcher_gui.cpython-310.pyc
+|   |   +-- base_gui.py
+|   |   +-- data_fetch_tab.py
+|   |   +-- fetcher_gui.py
+|   +-- powershells
+|   |   +-- asci.ps1
+|   |   +-- quick.ps1
+|   |   +-- __init__.py
+|   +-- Utilities
+|   |   +-- __pycache__
+|   |   |   +-- config_handling.cpython-310.pyc
+|   |   |   +-- DataLakeHandler.cpython-310.pyc
+|   |   |   +-- data_fetch_utils.cpython-310.pyc
+|   |   |   +-- data_store.cpython-310.pyc
+|   |   |   +-- __init__.cpython-310.pyc
+|   |   +-- config_handling.py
+|   |   +-- DataLakeHandler.py
+|   |   +-- data_fetch_utils.py
+|   |   +-- data_store.py
+|   |   +-- __init__.py
+|   +-- __pycache__
+|   |   +-- __init__.cpython-310.pyc
+|   +-- __init__.py
++-- Tests
+|   +-- data
+|   |   +-- csv
+|   +-- Data_Fetch
+|   |   +-- __pycache__
+|   |   |   +-- test_alpha_vantage_df.cpython-310.pyc
+|   |   |   +-- test_data_fetcher.cpython-310.pyc
+|   |   |   +-- test_polygon_io.cpython-310.pyc
+|   |   |   +-- __init__.cpython-310.pyc
+|   |   +-- test_alpha_vantage_fetcher.py
+|   |   +-- test_api_interaction.py
+|   |   +-- test_base_fetcher.py
+|   |   +-- test_gui.py
+|   |   +-- test_polygon_fetcher.py
+|   |   +-- test_real_time_fetcher.py
+|   |   +-- __init__.py
+|   +-- GUI
+|   |   +-- test_base_gui.py
+|   |   +-- test_fetcher_gui.py
+|   +-- logs
+|   |   +-- data_fetch_utils.log
+|   +-- mock_csv_dir
+|   +-- test_csv_dir
+|   |   +-- processed
+|   |   +-- raw
+|   +-- test_log_dir
+|   |   +-- test_log_file.log
+|   +-- Utilities
+|   |   +-- test_config_handling.py
+|   |   +-- test_data_fetch_utils.py
+|   |   +-- test_data_store.py
+|   +-- __pycache__
+|   |   +-- test_alpha_vantage_fetcher.cpython-310.pyc
+|   +-- app.log
+|   +-- config.ini
+|   +-- real_time_data_fetcher.log
+|   +-- run_tests.py
+|   +-- test_alpha_vantage_fetcher.py
+|   +-- test_polygon_fetcher.py
+|   +-- test_utils.py
+|   +-- __init__.py
++-- test_log_dir
+|   +-- test_log_file.log
++-- .env
++-- .gitignore
++-- app.log
++-- config.ini
++-- metadata_alpha_vantage.csv
++-- metadata_polygon.csv
+
+
+### Project Journal Entry
+
+**Date**: 2024-07-15
+5:30 pm - 11:30 pm
+
+**Today's Highlights:**
+
+1. **Error Handling in Tests**: Addressed `ModuleNotFoundError` issues in the tests by ensuring correct module imports and proper setup of the project path.
+2. **Enhancing GUI with BaseGUI Class**: Consolidated and refined the `BaseGUI` class to include Azure theme configuration and a method to add tabs to the notebook.
+3. **FetcherGUI Implementation**: Developed the `FetcherGUI` class to extend `BaseGUI` and add tabs for AlphaVantage, Nasdaq, and Polygon data fetchers.
+4. **Tab Creation in FetcherGUI**: Implemented methods in `FetcherGUI` to create and configure each data fetcher's tab, including entry fields for ticker symbols and buttons for data fetching.
+5. **Threading for Asynchronous Operations**: Integrated threading in `FetcherGUI` to perform data fetching operations asynchronously.
+6. **Testing Enhancements**: Updated `test_fetcher_gui.py` to properly initialize `FetcherGUI` without the `root` argument and adjusted test methods to reflect the correct usage of fetcher methods and mock objects.
+7. **Improving GUI Tests**: Created and updated tests for the GUI using `unittest` to ensure proper functionality of each data fetcher tab.
+8. **Resolving GUI Errors**: Fixed errors related to `_tkinter.tkapp` object not having the `add_tab` attribute by correctly implementing the `add_tab` method in `BaseGUI`.
+9. **Data Fetcher Class Testing**: Developed and tested a base data fetcher class with methods to construct API URLs, extract results, and fetch data asynchronously.
+10. **Cleaning Up Resources in Tests**: Ensured proper cleanup of test directories and files to avoid resource warnings during test execution.
+11. **Fixing Async Tests**: Properly configured `AsyncMock` for `aiohttp.ClientSession.get` to handle asynchronous context management in tests.
+12. **Handling Raised Exceptions in Tests**: Adjusted tests to properly handle raised exceptions and ensured `None` is returned when an error occurs during data fetching.
+13. **ResourceWarning Fixes**: Addressed `ResourceWarning` issues by ensuring proper closure of file handlers and other resources.
+14. **Constructing API URLs**: Implemented and tested methods for constructing API URLs with correct parameters.
+15. **Extracting and Validating Data**: Developed and validated methods for extracting and processing data from API responses.
+16. **Asynchronous Data Fetching**: Implemented and tested asynchronous data fetching methods to ensure efficient data retrieval without blocking the main application thread.
+17. **Refactoring Data Fetching Utilities**: Streamlined data fetching utilities in `data_fetch_utils.py` for improved logging and error handling.
+18. **Logging Enhancements**: Enhanced logging functionality across modules to provide detailed information on data fetching operations and errors.
+19. **Integration with CI/CD Pipeline**: Started integrating the project with a continuous integration and delivery pipeline to automate testing and deployment processes.
+20. **Documentation**: Updated project documentation to include new features, APIs used, setup instructions, and troubleshooting tips.
+21. **Test Script Simplification**: Simplified test scripts to reduce clutter and unnecessary debug information.
+22. **Improved Test Coverage**: Added tests to cover more scenarios, including error cases and edge conditions.
+23. **Environment Configuration**: Configured environment variables and ensured they are correctly loaded in test scripts.
+24. **Project Path Configuration**: Ensured the correct setup of the project path in test scripts to avoid import issues.
+25. **Async Test Fixes**: Fixed issues related to asynchronous tests, ensuring proper handling of asyncio loops and context management.
+26. **GUI Functionality Validation**: Verified the functionality of GUI components such as entry fields and buttons to ensure they correctly interact with the data fetcher classes.
+27. **Performance Optimization**: Optimized data fetching processes to reduce latency and improve overall application responsiveness.
+28. **Error Logging Standardization**: Standardized error logging formats and messages across different modules for consistency and ease of debugging.
+29. **User Feedback Integration**: Implemented user feedback mechanisms to notify users of data fetching progress and completion within the GUI.
+30. **Deployment Planning**: Initiated planning for deployment strategies, including versioning and release management considerations.
+
+---
+
+**Directory Structure and Files Updated:**
+
+```plaintext
+TheTradingRobotPlug/
+├── .vscode/
+│   └── launch.json
+├── data/
+│   ├── alpha_vantage/
+│   │   ├── archive/
+│   │   ├── processed/
+│   │   ├── raw/
+│   │   ├── AAPL_data.csv
+│   │   ├── GOOG_data.csv
+│   │   └── MSFT_data.csv
+│   ├── csv/
+│   │   ├── processed/
+│   │   └── raw/
+│   ├── polygon/
+│   │   ├── archive/
+│   │   ├── processed/
+│   │   └── raw/
+│   ├── processed/
+│   │   ├── alpha_vantage/
+│   │   │   └── archive/
+│   │   ├── nasdaq/
+│   │   └── polygon/
+│   │       └── archive/
+│   ├── processed_alpha_vantage/
+│   ├── processed_polygon/
+│   ├── processed_real_time/
+│   ├── raw/
+│   │   ├── alpha_vantage/
+│   │   ├── nasdaq/
+│   │   │   ├── processed/
+│   │   │   └── raw/
+│   │   └── polygon/
+│   │       └── archive/
+│   ├── real_time/
+│   │   ├── processed/
+│   │   └── raw/
+│   └── trading_data.db
+├── Documents/
+│   ├── Explanations/
+│   ├── Journal/
+│   │   ├── data fetch tab (preview).png
+│   │   ├── entry 1- 07-3-2024
+│   │   ├── entry 2 07-6-2024
+│   │   ├── entry 3 07-7-2024
+│   │   ├── entry 4 -07-8-2024
+│   │   ├── entry 5 07-12-2024 no power start
+│   │   ├── entry 6 07-14-2024 no power
+│   │   └── entry 7 -07-15-2024 no power
+│   └── Project Documentation/
+│       ├── project_documentation 1.0.md
+│       └── project_documentation.md
+│   └── Resume Stuff/
+│       └── data_fetch_skills
+├── logs/
+│   ├── alpha_vantage.log
+│   ├── data_fetch_utils.log
+│   ├── data_store.log
+│   ├── nasdaq.log
+│   ├── polygon_data_fetcher.log
+│   ├── polygon.log
+│   └── real_time.log
+├── Scrap/
+├── Scripts/
+│   ├── __pycache__/
+│   ├── Data_Fetchers/
+│   │   ├── __pycache__/
+│   │   ├── data/
+│   │   ├── __init__.py
+│   │   ├── alpha_vantage_fetcher.py
+│   │   ├── API_interaction.py
+│   │   ├── base_fetcher.py
+│   │   ├── data_fetch_main.py
+│   │   ├── polygon_fetcher.py
+│   │   └── real_time_fetcher.py
+│   ├── GUI/
+│   │   ├── __pycache__/
+│   │   ├── base_gui.py
+│   │   ├── data_fetch_tab.py
+│   │   └── fetcher_gui.py
+│   ├── powershells/
+│   │   ├── __init__.py
+│   │   ├── asci.ps1
+│   │   ├── devsetup.ps1
+│   │   └── quick.ps1
+│   └── Utilities/
+│       ├── __pycache__/
+│       ├── __init__.py
+│       ├── config_handling.py
+│       ├── data_fetch_utils.py
+│       ├── data_store.py
+│       └── DataLakeHandler.py
+│   └── __init__.py
+├── test_csv_dir/
+├── test_log_dir/
+├── Tests/
+│   ├── __pycache__/
+│   ├── data/
+│   │   └── csv/
+│   ├── Data_Fetch/
+│   │   ├── __pycache__/
+│   │   ├── __init__.py
+│   │   ├── test_alpha_vantage_fetcher.py
+│   │   ├── test_api_interaction.py
+│   │   ├── test_base_fetcher.py
+│   │   ├── test_data_fetcher.py
+│   │   ├── test_polygon_fetcher.py
+│   │   ├── test_real_time_fetcher.py
+│   │   └── test.py
+│   ├── GUI/
+│   │   ├── test_base_gui.py
+│   │  
+
+ ├── test_data_fetch_tab.py
+│   │   └── test_fetcher_gui.py
+│   ├── logs/
+│   ├── mock_csv_dir/
+│   ├── test_csv_dir/
+│   ├── test_log_dir/
+│   │   └── test_log_file.log
+│   ├── Utilities/
+│   │   ├── test_config_handling.py
+│   │   ├── test_data_fetch_utils.py
+│   │   └── test_data_store.py
+│   ├── __init__.py
+│   ├── config.ini
+│   └── run_tests.py
+├── TheTradingRobotPlug/
+├── .env
+├── .gitignore
+├── app.log
+├── config.ini
+├── metadata_alpha_vantage.csv
+└── metadata_polygon.csv
+└── real_time_data_fetcher.log
+```
+
+**Additional Notes:**
+- Cleaned up extra CSV files and created a databank to organize the data, improving data management and accessibility.
+- Continued refining and enhancing various components of the trading robot project, ensuring robustness and reliability.
+
+---
+
+This comprehensive list covers the detailed work accomplished today. Feel free to further customize it according to your specific project milestones and goals.

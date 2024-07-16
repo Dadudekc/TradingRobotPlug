@@ -1,3 +1,5 @@
+import os
+import sys
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime, timedelta
@@ -5,8 +7,6 @@ import asyncio
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import os
-import sys
 
 # Add project root to the Python path
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -33,13 +33,13 @@ class DataFetchTab(ttk.Frame):
         self.start_date_entry = ttk.Entry(self)
         self.start_date_entry.insert(0, default_start_date)
         self.start_date_entry.grid(row=1, column=1, padx=10, pady=10)
-        self.start_date_entry.bind("<FocusIn>", lambda event: self.clear_default_date(event, self.start_date_entry))
+        self.start_date_entry.bind("<FocusIn>", lambda event: self.clear_default_date(event, self.start_date_entry, default_start_date))
 
         ttk.Label(self, text="End Date (YYYY-MM-DD):").grid(row=2, column=0, padx=10, pady=10)
         self.end_date_entry = ttk.Entry(self)
         self.end_date_entry.insert(0, default_end_date)
         self.end_date_entry.grid(row=2, column=1, padx=10, pady=10)
-        self.end_date_entry.bind("<FocusIn>", lambda event: self.clear_default_date(event, self.end_date_entry))
+        self.end_date_entry.bind("<FocusIn>", lambda event: self.clear_default_date(event, self.end_date_entry, default_end_date))
 
         self.fetch_button = ttk.Button(self, text="Fetch Data", command=self.fetch_data)
         self.fetch_button.grid(row=3, column=0, columnspan=2, pady=20)
@@ -53,8 +53,9 @@ class DataFetchTab(ttk.Frame):
         self.status_label = ttk.Label(self, text="")
         self.status_label.grid(row=6, column=0, columnspan=2, pady=10)
 
-    def clear_default_date(self, event, entry):
-        entry.delete(0, tk.END)
+    def clear_default_date(self, event, entry, default_value):
+        if entry.get() == default_value:
+            entry.delete(0, tk.END)
 
     def fetch_data(self):
         symbols = self.symbols_entry.get().strip().split(',')
@@ -62,15 +63,20 @@ class DataFetchTab(ttk.Frame):
         end_date = self.end_date_entry.get()
 
         # Validate the dates
-        try:
-            datetime.strptime(start_date, '%Y-%m-%d')
-            datetime.strptime(end_date, '%Y-%m-%d')
-        except ValueError:
+        if not self.validate_dates(start_date, end_date):
             self.status_label.config(text="Invalid date format. Please use YYYY-MM-DD.")
             return
 
         # Run the async data fetch function
         asyncio.run(self.run_fetch_data(symbols, start_date, end_date))
+
+    def validate_dates(self, start_date, end_date):
+        try:
+            datetime.strptime(start_date, '%Y-%m-%d')
+            datetime.strptime(end_date, '%Y-%m-%d')
+            return True
+        except ValueError:
+            return False
 
     async def run_fetch_data(self, symbols, start_date, end_date):
         self.status_label.config(text="Fetching data...")
@@ -93,7 +99,7 @@ class DataFetchTab(ttk.Frame):
     def display_chart(self):
         symbols = self.symbols_entry.get().strip().split(',')
 
-        if not symbols:
+        if not symbols or symbols == ['']:
             self.status_label.config(text="No symbols provided.")
             return
 
@@ -104,6 +110,8 @@ class DataFetchTab(ttk.Frame):
                 self.plot_candlestick_chart(data, symbol)
             else:
                 self.status_label.config(text=f"No data found for symbol: {symbol}")
+                return
+
 
     def plot_candlestick_chart(self, data, symbol):
         df = pd.DataFrame(data)

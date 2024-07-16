@@ -26,36 +26,31 @@ async def fetch_data(symbols, start_date, end_date):
     data_store = DataStore()
     fetched_files = []
 
-    # Fetch and store data for Alpha Vantage
-    print("Fetching data from Alpha Vantage...")
-    alpha_data = {}
-    for symbol in symbols:
-        df = await alpha_vantage_fetcher.fetch_data_for_symbol(symbol, start_date, end_date)
+    async def fetch_and_save(fetcher, symbol):
+        df = await fetcher.fetch_data_for_symbol(symbol, start_date, end_date)
         if df is not None and not df.empty:
-            filename = f"{symbol}_alpha_vantage_data_{start_date}_to_{end_date}.csv"
-            alpha_vantage_fetcher.save_data(df, symbol, processed=False, overwrite=True)
-            alpha_data[symbol] = df
+            filename = f"{symbol}_{fetcher.source.lower()}_data_{start_date}_to_{end_date}.csv"
+            fetcher.save_data(df, symbol, processed=False, overwrite=True)
             fetched_files.append(filename)
-            print(f"Alpha Vantage data fetched and saved for {symbol} as {filename}")
-    if not alpha_data:
-        print("No data fetched from Alpha Vantage.")
+            print(f"{fetcher.source} data fetched and saved for {symbol} as {filename}")
+            return df
+        return None
 
-        # If no data from Alpha Vantage, use Polygon
-        print("Fetching data from Polygon...")
-        polygon_data = {}
-        for symbol in symbols:
-            df = await polygon_fetcher.fetch_data_for_symbol(symbol, start_date, end_date)
-            if df is not None and not df.empty:
-                filename = f"{symbol}_polygon_data_{start_date}_to_{end_date}.csv"
-                polygon_fetcher.save_data(df, symbol, processed=False, overwrite=True)
-                polygon_data[symbol] = df
-                fetched_files.append(filename)
-                print(f"Polygon data fetched and saved for {symbol} as {filename}")
-        if not polygon_data:
+    # Fetch data from Alpha Vantage
+    print("Fetching data from Alpha Vantage...")
+    alpha_data = await asyncio.gather(*[fetch_and_save(alpha_vantage_fetcher, symbol) for symbol in symbols])
+
+    # Check if any data was fetched from Alpha Vantage
+    if not any(df is not None and not df.empty for df in alpha_data):
+        print("No data fetched from Alpha Vantage. Fetching data from Polygon...")
+        polygon_data = await asyncio.gather(*[fetch_and_save(polygon_fetcher, symbol) for symbol in symbols])
+        if not any(df is not None and not df.empty for df in polygon_data):
             print("No data fetched from Polygon either.")
 
-    # List all saved CSV files
-    csv_files = data_store.list_csv_files()
+    # List all saved CSV files from both raw and processed directories
+    csv_files_raw = data_store.list_csv_files()
+    csv_files_processed = data_store.list_csv_files(directory=data_store.processed_csv_dir)
+    csv_files = csv_files_raw + csv_files_processed
     print(f"Available CSV files: {csv_files}")
     return fetched_files
 
