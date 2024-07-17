@@ -1,0 +1,430 @@
+### Weekly Wrap-Up: July 3 - July 15, 2024
+
+#### **Overview:**
+The past week has been highly productive, with significant advancements in the Trading Robot project. Despite facing various challenges, including a major hurricane and managing multiple responsibilities, substantial progress was made in restructuring, refactoring, and enhancing the project.
+
+---
+
+#### **Accomplishments:**
+
+1. **Refactoring and Organization:**
+   - Separated utility functions into `data_fetch_utils.py`.
+   - Implemented conditional imports and corrected directory references to resolve circular dependencies.
+   - Achieved modularization and improved script portability.
+   - Added dynamic path inclusion using `Pathlib` to ensure module accessibility across directories.
+   - Switched to `config.ini` for configuration management and used `dotenv` for environment variables.
+
+2. **Error Handling and Logging:**
+   - Integrated robust error handling and logging mechanisms.
+   - Enhanced logging for better debugging and monitoring.
+   - Improved error messages for clarity.
+
+3. **Testing and Validation:**
+   - Developed comprehensive unit tests for various modules.
+   - Ensured functionality and identified edge cases through systematic testing.
+   - Created initial versions of test files and continued to refine them.
+
+4. **Asynchronous Data Fetching:**
+   - Added support for asynchronous data fetching using `aiohttp`.
+   - Implemented methods for asynchronously fetching historical and real-time data.
+   - Introduced data validation before saving to ensure integrity.
+   - Developed real-time data fetching mechanisms with fallback to handle API rate limits.
+
+5. **Data Fetching Enhancements:**
+   - Recreated `DataFetchUtils` and updated `DataStore` to use new utility functions.
+   - Refined and tested data fetching scripts to handle edge cases and improve reliability.
+   - Implemented default dates and improved file naming conventions in the GUI.
+   - Provided user feedback in the GUI about fetching status and file names.
+   - Updated main script to use Alpha Vantage as the primary source and Polygon as a fallback.
+
+6. **GUI Development:**
+   - Developed a comprehensive data fetch GUI using Tkinter.
+   - Added functionalities to allow users to select data sources and fetch data.
+   - Improved user feedback mechanisms in the GUI.
+   - Integrated the Azure theme for a modern look and feel.
+
+7. **Integration and Deployment:**
+   - Integrated data storage with a data lake for S3 storage.
+   - Managed sensitive information using environment variables.
+   - Structured project files and directories for clarity and maintainability.
+   - Implemented continuous integration with proper documentation and Git version control.
+
+8. **AlphaVantage and Polygon Data Fetcher Improvements:**
+   - Enhanced error handling and logging for both AlphaVantage and Polygon fetchers.
+   - Implemented retry mechanisms with exponential backoff for handling transient errors.
+   - Improved data format handling and ensured consistency between fetchers.
+
+9. **Real-Time Data Fetching:**
+   - Developed methods to fetch real-time data with robust error handling and logging.
+   - Verified flexibility of fetchers and ensured they can be used interchangeably.
+
+---
+
+#### **Challenges:**
+
+- Managing circular imports and ensuring correct module paths.
+- Recreating the `data_fetch_utils.py` file from scratch after accidental deletion.
+- Handling date inputs and defaults in the GUI effectively.
+- Implementing robust fallback mechanisms for API rate limits.
+- Multitasking between day job responsibilities and project work.
+- Power outages and other difficulties due to a hurricane.
+
+---
+
+#### **Lessons Learned:**
+
+- The importance of modular design and dynamic path handling in large projects.
+- Effective error handling and logging are crucial for debugging and maintaining system reliability.
+- Comprehensive testing ensures robustness and helps identify edge cases.
+- Providing clear user feedback in the GUI enhances user experience.
+- Proper structuring of imports and dependencies avoids circular import issues.
+- Perseverance and adaptability can lead to progress even in challenging circumstances.
+
+---
+
+#### **Next Steps:**
+
+- Continue refining and testing the data fetching components.
+- Ensure comprehensive test coverage for all modules.
+- Implement additional features and enhancements based on user feedback.
+- Update project documentation with recent changes.
+- Plan and execute the deployment strategy for the project.
+
+---
+
+### **Conclusion:**
+The past week has been marked by significant progress and learning. The Trading Robot project is now more robust, organized, and feature-rich. With continued effort and focus, the project is well-positioned for further development and eventual deployment.
+
+### **Reflection on Skills Used:**
+
+- **Python Programming:** Implemented and refactored numerous modules, classes, and functions for data fetching and handling.
+- **API Interaction:** Managed responses and rate limits from Alpha Vantage and Polygon APIs.
+- **Asynchronous Programming:** Utilized `asyncio` and `aiohttp` for efficient, non-blocking data fetching.
+- **Data Processing:** Manipulated and stored data using Pandas.
+- **Error Handling:** Developed robust error handling strategies for various scenarios.
+- **Environment Management:** Managed sensitive information using environment variables.
+- **Logging:** Implemented detailed logging for monitoring and debugging purposes.
+- **GUI Development:** Created user interfaces using Tkinter.
+- **Testing:** Developed comprehensive unit tests to ensure the reliability of the code.
+- **Project Organization:** Maintained a well-structured project directory for clarity and maintainability.
+- **CI/CD Integration:** Began integrating continuous integration and deployment processes.
+
+### **Moving Forward: Data Processing Phase**
+
+Having completed the data fetching phase, the next goal is to efficiently process the fetched data. This will involve:
+
+- Cleaning and transforming the raw data.
+- Implementing algorithms for data analysis and trading strategy development.
+- Storing processed data in an optimized format for quick access and retrieval.
+- Enhancing the GUI to support data processing functionalities.
+
+---
+
+### **Project Directory Structure:**
+
+```plaintext
+C:\TheTradingRobotPlug
+├── .vscode
+├── data
+│   ├── alpha_vantage
+│   │   ├── archive
+│   │   ├── processed
+│   │   ├── raw
+│   │   ├── AAPL_data.csv
+│   │   ├── GOOG_data.csv
+│   │   └── MSFT_data.csv
+│   ├── csv
+│   │   ├── processed
+│   │   └── raw
+│   ├── polygon
+│   │   ├── archive
+│   │   ├── processed
+│   │   └── raw
+│   ├── processed
+│   │   ├── alpha_vantage
+│   │   │   └── archive
+│   │   ├── nasdaq
+│   │   └── polygon
+│   │       └── archive
+│   ├── processed_alpha_vantage
+│   ├── processed_polygon
+│   ├── processed_real_time
+│   ├── raw
+│   │   ├── alpha_vantage
+│   │   ├── nasdaq
+│   │   │   ├── processed
+│   │   │   └── raw
+│   │   └── polygon
+│   │       └── archive
+│   ├── real_time
+│   │   ├── processed
+│   │   └── raw
+│   └── trading_data.db
+├── Documents
+│   ├── Explanations
+│   ├── Journal
+│   │   ├── data fetch tab (preview).png
+│   │   ├── entry 1 07 - 3 - 2024
+│   │   ├── entry 2 07 - 6 - 2024
+│   │   ├── entry 3 07 - 7 - 2024
+│   │   ├── entry 4 07 - 8 - 2024
+│   │   ├── entry 5 07 - 12 - 2024 no power start
+│   │   ├── entry 6 07 - 14 - 2024 no power
+│   │   └── entry 7 07 - 15 - 2024 no power
+│   ├── Project Documentation
+│   │   ├── project_documentation 1.0.md
+│   │   └── project_documentation.md
+│   ├── Resume Stuff
+│   │   └── data_fetch_skills
+├── logs
+│   ├── alpha_vantage.log
+│   ├── data_fetch_utils.log
+│   ├── data_store.log
+│   ├── nasdaq.log
+│   ├── polygon_data_fetcher.log
+│   ├── polygon.log
+│   └── real_time.log
+├── Scrap
+├── Scripts
+│   ├── Data_Fetchers
+│   │   ├── data
+│   │   ├── __init__.py
+│   │   ├── alpha_vantage_fetcher.py
+│   │   ├── API_interaction.py
+│   │   ├── base_fetcher.py
+│   │   ├── data_fetch_main.py
+│   │   ├── polygon_fetcher.py
+│   │   └── real_time_fetcher.py
+│   ├── GUI
+│   │   ├── base_gui.py
+│   │   ├── data_fetch_tab.py
+│   │   └── fetcher_gui.py
+│   ├── powershells
+│   │   ├── __init__.py
+│   │   ├── asci.ps1
+│   │   ├── devsetup.ps1
+│   │   └── quick.ps1
+│   ├── Utilities
+│   │   ├── __init
+
+__.py
+│   │   ├── config_handling.py
+│   │   ├── data_fetch_utils.py
+│   │   ├── data_store.py
+│   │   └── DataLakeHandler.py
+│   └── __init__.py
+├── test_csv_dir
+├── test_log_dir
+├── Tests
+│   ├── Data_Fetch
+│   │   ├── __init__.py
+│   │   ├── test_alpha_vantage_fetcher.py
+│   │   ├── test_api_interaction.py
+│   │   ├── test_base_fetcher.py
+│   │   ├── test_data_fetcher.py
+│   │   ├── test_polygon_fetcher.py
+│   │   ├── test_real_time_fetcher.py
+│   │   └── test.py
+│   ├── GUI
+│   │   ├── test_base_gui.py
+│   │   ├── test_data_fetch_tab.py
+│   │   └── test_fetcher_gui.py
+│   ├── Utilities
+│   │   ├── test_config_handling.py
+│   │   ├── test_data_fetch_utils.py
+│   │   └── test_data_store.py
+│   ├── logs
+│   ├── mock_csv_dir
+│   ├── test_csv_dir
+│   ├── test_log_dir
+│   │   └── test_log_file.log
+│   ├── config.ini
+│   └── run_tests.py
+├── TheTradingRobotPlug
+├── .env
+├── .gitignore
+├── app.log
+├── config.ini
+├── metadata_alpha_vantage.csv
+├── metadata_polygon.csv
+└── real_time_data_fetcher.log
+```
+
+This wrap-up encapsulates the key achievements, challenges, lessons, and future directions for the Trading Robot project over the past week, along with the skills applied and the directory structure of the project.
+
+### Skills Used in the Past Week
+
+1. **Python Programming:**
+   - Implemented and refactored numerous modules, classes, and functions for data fetching and handling.
+   - Developed comprehensive unit tests for various components.
+
+2. **API Interaction:**
+   - Managed responses and rate limits from Alpha Vantage and Polygon APIs.
+   - Handled asynchronous API requests using `aiohttp`.
+
+3. **Asynchronous Programming:**
+   - Utilized `asyncio` and `aiohttp` for efficient, non-blocking data fetching.
+   - Implemented retry mechanisms with exponential backoff for transient errors.
+
+4. **Data Processing:**
+   - Manipulated and stored data using Pandas.
+   - Ensured data validation and integrity before saving.
+
+5. **Error Handling:**
+   - Developed robust error handling strategies for various scenarios.
+   - Enhanced logging for better debugging and monitoring.
+
+6. **Environment Management:**
+   - Managed sensitive information using environment variables.
+   - Utilized `dotenv` for loading configuration settings.
+
+7. **Logging:**
+   - Implemented detailed logging for monitoring and debugging purposes.
+   - Improved error messages for clarity and traceability.
+
+8. **GUI Development:**
+   - Created user interfaces using Tkinter.
+   - Integrated user feedback mechanisms in the GUI.
+
+9. **Testing:**
+   - Developed comprehensive unit tests to ensure the reliability of the code.
+   - Used `unittest` and `unittest.mock` for mocking API responses and testing asynchronous code.
+
+10. **Project Organization:**
+    - Maintained a well-structured project directory for clarity and maintainability.
+    - Managed dependencies and imports to avoid circular references.
+
+11. **CI/CD Integration:**
+    - Began integrating continuous integration and deployment processes.
+    - Ensured proper setup of the project path in test scripts.
+
+12. **Version Control:**
+    - Used Git for version control, ensuring descriptive commit messages.
+    - Managed branch issues and pushed changes to the remote repository.
+
+13. **Multitasking and Time Management:**
+    - Balanced project work with day job responsibilities.
+    - Efficiently prioritized tasks to make significant progress despite time constraints.
+
+14. **Documentation:**
+    - Updated project documentation with new features, APIs used, setup instructions, and troubleshooting tips.
+    - Created detailed journal entries to track daily progress and reflect on accomplishments.
+
+### Conclusion
+
+This wrap-up encapsulates the key achievements, challenges, lessons, and future directions for the Trading Robot project over the past week, along with the skills applied and the directory structure of the project.
+
+# Project Resume: Trading Robot Development
+
+## Project Overview:
+The Trading Robot project is a comprehensive initiative aimed at revolutionizing the fintech industry by allowing users to create custom deep learning trading robots, backtest them, and deploy them, all within a single application. The system is designed to fetch and process financial data, apply advanced trading strategies, and execute trades. The project incorporates various technologies and methodologies to ensure robustness, modularity, and scalability.
+
+## Key Skills and Technologies:
+### 1. Python Programming:
+- **Modules and Packages:** 
+  - Developed and organized Python scripts into modular packages for better maintainability and reusability.
+  - Utilized `__init__.py` files to define packages and ensure proper module resolution.
+- **Dynamic Path Management:**
+  - Implemented dynamic path addition to Python's `sys.path` to ensure portability across different environments.
+
+### 2. Data Handling and Processing:
+- **Data Fetching:**
+  - Developed scripts to fetch financial data from various APIs (Alpha Vantage, Polygon.io).
+  - Used `requests` library for making HTTP requests and handling API responses.
+- **Data Storage:**
+  - Created a `DataStore` class to handle data saving and retrieval from CSV files and SQL databases using pandas and sqlalchemy.
+  - Implemented functions to save and fetch data from SQLite databases, ensuring data persistence.
+
+### 3. Configuration Management:
+- **Environment Variables:**
+  - Used `dotenv` to load environment variables for sensitive information like API keys.
+- **Configuration Files:**
+  - Switched to using a `config.ini` file for managing paths and other configurations.
+  - Developed functions to load and handle configurations using `configparser`.
+
+### 4. Error Handling and Logging:
+- **Logging:**
+  - Set up logging mechanisms using Python’s logging module to capture and record errors and important events.
+  - Created log files to maintain records of operations and errors for debugging and monitoring purposes.
+- **Error Handling:**
+  - Implemented robust error handling in data fetching and processing scripts to ensure the system's reliability and resilience.
+
+### 5. Version Control:
+- **Git:**
+  - Managed the project's source code using Git, ensuring proper version control and collaboration.
+  - Resolved complex merge conflicts and maintained a clean commit history.
+
+### 6. Testing and Validation:
+- **Unit Testing:**
+  - Developed unit tests for various modules to ensure they work as expected using Python’s `unittest` framework.
+  - Ensured test coverage for data fetching, processing, and storage functionalities.
+- **Mocking:**
+  - Used `unittest.mock` to create mock objects for testing external dependencies and APIs.
+
+### 7. Project Structure and Organization:
+- **Directory Structure:**
+  - Organized project files and directories systematically for better readability and management.
+  - Ensured separation of concerns by grouping related scripts and modules together.
+- **Documentation:**
+  - Maintained a journal to document daily progress, key accomplishments, and next steps.
+
+## Skills Used in the Past Week
+
+### 1. Python Programming:
+   - Implemented and refactored numerous modules, classes, and functions for data fetching and handling.
+   - Developed comprehensive unit tests for various components.
+
+### 2. API Interaction:
+   - Managed responses and rate limits from Alpha Vantage and Polygon APIs.
+   - Handled asynchronous API requests using `aiohttp`.
+
+### 3. Asynchronous Programming:
+   - Utilized `asyncio` and `aiohttp` for efficient, non-blocking data fetching.
+   - Implemented retry mechanisms with exponential backoff for transient errors.
+
+### 4. Data Processing:
+   - Manipulated and stored data using Pandas.
+   - Ensured data validation and integrity before saving.
+
+### 5. Error Handling:
+   - Developed robust error handling strategies for various scenarios.
+   - Enhanced logging for better debugging and monitoring.
+
+### 6. Environment Management:
+   - Managed sensitive information using environment variables.
+   - Utilized `dotenv` for loading configuration settings.
+
+### 7. Logging:
+   - Implemented detailed logging for monitoring and debugging purposes.
+   - Improved error messages for clarity and traceability.
+
+### 8. GUI Development:
+   - Created user interfaces using Tkinter.
+   - Integrated user feedback mechanisms in the GUI.
+
+### 9. Testing:
+   - Developed comprehensive unit tests to ensure the reliability of the code.
+   - Used `unittest` and `unittest.mock` for mocking API responses and testing asynchronous code.
+
+### 10. Project Organization:
+    - Maintained a well-structured project directory for clarity and maintainability.
+    - Managed dependencies and imports to avoid circular references.
+
+### 11. CI/CD Integration:
+    - Began integrating continuous integration and deployment processes.
+    - Ensured proper setup of the project path in test scripts.
+
+### 12. Version Control:
+    - Used Git for version control, ensuring descriptive commit messages.
+    - Managed branch issues and pushed changes to the remote repository.
+
+### 13. Multitasking and Time Management:
+    - Balanced project work with day job responsibilities.
+    - Efficiently prioritized tasks to make significant progress despite time constraints.
+
+### 14. Documentation:
+    - Updated project documentation with new features, APIs used, setup instructions, and troubleshooting tips.
+    - Created detailed journal entries to track daily progress and reflect on accomplishments.
+
+## Conclusion
+This wrap-up encapsulates the key achievements, challenges, lessons, and future directions for the Trading Robot project over the data fetch directory, along with the skills applied.

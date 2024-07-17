@@ -1,20 +1,24 @@
+# C:\TheTradingRobotPlug\Scripts\Utilities\data_store.py
+
 import os
 import pandas as pd
 import pickle
 import sys
 from pathlib import Path
+import talib  # Ensure TA-Lib is imported
+
 
 # Add project root to the Python path for independent execution
 if __name__ == "__main__" and __package__ is None:
     script_dir = Path(__file__).resolve().parent
     project_root = script_dir.parent.parent
     sys.path.append(str(project_root))
-
+    
 from Scripts.Utilities.data_fetch_utils import DataFetchUtils
 from Scripts.Utilities.config_handling import ConfigManager
 
 class DataStore:
-    def __init__(self, csv_dir='C:/TheTradingRobotPlug/data/csv', db_path='C:/TheTradingRobotPlug/data/trading_data.db'):
+    def __init__(self, csv_dir='C:/TheTradingRobotPlug/data/alpha_vantage', db_path='C:/TheTradingRobotPlug/data/trading_data.db'):
         self.csv_dir = Path(csv_dir)
         self.processed_csv_dir = self.csv_dir / 'processed'
         self.raw_csv_dir = self.csv_dir / 'raw'
@@ -49,7 +53,11 @@ class DataStore:
 
     def save_to_csv(self, df, file_name, overwrite=False):
         file_path = self.csv_dir / file_name
-        self.utils.save_data_to_csv(df, file_path, overwrite)
+        # Ensure 'date' is a column before saving
+        if df.index.name == 'date':
+            df = df.reset_index()
+        df.to_csv(file_path, index=False)
+        self.utils.logger.info(f"Data saved to CSV at {file_path}")
 
     def save_to_sql(self, df, table_name, if_exists='replace'):
         self.utils.save_data_to_sql(df, table_name, self.db_path, if_exists)
@@ -57,8 +65,10 @@ class DataStore:
     def fetch_from_csv(self, file_name):
         file_path = self.csv_dir / file_name
         try:
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(file_path, parse_dates=['date'])
             self.utils.logger.info(f"Fetched data from CSV at {file_path}")
+            self.utils.logger.info(f"DataFrame columns: {df.columns}")
+            self.utils.logger.info(f"DataFrame head: \n{df.head()}")
             return df
         except FileNotFoundError as e:
             self.utils.logger.error(f"File not found: {file_path}")
@@ -78,7 +88,15 @@ class DataStore:
     def load_data(self, symbol):
         file_path = self.csv_dir / f'{symbol}_data.csv'
         if file_path.exists():
-            return pd.read_csv(file_path)
+            try:
+                df = pd.read_csv(file_path, parse_dates=['date'])
+                self.utils.logger.info(f"Loaded data for {symbol} from {file_path}")
+                self.utils.logger.info(f"DataFrame columns: {df.columns}")
+                self.utils.logger.info(f"DataFrame head: \n{df.head()}")
+                return df
+            except Exception as e:
+                self.utils.logger.error(f"Error loading data for {symbol} from {file_path}: {e}")
+                return None
         else:
             self.utils.logger.warning(f"No data found for {symbol} at {file_path}")
             return None

@@ -1,9 +1,7 @@
-# C:\TheTradingRobotPlug\Tests\GUI\test_data_fetch_tab.py
-
 import os
 import sys
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime
@@ -15,6 +13,9 @@ project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
 from Scripts.GUI.data_fetch_tab import DataFetchTab
+from Scripts.Data_Fetchers.data_fetch_main import main as fetch_data_main
+from Scripts.Utilities.data_store import DataStore
+from Scripts.Data_Processing.Technical_indicators.custom_indicators import CustomIndicators, sample_custom_indicator
 
 class TestDataFetchTab(unittest.TestCase):
 
@@ -37,11 +38,11 @@ class TestDataFetchTab(unittest.TestCase):
         self.assertIsInstance(self.app.status_label, ttk.Label)
 
     def test_clear_default_date(self):
-        default_value = self.app.start_date_entry.get()
+        self.app.start_date_entry.insert(0, "2023-07-17")
         self.app.start_date_entry.event_generate("<FocusIn>")
         self.assertEqual(self.app.start_date_entry.get(), "")
 
-    @patch('Scripts.GUI.data_fetch_tab.asyncio.run')
+    @patch('Scripts.GUI.data_fetch_tab.asyncio.run', return_value=None)
     def test_fetch_data(self, mock_asyncio_run):
         self.app.symbols_entry.delete(0, tk.END)  # Clear any existing text
         self.app.symbols_entry.insert(0, "AAPL,MSFT")
@@ -81,6 +82,57 @@ class TestDataFetchTab(unittest.TestCase):
         mock_data_store.return_value.load_data.assert_called_once_with("AAPL")
         mock_make_subplots.assert_called_once()
         mock_candlestick.assert_called_once()
+
+    @patch('Scripts.Data_Fetchers.data_fetch_main.main')
+    async def test_fetch_data_main(self, mock_fetch_data_main):
+        mock_fetch_data_main.return_value = ["file1.csv", "file2.csv"]
+        self.app.symbols_entry.insert(0, "AAPL,MSFT")
+        self.app.start_date_entry.insert(0, "2022-01-01")
+        self.app.end_date_entry.insert(0, "2023-01-01")
+        await self.app.fetch_data()
+        self.assertEqual(self.app.status_label.cget("text"), "Data fetched and saved: file1.csv, file2.csv")
+        mock_fetch_data_main.assert_called_once_with(['AAPL', 'MSFT'], '2022-01-01', '2023-01-01')
+
+    @patch('Scripts.Data_Fetchers.data_fetch_main.main')
+    async def test_fetch_all_data(self, mock_fetch_data_main):
+        mock_fetch_data_main.return_value = ["file1.csv", "file2.csv"]
+        self.app.symbols_entry.insert(0, "AAPL,MSFT")
+        await self.app.fetch_all_data()
+        expected_text = "Data fetched and saved: file1.csv, file2.csv"
+        self.assertEqual(self.app.status_label.cget("text"), expected_text)
+        mock_fetch_data_main.assert_called_once_with(['AAPL', 'MSFT'], '1900-01-01', datetime.now().strftime('%Y-%m-%d'))
+
+    @patch.object(DataStore, 'load_data')
+    def test_display_chart_with_indicator(self, mock_load_data):
+        mock_data = {
+            'date': pd.date_range(start='2022-01-01', periods=100),
+            'open': pd.Series(range(100)),
+            'high': pd.Series(range(100)),
+            'low': pd.Series(range(100)),
+            'close': pd.Series(range(100)),
+            'volume': pd.Series(range(100))
+        }
+        mock_load_data.return_value = mock_data
+        self.app.symbols_entry.insert(0, "AAPL")
+        self.app.indicators["Sample_Custom_Indicator"].set(True)
+        with patch.object(DataFetchTab, 'plot_candlestick_chart') as mock_plot:
+            self.app.display_chart()
+            mock_plot.assert_called_once()
+            df = mock_plot.call_args[0][0]
+            self.assertIn('Sample_Custom_Indicator', df.columns)
+
+    def test_toggle_select_all(self):
+        # Initially, all indicators are deselected
+        for var in self.app.indicators.values():
+            self.assertFalse(var.get())
+        # Select all indicators
+        self.app.toggle_select_all()
+        for var in self.app.indicators.values():
+            self.assertTrue(var.get())
+        # Deselect all indicators
+        self.app.toggle_select_all()
+        for var in self.app.indicators.values():
+            self.assertFalse(var.get())
 
 if __name__ == "__main__":
     unittest.main()

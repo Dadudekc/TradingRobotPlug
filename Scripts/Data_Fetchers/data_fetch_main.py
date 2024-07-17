@@ -2,8 +2,11 @@ import os
 import sys
 from pathlib import Path
 import asyncio
-from dotenv import load_dotenv
 from datetime import datetime, timedelta
+import yfinance as yf
+import pandas as pd
+from dotenv import load_dotenv
+import time 
 
 # Add project root to the Python path for module imports
 script_dir = Path(__file__).resolve().parent
@@ -13,16 +16,17 @@ sys.path.append(str(project_root))
 from Scripts.Data_Fetchers.alpha_vantage_fetcher import AlphaVantageDataFetcher
 from Scripts.Data_Fetchers.polygon_fetcher import PolygonDataFetcher
 from Scripts.Utilities.data_store import DataStore
-# from Scripts.Utilities.DataLakeHandler import DataLakeHandler  # Commented out for now
+from Scripts.Utilities.data_fetch_utils import DataFetchUtils
+
+# Ensure logging setup
+logger = DataFetchUtils("C:/TheTradingRobotPlug/logs/data_fetch_main.log").logger
 
 # Load environment variables from .env file
 load_dotenv()
 
 async def fetch_data(symbols, start_date, end_date):
-    # data_lake_handler = DataLakeHandler(bucket_name='your-s3-bucket-name')  # Commented out for now
-
-    alpha_vantage_fetcher = AlphaVantageDataFetcher()  # data_lake_handler commented out for now
-    polygon_fetcher = PolygonDataFetcher()  # data_lake_handler commented out for now
+    alpha_vantage_fetcher = AlphaVantageDataFetcher()
+    polygon_fetcher = PolygonDataFetcher()
     data_store = DataStore()
     fetched_files = []
 
@@ -32,27 +36,46 @@ async def fetch_data(symbols, start_date, end_date):
             filename = f"{symbol}_{fetcher.source.lower()}_data_{start_date}_to_{end_date}.csv"
             fetcher.save_data(df, symbol, processed=False, overwrite=True)
             fetched_files.append(filename)
-            print(f"{fetcher.source} data fetched and saved for {symbol} as {filename}")
+            logger.info(f"{fetcher.source} data fetched and saved for {symbol} as {filename}")
             return df
         return None
 
     # Fetch data from Alpha Vantage
-    print("Fetching data from Alpha Vantage...")
+    logger.info("Fetching data from Alpha Vantage...")
     alpha_data = await asyncio.gather(*[fetch_and_save(alpha_vantage_fetcher, symbol) for symbol in symbols])
 
     # Check if any data was fetched from Alpha Vantage
     if not any(df is not None and not df.empty for df in alpha_data):
-        print("No data fetched from Alpha Vantage. Fetching data from Polygon...")
+        logger.info("No data fetched from Alpha Vantage. Fetching data from Polygon...")
         polygon_data = await asyncio.gather(*[fetch_and_save(polygon_fetcher, symbol) for symbol in symbols])
         if not any(df is not None and not df.empty for df in polygon_data):
-            print("No data fetched from Polygon either.")
+            logger.info("No data fetched from Polygon either.")
 
     # List all saved CSV files from both raw and processed directories
     csv_files_raw = data_store.list_csv_files()
     csv_files_processed = data_store.list_csv_files(directory=data_store.processed_csv_dir)
     csv_files = csv_files_raw + csv_files_processed
-    print(f"Available CSV files: {csv_files}")
+    logger.info(f"Available CSV files: {csv_files}")
     return fetched_files
+
+def fetch_data_from_yfinance(symbol, start_date, end_date):
+    try:
+        yf_ticker = yf.Ticker(symbol)
+        data = yf_ticker.history(start=start_date, end=end_date)
+        if not data.empty:
+            data.reset_index(inplace=True)
+            data.rename(columns={
+                "Date": "date", 
+                "Open": "open", 
+                "High": "high", 
+                "Low": "low", 
+                "Close": "close", 
+                "Volume": "volume"
+            }, inplace=True)
+            return data
+    except Exception as e:
+        logger.error(f"yfinance fetch error: {e}")
+    return pd.DataFrame()
 
 async def main(symbols, start_date=None, end_date=None):
     # Set default dates to one year from today if not provided
@@ -64,4 +87,5 @@ async def main(symbols, start_date=None, end_date=None):
 
 if __name__ == "__main__":
     symbols = ["AAPL", "MSFT", "GOOG"]
-    asyncio.run(main(symbols))
+    fetched_data = asyncio.run(main(symbols))
+    print(fetched_data)

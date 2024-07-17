@@ -132,3 +132,53 @@ class PolygonDataFetcher(DataFetcher):
 
 # Initialize logger for utility purposes
 logging.basicConfig(level=logging.DEBUG)
+
+
+# C:\TheTradingRobotPlug\Scripts\Data_Fetchers\polygon_fetcher.py
+
+import pandas as pd
+import aiohttp
+from datetime import datetime
+from Scripts.Utilities.data_fetch_utils import DataFetchUtils
+
+class PolygonDataFetcher:
+    def __init__(self):
+        self.api_key = "YOUR_POLYGON_API_KEY"
+        self.base_url = "https://api.polygon.io/v2/aggs/ticker/"
+        self.logger = DataFetchUtils("C:/TheTradingRobotPlug/logs/polygon_fetcher.log").logger
+
+    async def fetch(self, symbol, start_date, end_date):
+        url = f"{self.base_url}{symbol}/range/1/day/{start_date}/{end_date}"
+        params = {
+            "apiKey": self.api_key
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, params=params) as response:
+                data = await response.json()
+                return self.extract_data(data)
+
+    def extract_data(self, data):
+        try:
+            results = data.get("results", [])
+            if not results:
+                self.logger.warning(f"No data found for key: results")
+                return pd.DataFrame()
+
+            records = [
+                {
+                    "date": datetime.utcfromtimestamp(item["t"] / 1000).strftime('%Y-%m-%d'),
+                    "open": item["o"],
+                    "high": item["h"],
+                    "low": item["l"],
+                    "close": item["c"],
+                    "volume": item["v"],
+                    "symbol": data["ticker"]
+                }
+                for item in results
+            ]
+            df = pd.DataFrame(records)
+            self.logger.info(f"Extracted {len(records)} records for symbol {data['ticker']}")
+            return df
+        except Exception as e:
+            self.logger.error(f"Error extracting data: {e}")
+            return pd.DataFrame()

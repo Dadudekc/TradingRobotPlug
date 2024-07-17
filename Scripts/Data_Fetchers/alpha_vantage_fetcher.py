@@ -2,22 +2,23 @@
 
 import asyncio
 import logging
+import os
+import sys
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
 import aiohttp
 import pandas as pd
 from aiohttp import ClientSession, ClientTimeout, ClientConnectionError, ContentTypeError
-import os
-import sys
 
 # Ensure the project root is in the Python path for module imports
 script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
-from Scripts.Utilities.DataLakeHandler import DataLakeHandler
+from Scripts.Utilities.data_fetch_utils import DataFetchUtils
 from Scripts.Data_Fetchers.base_fetcher import DataFetcher
+from Scripts.Utilities.DataLakeHandler import DataLakeHandler  # Add this import if `DataLakeHandler` is being used
 
 class AlphaVantageDataFetcher(DataFetcher):
     def __init__(self, data_lake_handler: Optional[DataLakeHandler] = None):
@@ -27,13 +28,7 @@ class AlphaVantageDataFetcher(DataFetcher):
                          'C:/TheTradingRobotPlug/data/trading_data.db', 
                          'C:/TheTradingRobotPlug/logs/alpha_vantage.log', 
                          'AlphaVantage', data_lake_handler)
-        self.utils = self._initialize_utils()  # Initialize utils attribute
-
-    def _initialize_utils(self):
-        # Initialize and return utility attributes, such as a logger
-        logger = logging.getLogger('AlphaVantageDataFetcher')
-        logger.setLevel(logging.DEBUG)
-        return logger
+        self.utils = DataFetchUtils("C:/TheTradingRobotPlug/logs/alpha_vantage_fetcher.log").logger
 
     def construct_api_url(self, symbol: str, function: str = "TIME_SERIES_DAILY", interval: str = "1min") -> str:
         return f"{self.base_url}?function={function}&symbol={symbol}&interval={interval}&apikey={self.api_key}&outputsize=full&datatype=json"
@@ -82,30 +77,27 @@ class AlphaVantageDataFetcher(DataFetcher):
 
         try:
             async with ClientSession(timeout=timeout) as session:
-                async with session.get(url) as response:
-                    if response.status != 200:
-                        self.utils.error(f"{self.source}: Failed to fetch data for {symbol}. Status code: {response.status}")
-                        return None
+                data = await self.fetch_data(url, session)
+                if not data:
+                    self.utils.warning(f"{self.source}: No data fetched for {symbol}.")
+                    return None
 
-                    data = await response.json(content_type=None)
-                    self.utils.debug(f"AlphaVantage API response for {symbol}: {data}")
+                results = self.extract_results(data, "Time Series (Daily)")
 
-                    results = self.extract_results(data, "Time Series (Daily)")
+                if not results:
+                    self.utils.warning(f"{self.source}: Fetched data for {symbol} is not in the expected format. Data: {data}")
+                    return None
 
-                    if not results:
-                        self.utils.warning(f"{self.source}: Fetched data for {symbol} is not in the expected format. Data: {data}")
-                        return None
+                df = pd.DataFrame(results)
+                df['date'] = pd.to_datetime(df['date'])
+                df.set_index('date', inplace=True)
+                df = df.sort_index()  # Ensure the index is sorted
+                df['symbol'] = symbol
 
-                    df = pd.DataFrame(results)
-                    df['date'] = pd.to_datetime(df['date'])
-                    df.set_index('date', inplace=True)
-                    df = df.sort_index()  # Ensure the index is sorted
-                    df['symbol'] = symbol
+                filtered_df = df.loc[start_date:end_date]
+                self.utils.debug(f"{self.source}: Fetched data for {symbol}: {filtered_df}")
 
-                    filtered_df = df.loc[start_date:end_date]
-                    self.utils.debug(f"{self.source}: Fetched data for {symbol}: {filtered_df}")
-
-                    return filtered_df
+                return filtered_df
 
         except ClientConnectionError as e:
             self.utils.error(f"Connection error for symbol {symbol}: {e}")
