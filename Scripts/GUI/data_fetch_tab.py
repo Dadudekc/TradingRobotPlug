@@ -33,38 +33,48 @@ class DataFetchTab(ttk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
+        # Frame for data fetching
         fetch_frame = ttk.LabelFrame(self, text="Fetch Data")
         fetch_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 
+        # Ticker symbols entry
         ttk.Label(fetch_frame, text="Ticker Symbols (comma-separated):").grid(row=0, column=0, padx=10, pady=10)
         self.symbols_entry = ttk.Entry(fetch_frame)
         self.symbols_entry.grid(row=0, column=1, padx=10, pady=10)
 
+        # Default date range
         default_end_date = datetime.now().strftime('%Y-%m-%d')
         default_start_date = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
 
+        # Start date entry
         ttk.Label(fetch_frame, text="Start Date (YYYY-MM-DD):").grid(row=1, column=0, padx=10, pady=10)
         self.start_date_entry = ttk.Entry(fetch_frame)
         self.start_date_entry.insert(0, default_start_date)
         self.start_date_entry.grid(row=1, column=1, padx=10, pady=10)
 
+        # End date entry
         ttk.Label(fetch_frame, text="End Date (YYYY-MM-DD):").grid(row=2, column=0, padx=10, pady=10)
         self.end_date_entry = ttk.Entry(fetch_frame)
         self.end_date_entry.insert(0, default_end_date)
         self.end_date_entry.grid(row=2, column=1, padx=10, pady=10)
 
+        # Fetch data button
         self.fetch_button = ttk.Button(fetch_frame, text="Fetch Data", command=self.fetch_data)
         self.fetch_button.grid(row=3, column=0, columnspan=2, pady=10)
 
+        # Fetch all data button
         self.all_data_button = ttk.Button(fetch_frame, text="Fetch All Data", command=self.fetch_all_data)
         self.all_data_button.grid(row=4, column=0, columnspan=2, pady=10)
 
+        # Status label
         self.status_label = ttk.Label(fetch_frame, text="")
         self.status_label.grid(row=5, column=0, columnspan=2, pady=10)
 
+        # Frame for selecting indicators
         indicator_frame = ttk.LabelFrame(self, text="Select Indicators")
         indicator_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
 
+        # Dictionary for storing indicator options
         self.indicators = {
             "Sample_Custom_Indicator": tk.BooleanVar(),
             "Another_Custom_Indicator": tk.BooleanVar(),
@@ -93,6 +103,7 @@ class DataFetchTab(ttk.Frame):
             "Volume Oscillator": tk.BooleanVar()
         }
 
+        # Create checkbuttons for indicators
         row = 0
         col = 0
         for ind, var in self.indicators.items():
@@ -103,19 +114,23 @@ class DataFetchTab(ttk.Frame):
                 row = 0
                 col += 1
 
+        # Button to select all indicators
         self.select_all_button = ttk.Button(indicator_frame, text="Select All", command=self.toggle_select_all)
         self.select_all_button.grid(row=13, column=0, columnspan=2, pady=10)
 
+        # Button to display chart
         self.display_button = ttk.Button(indicator_frame, text="Display Chart", command=self.display_chart)
         self.display_button.grid(row=14, column=0, columnspan=2, pady=10)
 
     def toggle_select_all(self):
+        # Toggle selection of all indicators
         current_state = any(var.get() for var in self.indicators.values())
         new_state = not current_state
         for var in self.indicators.values():
             var.set(new_state)
 
     def fetch_data(self):
+        # Fetch data for specified symbols and date range
         symbols = self.symbols_entry.get().strip().split(',')
         start_date = self.start_date_entry.get()
         end_date = self.end_date_entry.get()
@@ -127,6 +142,7 @@ class DataFetchTab(ttk.Frame):
         asyncio.run(self.run_fetch_data(symbols, start_date, end_date))
 
     def validate_dates(self, start_date, end_date):
+        # Validate date format
         try:
             datetime.strptime(start_date, '%Y-%m-%d')
             datetime.strptime(end_date, '%Y-%m-%d')
@@ -135,6 +151,7 @@ class DataFetchTab(ttk.Frame):
             return False
 
     async def run_fetch_data(self, symbols, start_date, end_date):
+        # Run data fetching asynchronously
         self.status_label.config(text="Fetching data...")
         try:
             fetched_files = await fetch_data_main(symbols, start_date, end_date)
@@ -148,12 +165,14 @@ class DataFetchTab(ttk.Frame):
             logger.error(f"Error fetching data: {e}")
 
     def fetch_all_data(self):
+        # Fetch all available data
         symbols = self.symbols_entry.get().strip().split(',')
         start_date = "1900-01-01"
         end_date = datetime.now().strftime('%Y-%m-%d')
         asyncio.run(self.run_fetch_data(symbols, start_date, end_date))
 
     def apply_indicators_to_fetched_data(self, fetched_files):
+        # Apply selected indicators to fetched data
         data_store = DataStore(csv_dir='C:/TheTradingRobotPlug/data/alpha_vantage')
         for file in fetched_files:
             symbol = file.split('_')[0]
@@ -210,6 +229,7 @@ class DataFetchTab(ttk.Frame):
                 logger.warning(f"No data found for symbol: {symbol}")
 
     def display_chart(self):
+        # Display chart with selected indicators
         symbols = self.symbols_entry.get().strip().split(',')
         selected_indicators = [key for key, var in self.indicators.items() if var.get()]
 
@@ -284,8 +304,7 @@ class DataFetchTab(ttk.Frame):
                                     mode='lines',
                                     name=col_name
                                 ), row=2 if indicator in ["SMA", "EMA", "MACD", "ADX", "Ichimoku", "PSAR"] else 3, col=1)
-
-                fig.update_layout(title=f'Candlestick Chart and Indicators for {symbol}', xaxis_title='Date', yaxis_title='Price')
+              fig.update_layout(title=f'Candlestick Chart and Indicators for {symbol}', xaxis_title='Date', yaxis_title='Price')
                 fig.show()
             else:
                 self.status_label.config(text=f"No data found for symbol: {symbol}")

@@ -1,0 +1,312 @@
+### Journal Entry
+
+**Date:** July 6, 2024  ------- 3:27 am------
+
+**Summary:**
+Today, I focused on getting the original files in my TradingRobotPlug project to work correctly. I encountered a major setback when the data fetching utility (`data_fetch_utils.py`) got deleted, so I had to recreate it from scratch. This involved setting up a `DataFetchUtils` class with functions for logging, ensuring directory existence, and handling data operations with CSV and SQL files.
+
+**Progress:**
+1. **Recreated DataFetchUtils:**
+   - Implemented a new `DataFetchUtils` class with methods to set up a logger, ensure directory existence, save data to CSV, save data to SQL, and fetch data from SQL.
+
+2. **Updated DataStore:**
+   - Modified the `DataStore` class to use the new `DataFetchUtils` class for all data operations.
+   - Ensured that all methods in `DataStore` properly utilize the utility functions provided by `DataFetchUtils`.
+
+3. **Test Files:**
+   - Created initial versions of test files for both `DataFetchUtils` and `DataStore`.
+   - Encountered and fixed several syntax errors, though the test files still need more work to ensure comprehensive coverage and error-free execution.
+
+4. **Realization About Config Handling:**
+   - I just realized that the `config_handling.py` file is currently empty. This will need to be addressed to manage configuration settings effectively in the project.
+
+**Challenges:**
+- Multitasking between my day job and working on this project was tricky. It's funny because it reminded me of sneaking off to smoke weed in the past. Now, I'm sneaking in project work instead.
+- Recreating `data_fetch_utils.py` from scratch was time-consuming but necessary to get the project back on track.
+
+**Next Steps:**
+- Complete and debug the test files for `DataFetchUtils` and `DataStore` to ensure all functionalities are thoroughly tested and working correctly.
+- Run the tests to validate the implementations and make any necessary adjustments based on the test results.
+- Address the empty `config_handling.py` file to manage configuration settings properly.
+- Continue modularizing and refining the project for better organization and maintainability.
+
+**Reflection:**
+Despite the challenges, I'm making steady progress. Rebuilding the data fetching utility was a significant step forward, and once the test files are complete, I’ll have more confidence in the robustness of my code. The multitasking aspect adds a layer of complexity, but it's also a reminder of how far I've come in terms of prioritizing productive and meaningful work.
+
+**Opportunity:**
+Additionally, I have a job opportunity to train models with the company Outlier AI. This is an exciting prospect that aligns well with my current work and career goals.
+
+**Project Structure:**
+Here's the current structure of my project:
+
+```
+C:\TheTradingRobotPlug
+├── data
+│   └── csv
+├── Documents
+│   ├── Explanations
+│   ├── Journal
+│   │   ├── entry 1- 07-3-2024
+│   │   └── entry 2 07-6-2024
+│   └── Resume Stuff
+│       └── data_fetch_skills
+├── logs
+│   ├── data_fetch_utils.log
+│   └── data_store.log
+├── Scripts
+│   ├── __pycache__
+│   ├── Data_Fetch
+│   │   ├── __pycache__
+│   │   ├── data
+│   │   ├── __init__.py
+│   │   ├── alpha_vantage_df.py
+│   │   └── nasdaq.py
+│   │   └── polygon_io.py
+│   ├── powershells
+│   └── Utilities
+│       ├── __pycache__
+│       ├── __init__.py
+│       ├── config_handling.py
+│       ├── data_fetch_utils.py
+│       └── data_store.py
+│   ├── __init__.py
+├── Tests
+│   ├── Data_Fetch
+│   │   ├── __pycache__
+│   │   ├── __init__.py
+│   │   ├── test_alpha_vantage_df.py
+│   │   └── test_polygon_io.py
+│   ├── mock_csv_dir
+│   └── Utilities
+│       ├── test_config_handling.py
+│       ├── test_data_fetch_utils.py
+│       └── test_data_store.py
+│   ├── __init__.py
+│   └── run_tests.py
+├── .env
+├── .gitignore
+└── config.ini
+```
+
+
+
+---- 3:38 pm -----
+
+### Journal Entry
+
+**Date:** July 6, 2024 (continued)
+
+**Summary:**
+Since the last update, I have focused on creating a project document, resolving import errors, and updating the file structure documentation. These steps were essential to ensure the project is well-documented and all components are functioning correctly.
+
+**Progress:**
+
+1. **Resolved Import Errors:**
+   - At 3:27 am, I successfully resolved import errors in the test files, allowing the tests to run without issues.
+
+2. **Created Project Document:**
+   - Developed a comprehensive project document detailing the project's goals, recent work, and future plans.
+   - The document includes a summary of the work done, the project's structure, and the next steps.
+
+3. **Updated File Structure Documentation:**
+   - Documented the current file structure at 3:36 pm, capturing the state of the project as accurately as possible given my multitasking across two jobs.
+
+**Challenges:**
+- Documenting the file structure while working two jobs was challenging, but I managed to capture the necessary details.
+- Ensuring all test files had the correct imports and paths required careful attention to detail.
+
+**Next Steps:**
+- Complete and debug the test files for `nasdaq.py` and `alpha_vantage.py` to ensure all functionalities are thoroughly tested and working correctly.
+- Develop a comprehensive data fetch GUI.
+- Create a main file that integrates all data fetch features.
+- Continue refining and modularizing the project for better organization and maintainability.
+- Prepare for the job opportunity with Outlier AI, leveraging the work done on this project as part of my portfolio.
+
+**Reflection:**
+The progress made today, particularly resolving the import errors and creating the project documentation, marks a significant step forward. It reinforces the importance of documentation and testing in maintaining a robust and well-organized project. Multitasking remains a challenge, but it’s also a reminder of my commitment to both my professional responsibilities and personal projects.
+
+**Updated Project Structure:**
+
+```
+C:\TheTradingRobotPlug
+├── data
+│   └── csv
+├── Documents
+│   ├── Explanations
+│   ├── Journal
+│   │   ├── entry 1- 07-3-2024
+│   │   └── entry 2 07-6-2024
+│   ├── Project Documentation
+│   │   └── project_documentation.md
+│   └── Resume Stuff
+│       └── data_fetch_skills
+├── logs
+│   ├── data_fetch_utils.log
+│   └── data_store.log
+├── Scripts
+│   ├── __pycache__
+│   ├── Data_Fetch
+│   │   ├── __pycache__
+│   │   ├── data
+│   │   ├── __init__.py
+│   │   ├── alpha_vantage_df.py
+│   │   ├── API_interaction.py
+│   │   ├── nasdaq.py
+│   │   └── polygon_io.py
+│   ├── powershells
+│   │   ├── __init__.py
+│   │   └── quick.ps1
+│   └── Utilities
+│       ├── __pycache__
+│       ├── __init__.py
+│       ├── config_handling.py
+│       ├── data_fetch_utils.py
+│       └── data_store.py
+│   ├── __init__.py
+├── Tests
+│   ├── Data_Fetch
+│   │   ├── __pycache__
+│   │   ├── __init__.py
+│   │   ├── test_alpha_vantage_df.py
+│   │   └── test_polygon_io.py
+│   ├── mock_csv_dir
+│   └── Utilities
+│       ├── test_config_handling.py
+│       ├── test_data_fetch_utils.py
+│       ├── test_data_store.py
+│   ├── __init__.py
+│   └── run_tests.py
+├── .env
+├── .gitignore
+└── config.ini
+```
+
+This detailed structure helps me keep track of where everything is and ensures that I maintain organization as I continue to develop and refine my project.
+
+
+### Skills Demonstrated Today
+
+1. **Problem-Solving:**
+   - Addressed and resolved import errors in test files, ensuring they ran correctly.
+   - Rebuilt the `data_fetch_utils.py` from scratch after it was accidentally deleted, showing resilience and resourcefulness.
+
+2. **Programming and Scripting:**
+   - Implemented the `DataFetchUtils` class with various data handling and logging methods.
+   - Updated the `DataStore` class to integrate the new utility functions.
+   - Developed a basic `ConfigManager` for handling configuration settings.
+   - Created and debugged test scripts for various components (`DataFetchUtils`, `DataStore`, `ConfigManager`).
+
+3. **Testing and Debugging:**
+   - Created and executed test scripts to ensure the functionality of newly implemented and existing components.
+   - Fixed syntax errors and path issues in the test files.
+   - Properly handled logger shutdown to avoid permission errors during test cleanup.
+
+4. **Documentation:**
+   - Developed a comprehensive project document that includes the project's goals, recent work, future plans, and current file structure.
+   - Documented the file structure and captured the state of the project accurately.
+
+5. **Git and Version Control:**
+   - Used Git to commit changes with descriptive messages.
+   - Managed branch issues and pushed changes to the remote repository.
+
+6. **Time Management and Multitasking:**
+   - Successfully managed to work on the project while fulfilling responsibilities at two jobs.
+   - Efficiently prioritized tasks to make significant progress on the project despite time constraints.
+
+7. **Attention to Detail:**
+   - Ensured that all test files had the correct imports and paths.
+   - Carefully documented the file structure and maintained organization within the project.
+
+These skills collectively demonstrate a strong ability to manage complex projects, resolve issues, and maintain a high level of organization and documentation, all while balancing multiple responsibilities.
+
+### Journal Entry - July 6, 2024
+
+**Time Spent:** 2-00pm -6pm
+
+**Accomplishments:**
+
+Today was a productive session where significant progress was made on the `TheTradingRobotPlug` project. Here’s a detailed recap of what was achieved:
+
+1. **Directory Structure and Files:**
+   - Created and organized the project's directory structure, ensuring that all necessary files and folders are in place. This includes setting up directories for data storage, logs, scripts, tests, and documentation.
+
+```
+TheTradingRobotPlug/
+├── .env                          # Environment variables for API keys and configuration
+├── .gitignore                    # Git ignore file to exclude certain files and directories from version control
+├── config.ini                    # Configuration file for project settings
+├── data/
+│   ├── csv/
+│   │   └── AAPL_data.csv         # CSV files storing fetched data for different stocks
+│   ├── nasdaq/                   # Directory for storing NASDAQ fetched data
+│   ├── polygon/                  # Directory for storing Polygon fetched data
+│   └── trading_data.db           # SQLite database for storing trading data
+├── Documents/
+│   ├── Explanations/             # Directory for explanation documents
+│   ├── Journal/
+│   │   ├── entry 1-07-3-2024     # Journal entry for July 3, 2024
+│   │   └── entry 2-07-6-2024     # Journal entry for July 6, 2024
+│   ├── Project Documentation/
+│   │   └── project_documentation.md # Markdown file for project documentation
+│   └── Resume Stuff/
+│       └── data_fetch_skills     # Documentation on data fetching skills for resume
+├── logs/
+│   ├── alpha_vantage.log         # Log file for Alpha Vantage data fetching
+│   ├── data_fetch_utils.log      # Log file for data fetch utilities
+│   ├── data_store.log            # Log file for data storage operations
+│   ├── nasdaq.log                # Log file for NASDAQ data fetching
+│   └── polygon_data_fetcher.log  # Log file for Polygon data fetching
+├── Scrap/
+│   ├── data_fetch_scrap/
+│   │   ├── alpha_vantage_df.py   # Scrapped Alpha Vantage data fetch script
+│   │   ├── nasdaq.py             # Scrapped NASDAQ data fetch script
+│   │   ├── polygon_io.py         # Scrapped Polygon data fetch script
+│   │   ├── test_alpha_vantage_df.py # Test script for Alpha Vantage data fetch
+│   │   └── test_polygon_io.py    # Test script for Polygon data fetch
+├── Scripts/
+│   ├── __pycache__/              # Directory for Python cache files
+│   ├── Data_Fetch/
+│   │   ├── __init__.py           # Init file for Data Fetch module
+│   │   ├── data/                 # Directory for storing fetched data
+│   │   ├── data_fetcher.py       # Main script for fetching data from various sources
+│   │   └── API_interaction.py    # Script for interacting with APIs
+│   ├── Utilities/
+│   │   ├── __init__.py           # Init file for Utilities module
+│   │   ├── config_handling.py    # Script for handling configuration settings
+│   │   ├── data_fetch_utils.py   # Utility functions for data fetching
+│   │   └── data_store.py         # Utility functions for data storage
+│   └── __init__.py               # Init file for Scripts module
+├── Tests/
+│   ├── __pycache__/              # Directory for Python cache files
+│   ├── Data_Fetch/
+│   │   ├── __init__.py           # Init file for Data Fetch tests
+│   │   └── test_data_fetcher.py  # Test script for data fetching functionality
+│   ├── Utilities/                # Directory for utility tests
+│   ├── mock_csv_dir/             # Directory for mock CSV files used in tests
+│   └── run_tests.py              # Script to run all tests
+```
+
+2. **Data Fetching Enhancements:**
+   - Updated the main data fetching script (`data_fetcher.py`) to improve logging, error handling, and ensure compatibility with various APIs (Alpha Vantage, Nasdaq, Polygon). This involved refining the URL construction and result extraction methods.
+   - Introduced enhanced logging that includes the source of the data being fetched, making it easier to debug and understand where each piece of data originates.
+   - Fixed issues related to fetching and filtering data by ensuring the DataFrame index is sorted correctly.
+
+3. **Error Handling and Logging:**
+   - Improved error messages for better clarity. For instance, the error logs now clearly indicate which API caused the error and provide a more detailed description of the error.
+   - Added debug logs to trace the flow of data fetching and pinpoint where potential issues may arise.
+
+4. **Testing and Debugging:**
+   - Ran tests using the updated `test_data_fetcher.py` script to ensure that data fetching and saving mechanisms work correctly.
+   - Fixed several issues related to incorrect data fetching, specifically addressing problems with non-monotonic DatetimeIndexes and handling 404 errors from the Nasdaq API.
+
+**Next Steps:**
+- Further refine and optimize the data fetching scripts to handle edge cases and improve reliability.
+- Continue building out test cases to cover more scenarios and ensure robustness.
+- Begin working on integrating the data fetching capabilities into the main application logic.
+- Document the changes and updates made during this session in the project documentation.
+
+**Challenges:**
+- Encountered issues with the Nasdaq API returning 404 errors. Need to verify the API endpoints and access credentials.
+- Ensuring that data filtering works correctly with sorted indexes was a bit challenging but resolved successfully.
+
+Overall, today’s session was highly productive, laying a strong foundation for further development and testing of the `TheTradingRobotPlug` project.
