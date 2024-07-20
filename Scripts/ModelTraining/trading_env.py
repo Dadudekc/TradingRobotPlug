@@ -1,61 +1,76 @@
-# trading_env.py
-
-import gym
-from gym import spaces
 import numpy as np
+from risk_management import RiskManager
 
-class TradingEnv(gym.Env):
-    def __init__(self, data, initial_balance=1000):
-        super(TradingEnv, self).__init__()
+class TradingEnv:
+    def __init__(self, data, initial_balance=10000, risk_manager=None):
         self.data = data
-        self.initial_balance = initial_balance
-        self.balance = initial_balance
-        self.position = 0
         self.current_step = 0
-        self.max_price = 0
-        self.min_price = np.inf
+        self.initial_balance = initial_balance
+        self.balance = self.initial_balance
+        self.shares_held = 0
+        self.total_reward = 0
+        self.done = False
+        self.price = self.data['Close'].iloc[self.current_step]
+        self.risk_manager = risk_manager
 
-        self.action_space = spaces.Discrete(3)  # [hold, buy, sell]
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.data.shape[1],), dtype=np.float32)
+        if self.risk_manager:
+            self.risk_manager.initialize(self.balance)
 
     def reset(self):
-        self.balance = self.initial_balance
-        self.position = 0
         self.current_step = 0
-        self.max_price = 0
-        self.min_price = np.inf
-        return self._next_observation()
+        self.balance = self.initial_balance
+        self.shares_held = 0
+        self.total_reward = 0
+        self.done = False
+        self.price = self.data['Close'].iloc[self.current_step]
 
-    def _next_observation(self):
-        return self.data[self.current_step]
+        if self.risk_manager:
+            self.risk_manager.initialize(self.balance)
+
+        return self._get_observation()
 
     def step(self, action):
-        current_price = self.data[self.current_step, 0]  # Assuming 'Close' price is the first column
-        self.max_price = max(self.max_price, current_price)
-        self.min_price = min(self.min_price, current_price)
-
-        reward = 0
-        done = False
-
-        if action == 1:  # Buy
-            self.position += self.balance / current_price
-            self.balance = 0
-        elif action == 2:  # Sell
-            self.balance += self.position * current_price
-            self.position = 0
-            reward = self.balance - self.initial_balance  # Calculate reward based on profit/loss
-
+        self._take_action(action)
         self.current_step += 1
+        self.price = self.data['Close'].iloc[self.current_step]
+        reward = self._calculate_reward()
+        self.total_reward += reward
 
-        if self.current_step >= len(self.data) - 1:
-            done = True
-            # Calculate MFE and MAE
-            mfe = (self.max_price - current_price) / current_price
-            mae = (current_price - self.min_price) / current_price
-            reward += mfe - mae
+        if self.risk_manager:
+            self.risk_manager.update(self.balance)
+            risk_status = self.risk_manager.check_risk(self.balance)
+            if risk_status == "STOP_TRADING":
+                self.done = True
+            elif risk_status == "STOP_LOSS":
+                self._take_action([1, 1])  # Sell all shares
+                self.done = True
+            elif risk_status == "TAKE_PROFIT":
+                self._take_action([1, 1])  # Sell all shares
+                self.done = True
 
-        return self._next_observation(), reward, done, {}
+        done = self.current_step >= len(self.data) - 1 or self.done
+        info = {'balance': self.balance, 'price': self.price}
+        return self._get_observation(), reward, done, info
 
-    def render(self, mode='human'):
-        profit = self.balance + self.position * self.data[self.current_step, 0] - self.initial_balance
-        print(f'Step: {self.current_step}, Balance: {self.balance}, Position: {self.position}, Profit: {profit}')
+    def _take_action(self, action):
+        action_type = action[0]
+        amount = action[1]
+
+        if action_type == 0:  # Buy
+            total_possible = self.balance // self.price
+            shares_bought = total_possible * amount
+            cost = shares_bought * self.price * (1 + transaction_cost)
+            self.balance -= cost
+            self.shares_held += shares_bought
+        elif action_type == 1:  # Sell
+            shares_sold = self.shares_held * amount
+            self.balance += shares_sold * self.price * (1 - transaction_cost)
+            self.shares_held -= shares_sold
+
+    def _calculate_reward(self):
+        current_value = self.shares_held * self.price + self.balance
+        reward = current_value - self.total_reward
+        return reward
+
+    def _get_observation(self):
+        return np.array([self.balance, self.shares_held, self.price])

@@ -3,8 +3,16 @@ from tkinter import ttk, filedialog, messagebox
 import queue
 import threading
 import pandas as pd
+import os
+import sys
+
+# Add project root to the Python path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
+sys.path.append(project_root)
+
 from model_training import ModelTraining
-from data_handler import DataHandler  # Updated import from DataPreprocessing to DataHandler
+from Scripts.Utilities.DataHandler import DataHandler  # Updated import from DataPreprocessing to DataHandler
 from utilities import MLRobotUtils
 from logging_module import ModelTrainingLogger
 
@@ -164,3 +172,10 @@ class ModelTrainingTab(tk.Frame):
     def preview_selected_data(self, file_path):
         data = pd.read_csv(file_path)
         self.display_message("Data preview:\n" + str(data.head()), level="INFO")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Model Training Application")
+    app = ModelTrainingTab(root, config={"key": "value"}, scaler_options=["StandardScaler", "MinMaxScaler"])
+    app.pack(expand=True, fill="both")
+    root.mainloop()
