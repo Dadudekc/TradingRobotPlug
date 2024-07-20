@@ -11,7 +11,7 @@ project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
 # Import necessary classes from the Model_Training directory
-from Scripts.ModelTraining.DataHandler import DataHandler
+from Scripts.Utilities.DataHandler import DataHandler
 from Model_Training.ModelTrainer import ModelTrainer
 from Model_Training.ModelEvaluator import ModelEvaluator
 from Model_Training.HyperparameterTuner import HyperparameterTuner
