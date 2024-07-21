@@ -1,132 +1,198 @@
-import os
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from stable_baselines3 import PPO
-from stable_baselines3.common.env_util import make_vec_env
-import yfinance as yf
-from trading_env import TradingEnv
-from risk_management import RiskManager
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog, messagebox
+import queue
+import threading
+import pandas as pd
+import os
+import sys
 
-def fetch_stock_data(ticker, start_date, end_date):
-    data = yf.download(ticker, start=start_date, end=end_date)
-    return data
+# Add project root to the Python path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
+sys.path.append(project_root)
 
-def backtest_drl_model(data, model_path, transaction_cost=0.001):
-    data['Date'] = pd.to_datetime(data.index)
-    data.set_index('Date', inplace=True)
-    env = make_vec_env(lambda: TradingEnv(data), n_envs=1)
-    model = PPO.load(model_path)
-    obs = env.reset()
-    done = False
-    total_reward = 0
-    final_balance = 0
-    prices = []
-    rewards = []
-    while not done:
-        action, _states = model.predict(obs)
-        obs, reward, done, info = env.step(action)
-        total_reward += reward[0]
-        final_balance = info[0]['balance']
-        prices.append(info[0]['price'])
-        rewards.append(total_reward)
-    prices = np.array(prices)
-    mfe = np.max(prices) - prices[0]
-    mae = prices[0] - np.min(prices)
-    return total_reward, final_balance, mfe, mae, rewards, prices
+from model_training import ModelTraining
+from Scripts.Utilities.DataHandler import DataHandler
+from utilities import MLRobotUtils
+from logging_module import ModelTrainingLogger
 
-def plot_backtest_results(step_rewards, step_prices):
-    plt.figure(figsize=(12, 6))
-    plt.subplot(2, 1, 1)
-    plt.plot(step_rewards, label='Cumulative Reward')
-    plt.title('Backtest Results')
-    plt.xlabel('Steps')
-    plt.ylabel('Cumulative Reward')
-    plt.legend()
-    plt.subplot(2, 1, 2)
-    plt.plot(step_prices, label='Stock Price', color='orange')
-    plt.xlabel('Steps')
-    plt.ylabel('Stock Price')
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+class ModelTrainingTab(tk.Frame):
+    def __init__(self, parent, config_file, scaler_options):
+        super().__init__(parent)
+        self.config_file = config_file
+        self.scaler_options = scaler_options
+        self.queue = queue.Queue()
+        self.utils = MLRobotUtils()
+        self.is_debug_mode = False
+        self.log_text = tk.Text(self, height=10, state='disabled')
+        self.logger = ModelTrainingLogger(self.log_text)
+        self.model_training = ModelTraining(self.logger)
+        self.data_handler = DataHandler(config_file=self.config_file, log_text_widget=self.log_text)
 
-def train_and_backtest_model(ticker, start_date, end_date, model_save_path, training_timesteps=10000):
-    data = fetch_stock_data(ticker, start_date, end_date)
-    risk_manager = RiskManager(max_drawdown=0.2, stop_loss=0.05, take_profit=0.1)
-    env = make_vec_env(lambda: TradingEnv(data, risk_manager=risk_manager), n_envs=1)
-    model = PPO('MlpPolicy', env, verbose=1)
-    model.learn(total_timesteps=training_timesteps)
-    model.save(model_save_path)
-    total_reward, final_balance, mfe, mae, rewards, prices = backtest_drl_model(data, model_save_path)
-    plot_backtest_results(rewards, prices)
-    return {
-        'total_reward': total_reward,
-        'final_balance': final_balance,
-        'mfe': mfe,
-        'mae': mae
-    }
+        self.scaler_type_var = tk.StringVar(self)
+        
+        self.setup_gui()
 
-def train_model(ticker, start_date, end_date, model_save_path, training_timesteps=10000):
-    data = fetch_stock_data(ticker, start_date, end_date)
-    env = make_vec_env(lambda: TradingEnv(data), n_envs=1)
-    model = PPO('MlpPolicy', env, verbose=1)
-    model.learn(total_timesteps=training_timesteps)
-    model.save(model_save_path)
-    print("Model training completed and saved.")
+    def toggle_debug_mode(self):
+        self.is_debug_mode = not self.is_debug_mode
+        if self.is_debug_mode:
+            self.utils.log_message("Debug mode enabled", self.log_text, False)
+        else:
+            self.utils.log_message("Debug mode disabled", self.log_text, False)
 
-def run_reinforcement_learning():
-    ticker = ticker_entry.get()
-    start_date = start_date_entry.get()
-    end_date = end_date_entry.get()
-    model_save_path = model_path_entry.get()
-    results = train_and_backtest_model(ticker, start_date, end_date, model_save_path)
-    results_label.config(text=f"Backtest Results: {results}")
+    def setup_gui(self):
+        self.setup_title_label()
+        self.setup_data_file_path_section()
+        self.setup_scaler_type_selection()
+        self.setup_model_type_selection()
+        self.setup_training_configurations()
+        self.setup_start_training_button()
+        self.setup_progress_and_logging()
+        self.setup_debug_mode_toggle()
+        self.after(100, self.process_queue)
 
-def run_regular_training():
-    ticker = ticker_entry.get()
-    start_date = start_date_entry.get()
-    end_date = end_date_entry.get()
-    model_save_path = model_path_entry.get()
-    train_model(ticker, start_date, end_date, model_save_path)
-    results_label.config(text="Model training completed and saved.")
+    def setup_title_label(self):
+        tk.Label(self, text="Model Training", font=("Helvetica", 16)).pack(pady=10)
 
-app = tk.Tk()
-app.title("Trading Robot")
+    def setup_data_file_path_section(self):
+        tk.Label(self, text="Data File Path:").pack()
+        self.data_file_entry = tk.Entry(self)
+        self.data_file_entry.pack()
+        ttk.Button(self, text="Browse", command=self.browse_data_file).pack(pady=5)
 
-frame = ttk.Frame(app, padding="10")
-frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+    def setup_scaler_type_selection(self):
+        tk.Label(self, text="Select Scaler Type:").pack()
+        scaler_type_dropdown = ttk.Combobox(self, textvariable=self.scaler_type_var, values=self.scaler_options)
+        scaler_type_dropdown.pack()
+        scaler_type_dropdown.current(0)
 
-ttk.Label(frame, text="Ticker:").grid(row=0, column=0, sticky=tk.W)
-ticker_entry = ttk.Entry(frame)
-ticker_entry.grid(row=0, column=1, sticky=(tk.W, tk.E))
+    def setup_model_type_selection(self):
+        tk.Label(self, text="Select Model Type:").pack()
+        self.model_type_var = tk.StringVar(self)
+        model_type_dropdown = ttk.Combobox(self, textvariable=self.model_type_var, 
+                                           values=["linear_regression", "random_forest", "neural_network", "LSTM", "ARIMA"])
+        model_type_dropdown.pack()
+        model_type_dropdown.bind("<<ComboboxSelected>>", self.show_dynamic_options)
+        self.dynamic_options_frame = tk.Frame(self)
+        self.dynamic_options_frame.pack(pady=5)
 
-ttk.Label(frame, text="Start Date (YYYY-MM-DD):").grid(row=1, column=0, sticky=tk.W)
-start_date_entry = ttk.Entry(frame)
-start_date_entry.grid(row=1, column=1, sticky=(tk.W, tk.E))
+    def setup_training_configurations(self):
+        tk.Label(self, text="Training Configurations", font=("Helvetica", 14)).pack(pady=5)
+        self.settings_frame = tk.Frame(self)
+        self.settings_frame.pack()
 
-ttk.Label(frame, text="End Date (YYYY-MM-DD):").grid(row=2, column=0, sticky=tk.W)
-end_date_entry = ttk.Entry(frame)
-end_date_entry.grid(row=2, column=1, sticky=(tk.W, tk.E))
+    def setup_start_training_button(self):
+        self.start_training_button = ttk.Button(self, text="Start Training", command=self.start_training)
+        self.start_training_button.pack(pady=10)
 
-ttk.Label(frame, text="Model Save Path:").grid(row=3, column=0, sticky=tk.W)
-model_path_entry = ttk.Entry(frame)
-model_path_entry.grid(row=3, column=1, sticky=(tk.W, tk.E))
+    def setup_progress_and_logging(self):
+        self.progress_var = tk.IntVar(self, value=0)
+        ttk.Progressbar(self, variable=self.progress_var, maximum=100).pack(pady=5)
+        self.log_text.pack()
 
-frame.columnconfigure(1, weight=1)
+    def setup_debug_mode_toggle(self):
+        self.debug_button = tk.Button(self, text="Enable Debug Mode", command=self.toggle_debug_mode)
+        self.debug_button.pack(pady=5)
 
-button_frame = ttk.Frame(frame, padding="10")
-button_frame.grid(row=4, column=0, columnspan=2, sticky=(tk.W, tk.E))
+    def toggle_debug_mode(self):
+        self.is_debug_mode = not self.is_debug_mode
+        btn_text = "Disable Debug Mode" if self.is_debug_mode else "Enable Debug Mode"
+        self.debug_button.config(text=btn_text)
+        self.display_message(f"Debug mode {'enabled' if self.is_debug_mode else 'disabled'}", level="DEBUG")
 
-reinforcement_button = ttk.Button(button_frame, text="Run Reinforcement Learning", command=run_reinforcement_learning)
-reinforcement_button.grid(row=0, column=0, padx=5)
+    def browse_data_file(self):
+        file_path = filedialog.askopenfilename(
+            filetypes=[("CSV Files", "*.csv"), ("Excel Files", "*.xlsx"), ("All Files", "*.*")])
+        if file_path:
+            self.data_file_entry.delete(0, tk.END)
+            self.data_file_entry.insert(0, file_path)
+            self.preview_selected_data(file_path)
 
-regular_training_button = ttk.Button(button_frame, text="Run Regular Training", command=run_regular_training)
-regular_training_button.grid(row=0, column=1, padx=5)
+    def show_dynamic_options(self, *_):
+        for widget in self.dynamic_options_frame.winfo_children():
+            widget.destroy()
 
-results_label = ttk.Label(frame, text="")
-results_label.grid(row=5, column=0, columnspan=2, pady=10)
+        selected_model_type = self.model_type_var.get()
+        if selected_model_type in self.model_training.model_configs:
+            for layer in self.model_training.model_configs[selected_model_type]['layers']:
+                tk.Label(self.dynamic_options_frame, text=layer['type']).pack()
+                if 'units' in layer:
+                    entry = tk.Entry(self.dynamic_options_frame)
+                    entry.insert(0, str(layer['units']))
+                    entry.pack()
+                    setattr(self, f"{layer['type']}_units_entry", entry)
+                if 'rate' in layer:
+                    entry = tk.Entry(self.dynamic_options_frame)
+                    entry.insert(0, str(layer['rate']))
+                    entry.pack()
+                    setattr(self, f"{layer['type']}_rate_entry", entry)
+                if 'activation' in layer:
+                    entry = tk.Entry(self.dynamic_options_frame)
+                    entry.insert(0, layer['activation'] if layer['activation'] else "")
+                    entry.pack()
+                    setattr(self, f"{layer['type']}_activation_entry", entry)
 
-app.mainloop()
+    def start_training(self):
+        data_file = self.data_file_entry.get()
+        model_type = self.model_type_var.get()
+        scaler_type = self.scaler_type_var.get()
+
+        if not data_file:
+            messagebox.showerror("Error", "Data file not selected")
+            return
+
+        if not model_type:
+            messagebox.showerror("Error", "Model type not selected")
+            return
+
+        epochs = int(self.epochs_entry.get()) if hasattr(self, 'epochs_entry') else 50
+        
+        # Use the DataHandler to preprocess data
+        data = pd.read_csv(data_file)
+        X_train, X_val, y_train, y_val = self.data_handler.preprocess_data(data, target_column='close', scaler_type=scaler_type)
+        
+        if X_train is not None and y_train is not None:
+            self.model_training.start_training(X_train, y_train, X_val, y_val, model_type, epochs)
+        else:
+            self.display_message("Data preprocessing failed. Training aborted.", level="ERROR")
+
+    def process_queue(self):
+        try:
+            while not self.queue.empty():
+                message = self.queue.get_nowait()
+                self.logger.log(message)
+        except queue.Empty:
+            pass
+        finally:
+            self.after(100, self.process_queue)
+
+    def display_message(self, message, level="INFO"):
+        if level == "DEBUG":
+            self.logger.debug(message)
+        elif level == "ERROR":
+            self.logger.error(message)
+        else:
+            self.logger.info(message)
+
+    def preview_selected_data(self, file_path):
+        try:
+            data = pd.read_csv(file_path)
+            self.display_message("Data preview:\n" + str(data.head()), level="INFO")
+        except Exception as e:
+            self.display_message(f"Error loading data: {str(e)}", level="ERROR")
+
+def main():
+    root = tk.Tk()
+    root.title("Model Training Application")
+    
+    # Configuration file path and scaler options for demonstration
+    config_file = 'path_to_your_config_file.ini'  # Update this with the actual path to your configuration file
+    scaler_options = ["StandardScaler", "MinMaxScaler", "RobustScaler", "Normalizer", "MaxAbsScaler"]
+    
+    model_training_tab = ModelTrainingTab(root, config_file=config_file, scaler_options=scaler_options)
+    model_training_tab.pack(expand=True, fill="both")
+    
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()

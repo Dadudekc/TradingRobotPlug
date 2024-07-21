@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/TheTradingRobotPlug/mlruns/0/4ab4ace532ca49118c1c2a9a6ccd360f/artifacts
+end_time: 1721558948501
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 4ab4ace532ca49118c1c2a9a6ccd360f
+run_name: resilient-loon-433
+run_uuid: 4ab4ace532ca49118c1c2a9a6ccd360f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1721558484124
+status: 3
+tags: []
+user_id: Dagurlkc

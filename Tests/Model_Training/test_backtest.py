@@ -15,7 +15,7 @@ print("Project Root:", project_root)
 print("Current Sys Path:", sys.path)
 
 import yfinance as yf
-from Scripts.Data_Fetchers.trading_functions import fetch_stock_data, backtest_drl_model, TradingEnv, plot_backtest_results
+from Scripts.ModelTraining.continuous_learning.trading_functions import fetch_stock_data, backtest_drl_model, TradingEnv, plot_backtest_results
 
 class TestTradingFunctions(unittest.TestCase):
     

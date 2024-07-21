@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
-import os
 import joblib
 import json
 import traceback
@@ -13,11 +12,34 @@ from sklearn.metrics import mean_squared_error, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.impute import SimpleImputer
+import os
+import sys
+from pathlib import Path
+
+# Adjust the Python path dynamically for independent execution
+if __name__ == "__main__" and __package__ is None:
+    script_dir = Path(__file__).resolve().parent
+    project_root = script_dir.parent.parent
+    sys.path.append(str(project_root))
+
+from Scripts.Utilities.config_handling import ConfigManager
 
 class DataHandler:
-    def __init__(self, config, log_text_widget=None):
-        self.config = config
+    def __init__(self, config_file='config.ini', log_text_widget=None, data_store=None):
+        # Initialize ConfigManager
+        defaults = {
+            'SCALING': {
+                'default_scaler': 'StandardScaler'
+            },
+            'DIRECTORIES': {
+                'data_dir': 'data/csv'
+            }
+        }
+        self.config_manager = ConfigManager(config_file=config_file, defaults=defaults)
+        
+        self.config = self.config_manager.config
         self.log_text_widget = log_text_widget
+        self.data_store = data_store
         self.scalers = {
             'StandardScaler': StandardScaler(),
             'MinMaxScaler': MinMaxScaler(),
@@ -48,9 +70,11 @@ class DataHandler:
             self.log(error_message, "ERROR")
             return None
 
-    def preprocess_data(self, data_file_path, target_column='close', date_column='date', lag_sizes=[1, 2, 3, 5, 10], window_sizes=[5, 10, 20], scaler_type='StandardScaler'):
+    def preprocess_data(self, data, target_column='close', date_column='date', lag_sizes=[1, 2, 3, 5, 10], window_sizes=[5, 10, 20], scaler_type=None):
         try:
-            data = pd.read_csv(data_file_path)
+            if isinstance(data, str):
+                raise ValueError("Expected data to be a DataFrame, got string instead.")
+
             if date_column in data.columns:
                 data[date_column] = pd.to_datetime(data[date_column])
                 reference_date = data[date_column].min()
@@ -75,9 +99,14 @@ class DataHandler:
                 self.log(f"The '{target_column}' column is missing from the dataset. Please check the dataset.", "ERROR")
                 return None, None, None, None
 
+            # Convert non-numeric data to NaN
+            X = X.apply(pd.to_numeric, errors='coerce')
+
             imputer = SimpleImputer(strategy='mean')
             X_imputed = imputer.fit_transform(X)
 
+            if scaler_type is None:
+                scaler_type = self.config_manager.get('SCALING', 'default_scaler', 'StandardScaler')
             scaler = self.scalers.get(scaler_type, StandardScaler())
             X_scaled = scaler.fit_transform(X_imputed)
             X_train, X_val, y_train, y_val = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
@@ -200,3 +229,36 @@ class DataHandler:
             self.log(f"Data preview from {file_path}:\n{data.head()}")
         except Exception as e:
             self.log(f"An error occurred while reading the file: {str(e)}", "ERROR")
+
+    def fetch_and_preprocess_data(self, symbol, target_column='close', date_column='date', lag_sizes=[1, 2, 3, 5, 10], window_sizes=[5, 10, 20], scaler_type='StandardScaler'):
+        try:
+            if not self.data_store:
+                self.log("DataStore is not initialized.", "ERROR")
+                return None, None, None, None
+
+            data = self.data_store.load_data(symbol)
+            
+            if data is None:
+                self.log(f"No data available for {symbol}.", "ERROR")
+                return None, None, None, None
+
+            # Ensure the data is a DataFrame
+            if not isinstance(data, pd.DataFrame):
+                self.log("Loaded data is not a DataFrame.", "ERROR")
+                return None, None, None, None
+
+            return self.preprocess_data(data, target_column, date_column, lag_sizes, window_sizes, scaler_type)
+        except Exception as e:
+            error_message = f"Error during fetch and preprocess data: {str(e)}\n{traceback.format_exc()}"
+            self.log(error_message, "ERROR")
+            return None, None, None, None
+
+
+# Example usage
+if __name__ == "__main__":
+    from Scripts.Utilities.data_store import DataStore
+
+    config_file = 'config.ini'
+    data_store = DataStore()
+    data_handler = DataHandler(config_file=config_file, data_store=data_store)
+    data_handler.preview_data('C:/TheTradingRobotPlug/data/alpha_vantage/tsla_data.csv')

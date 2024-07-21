@@ -12,14 +12,14 @@ project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
 from model_training import ModelTraining
-from Scripts.Utilities.DataHandler import DataHandler  # Updated import from DataPreprocessing to DataHandler
+from Scripts.Utilities.DataHandler import DataHandler
 from utilities import MLRobotUtils
 from logging_module import ModelTrainingLogger
 
 class ModelTrainingTab(tk.Frame):
-    def __init__(self, parent, config, scaler_options):
+    def __init__(self, parent, config_file, scaler_options):
         super().__init__(parent)
-        self.config = config
+        self.config_file = config_file
         self.scaler_options = scaler_options
         self.queue = queue.Queue()
         self.utils = MLRobotUtils()
@@ -27,11 +27,12 @@ class ModelTrainingTab(tk.Frame):
         self.log_text = tk.Text(self, height=10, state='disabled')
         self.logger = ModelTrainingLogger(self.log_text)
         self.model_training = ModelTraining(self.logger)
-        self.data_handler = DataHandler(self.config, self.log_text)  # Updated from DataPreprocessing to DataHandler
+        self.data_handler = DataHandler(config_file=self.config_file, log_text_widget=self.log_text)
 
         self.scaler_type_var = tk.StringVar(self)
         
         self.setup_gui()
+
 
     def toggle_debug_mode(self):
         self.is_debug_mode = not self.is_debug_mode
@@ -138,18 +139,23 @@ class ModelTrainingTab(tk.Frame):
         scaler_type = self.scaler_type_var.get()
 
         if not data_file:
-            raise ValueError("Data file not selected")
+            messagebox.showerror("Error", "Data file not selected")
+            return
 
         if not model_type:
-            raise ValueError("Model type not selected")
+            messagebox.showerror("Error", "Model type not selected")
+            return
 
         epochs = int(self.epochs_entry.get()) if hasattr(self, 'epochs_entry') else 50
         
         # Use the DataHandler to preprocess data
-        X_train, X_val, y_train, y_val = self.data_handler.preprocess_data(data_file, scaler_type, model_type)
+        data = pd.read_csv(data_file)
+        X_train, X_val, y_train, y_val = self.data_handler.preprocess_data(data, target_column='close', scaler_type=scaler_type)
         
         if X_train is not None and y_train is not None:
             self.model_training.start_training(X_train, y_train, X_val, y_val, model_type, epochs)
+        else:
+            self.display_message("Data preprocessing failed. Training aborted.", level="ERROR")
 
     def process_queue(self):
         try:
@@ -170,12 +176,15 @@ class ModelTrainingTab(tk.Frame):
             self.logger.info(message)
 
     def preview_selected_data(self, file_path):
-        data = pd.read_csv(file_path)
-        self.display_message("Data preview:\n" + str(data.head()), level="INFO")
+        try:
+            data = pd.read_csv(file_path)
+            self.display_message("Data preview:\n" + str(data.head()), level="INFO")
+        except Exception as e:
+            self.display_message(f"Error loading data: {str(e)}", level="ERROR")
 
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("Model Training Application")
-    app = ModelTrainingTab(root, config={"key": "value"}, scaler_options=["StandardScaler", "MinMaxScaler"])
+    app = ModelTrainingTab(root, config_file='path_to_your_config_file.ini', scaler_options=["StandardScaler", "MinMaxScaler"])
     app.pack(expand=True, fill="both")
     root.mainloop()

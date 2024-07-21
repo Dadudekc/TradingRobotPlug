@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/TheTradingRobotPlug/mlruns/0/29151e348add498dbef924500a2b4721/artifacts
+end_time: 1721515810560
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 29151e348add498dbef924500a2b4721
+run_name: traveling-smelt-63
+run_uuid: 29151e348add498dbef924500a2b4721
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1721515517209
+status: 3
+tags: []
+user_id: Dagurlkc

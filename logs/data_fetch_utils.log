@@ -28,3 +28,4 @@
 2024-07-06 04:31:20,096 INFO Data fetched from SQL table test_table in database test_data/test_trading_data.db
 2024-07-06 04:31:20,096 INFO Data fetched from SQL table test_table in database test_data/test_trading_data.db
 2024-07-06 04:31:20,096 INFO Data fetched from SQL table test_table in database test_data/test_trading_data.db
+2024-07-20 22:09:43,627 ERROR Directory path is None. Please check the configuration.
