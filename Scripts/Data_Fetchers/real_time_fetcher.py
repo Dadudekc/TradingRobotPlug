@@ -1,10 +1,8 @@
-# C:\TheTradingRobotPlug\Scripts\Data_Fetchers\real_time_fetcher.py
-
 import os
 import sys
 import requests
 import pandas as pd
-from typing import Optional
+from typing import Optional, List, Dict
 from datetime import datetime
 from dotenv import load_dotenv
 import logging
@@ -27,10 +25,25 @@ logging.basicConfig(level=logging.INFO, filename='real_time_data_fetcher.log',
 logger = logging.getLogger(__name__)
 
 class RealTimeDataFetcher(DataFetcher):
+    """
+    Class for fetching real-time data from Alpha Vantage and Polygon APIs.
+
+    Attributes:
+        ALPHA_BASE_URL (str): Base URL for Alpha Vantage API.
+        POLYGON_BASE_URL (str): Base URL for Polygon API.
+    """
+
     ALPHA_BASE_URL = "https://www.alphavantage.co/query"
     POLYGON_BASE_URL = "https://api.polygon.io/v1"
 
     def __init__(self, alpha_api_key: str, polygon_api_key: str):
+        """
+        Initializes the RealTimeDataFetcher with the given API keys.
+
+        Args:
+            alpha_api_key (str): Alpha Vantage API key.
+            polygon_api_key (str): Polygon API key.
+        """
         self.alpha_api_key = alpha_api_key
         self.polygon_api_key = polygon_api_key
         super().__init__('ALPHAVANTAGE_API_KEY', self.ALPHA_BASE_URL, 
@@ -41,17 +54,47 @@ class RealTimeDataFetcher(DataFetcher):
                          'AlphaVantageRealTime', None)
 
     def construct_alpha_api_url(self, symbol: str) -> str:
+        """
+        Constructs the API URL for fetching data from Alpha Vantage.
+
+        Args:
+            symbol (str): The stock symbol to fetch data for.
+
+        Returns:
+            str: The constructed API URL.
+        """
         return (
             f"{self.ALPHA_BASE_URL}?function=TIME_SERIES_INTRADAY"
             f"&symbol={symbol}&interval=1min&apikey={self.alpha_api_key}"
         )
 
     def construct_polygon_api_url(self, symbol: str) -> str:
+        """
+        Constructs the API URL for fetching data from Polygon.
+
+        Args:
+            symbol (str): The stock symbol to fetch data for.
+
+        Returns:
+            str: The constructed API URL.
+        """
         return (
             f"{self.POLYGON_BASE_URL}/last/stocks/{symbol}?apiKey={self.polygon_api_key}"
         )
 
     def extract_alpha_results(self, data: dict) -> list:
+        """
+        Extracts results from the fetched Alpha Vantage data.
+
+        Args:
+            data (dict): The fetched data dictionary.
+
+        Returns:
+            list: A list of dictionaries containing the extracted results.
+        
+        Raises:
+            ValueError: If the data format is unexpected or contains an error.
+        """
         if "Time Series (1min)" in data:
             return [
                 {"timestamp": timestamp, **values}
@@ -62,6 +105,18 @@ class RealTimeDataFetcher(DataFetcher):
             raise ValueError("Unexpected data format or error in response")
 
     def extract_polygon_results(self, data: dict) -> list:
+        """
+        Extracts results from the fetched Polygon data.
+
+        Args:
+            data (dict): The fetched data dictionary.
+
+        Returns:
+            list: A list of dictionaries containing the extracted results.
+        
+        Raises:
+            ValueError: If the data format is unexpected or contains an error.
+        """
         if "results" in data:
             return [
                 {
@@ -79,6 +134,18 @@ class RealTimeDataFetcher(DataFetcher):
             raise ValueError("Unexpected data format or error in response")
 
     def fetch_real_time_data(self, symbol: str) -> pd.DataFrame:
+        """
+        Fetches real-time data for a given ticker symbol.
+
+        Args:
+            symbol (str): The stock symbol to fetch data for.
+
+        Returns:
+            pd.DataFrame: The fetched real-time data as a pandas DataFrame.
+        
+        Raises:
+            RuntimeError: If both Alpha Vantage and Polygon API requests fail.
+        """
         try:
             # Try fetching data from Alpha Vantage
             url = self.construct_alpha_api_url(symbol)

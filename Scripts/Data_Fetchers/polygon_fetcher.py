@@ -18,23 +18,64 @@ from Scripts.Utilities.DataLakeHandler import DataLakeHandler
 from Scripts.Data_Fetchers.base_fetcher import DataFetcher
 
 class PolygonDataFetcher(DataFetcher):
+    """
+    Class for fetching historical and real-time data from the Polygon API.
+
+    Attributes:
+        data_lake_handler (Optional[DataLakeHandler]): Handler for storing data in a data lake.
+    """
+
     def __init__(self, data_lake_handler: Optional[DataLakeHandler] = None):
-        super().__init__('POLYGON_API_KEY', 'https://api.polygon.io/v2/aggs/ticker', 
-                         'C:/TheTradingRobotPlug/data/polygon', 
-                         'C:/TheTradingRobotPlug/data/processed_polygon', 
-                         'C:/TheTradingRobotPlug/data/trading_data.db', 
-                         'C:/TheTradingRobotPlug/logs/polygon.log', 
+        """
+        Initializes the PolygonDataFetcher with the given parameters.
+        
+        Args:
+            data_lake_handler (Optional[DataLakeHandler]): Handler for storing data in a data lake.
+        """
+        super().__init__('POLYGON_API_KEY', 'https://api.polygon.io/v2/aggs/ticker',
+                         'C:/TheTradingRobotPlug/data/polygon',
+                         'C:/TheTradingRobotPlug/data/processed_polygon',
+                         'C:/TheTradingRobotPlug/data/trading_data.db',
+                         'C:/TheTradingRobotPlug/logs/polygon.log',
                          'Polygon', data_lake_handler)
         self.utils = self._initialize_utils()  # Initialize utils attribute
 
     def _initialize_utils(self):
+        """
+        Initializes utility attributes.
+        
+        Returns:
+            None
+        """
         # Placeholder for actual initialization of utility attributes
         return None
 
     def construct_api_url(self, symbol: str, start_date: str, end_date: str) -> str:
+        """
+        Constructs the API URL for fetching data from Polygon.
+
+        Args:
+            symbol (str): The stock symbol to fetch data for.
+            start_date (str): The start date for fetching data.
+            end_date (str): The end date for fetching data.
+
+        Returns:
+            str: The constructed API URL.
+        """
         return f"{self.base_url}/{symbol}/range/1/day/{start_date}/{end_date}?apiKey={self.api_key}"
 
     async def fetch_data(self, url: str, session: ClientSession, retries: int = 3) -> Dict[str, Any]:
+        """
+        Fetches data from the provided URL with retries on failure.
+
+        Args:
+            url (str): The API URL to fetch data from.
+            session (ClientSession): The aiohttp client session.
+            retries (int): The number of retries on failure. Defaults to 3.
+
+        Returns:
+            Dict[str, Any]: The fetched data as a dictionary.
+        """
         for attempt in range(retries):
             try:
                 async with session.get(url) as response:
@@ -52,6 +93,16 @@ class PolygonDataFetcher(DataFetcher):
                 raise
 
     def extract_results(self, data: dict, time_series_key: str = 'results') -> list:
+        """
+        Extracts results from the fetched data.
+
+        Args:
+            data (dict): The fetched data dictionary.
+            time_series_key (str): The key for the time series data in the dictionary. Defaults to 'results'.
+
+        Returns:
+            list: A list of dictionaries containing the extracted results.
+        """
         results = data.get(time_series_key, [])
         return [
             {
@@ -66,6 +117,17 @@ class PolygonDataFetcher(DataFetcher):
         ]
 
     async def fetch_data_for_symbol(self, symbol: str, start_date: str, end_date: str) -> Optional[pd.DataFrame]:
+        """
+        Fetches historical data for a given ticker symbol asynchronously.
+
+        Args:
+            symbol (str): The stock symbol to fetch data for.
+            start_date (str): The start date for fetching data.
+            end_date (str): The end date for fetching data.
+
+        Returns:
+            Optional[pd.DataFrame]: The fetched data as a pandas DataFrame, or None if no data was fetched.
+        """
         url = self.construct_api_url(symbol, start_date, end_date)
         timeout = ClientTimeout(total=60)
         
@@ -97,6 +159,15 @@ class PolygonDataFetcher(DataFetcher):
             return None
 
     async def fetch_real_time_data(self, symbol: str) -> pd.DataFrame:
+        """
+        Fetches real-time data for a given ticker symbol asynchronously.
+
+        Args:
+            symbol (str): The stock symbol to fetch real-time data for.
+
+        Returns:
+            pd.DataFrame: The fetched real-time data as a pandas DataFrame.
+        """
         url = f"{self.base_url}/{symbol}/range/1/minute/2023-01-01/2023-12-31?apiKey={self.api_key}"
         timeout = ClientTimeout(total=60)
         
@@ -124,6 +195,17 @@ class PolygonDataFetcher(DataFetcher):
             return pd.DataFrame()
 
     async def fetch_data_for_multiple_symbols(self, symbols: List[str], start_date: str, end_date: str) -> Dict[str, Optional[pd.DataFrame]]:
+        """
+        Fetches historical data for multiple ticker symbols asynchronously.
+
+        Args:
+            symbols (List[str]): The list of stock symbols to fetch data for.
+            start_date (str): The start date for fetching data.
+            end_date (str): The end date for fetching data.
+
+        Returns:
+            Dict[str, Optional[pd.DataFrame]]: A dictionary mapping symbols to their fetched data as pandas DataFrames.
+        """
         timeout = ClientTimeout(total=60)
         async with ClientSession(timeout=timeout) as session:
             tasks = [self.fetch_data_for_symbol(symbol, start_date, end_date) for symbol in symbols]
@@ -133,7 +215,6 @@ class PolygonDataFetcher(DataFetcher):
 # Initialize logger for utility purposes
 logging.basicConfig(level=logging.DEBUG)
 
-
 # C:\TheTradingRobotPlug\Scripts\Data_Fetchers\polygon_fetcher.py
 
 import pandas as pd
@@ -142,12 +223,35 @@ from datetime import datetime
 from Scripts.Utilities.data_fetch_utils import DataFetchUtils
 
 class PolygonDataFetcher:
+    """
+    A class to fetch data from Polygon API.
+
+    Attributes:
+        api_key (str): The API key for Polygon.
+        base_url (str): The base URL for Polygon API.
+        logger (logging.Logger): Logger for logging messages.
+    """
+
     def __init__(self):
+        """
+        Initializes the PolygonDataFetcher with API key and base URL.
+        """
         self.api_key = "YOUR_POLYGON_API_KEY"
         self.base_url = "https://api.polygon.io/v2/aggs/ticker/"
         self.logger = DataFetchUtils("C:/TheTradingRobotPlug/logs/polygon_fetcher.log").logger
 
     async def fetch(self, symbol, start_date, end_date):
+        """
+        Fetches data for a given symbol from Polygon API.
+
+        Args:
+            symbol (str): The stock symbol to fetch data for.
+            start_date (str): The start date for fetching data.
+            end_date (str): The end date for fetching data.
+
+        Returns:
+            pd.DataFrame: The fetched data as a pandas DataFrame.
+        """
         url = f"{self.base_url}{symbol}/range/1/day/{start_date}/{end_date}"
         params = {
             "apiKey": self.api_key
@@ -158,6 +262,15 @@ class PolygonDataFetcher:
                 return self.extract_data(data)
 
     def extract_data(self, data):
+        """
+        Extracts data from the JSON response.
+
+        Args:
+            data (dict): The JSON response from the API.
+
+        Returns:
+            pd.DataFrame: The extracted data as a pandas DataFrame.
+        """
         try:
             results = data.get("results", [])
             if not results:
