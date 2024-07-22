@@ -16,7 +16,17 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import RandomizedSearchCV, cross_val_score, train_test_split
 from statsmodels.tsa.arima.model import ARIMA
+import pmdarima as pm
 import logging
+
+# Setup logger
+logger = logging.getLogger('ModelTraining')
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 class ModelTraining:
     def __init__(self, logger):
@@ -209,18 +219,17 @@ class ModelTraining:
             model.compile(optimizer=self.model_configs['neural_network']['optimizer'], loss=self.model_configs['neural_network']['loss'])
             X_train_reshaped, X_val_reshaped = X_train, X_val
         elif model_type == "LSTM":
-            for layer in self.model_configs['LSTM']['layers']:
-                if layer['type'] == 'lstm':
-                    model.add(LSTM(units=layer['units'], return_sequences=layer['return_sequences'], input_shape=layer['input_shape'], kernel_regularizer=layer['kernel_regularizer']))
-                elif layer['type'] == 'batch_norm':
+            model.add(LSTM(units=self.model_configs['LSTM']['layers'][0]['units'], return_sequences=self.model_configs['LSTM']['layers'][0]['return_sequences'], kernel_regularizer=self.model_configs['LSTM']['layers'][0]['kernel_regularizer'], input_shape=(X_train.shape[1], 1)))
+            for layer in self.model_configs['LSTM']['layers'][1:]:
+                if layer['type'] == 'batch_norm':
                     model.add(BatchNormalization())
                 elif layer['type'] == 'dropout':
                     model.add(Dropout(rate=layer['rate']))
                 elif layer['type'] == 'dense':
                     model.add(Dense(units=layer['units'], activation=layer['activation'], kernel_regularizer=layer['kernel_regularizer']))
             model.compile(optimizer=self.model_configs['LSTM']['optimizer'], loss=self.model_configs['LSTM']['loss'])
-            X_train_reshaped = X_train.values.reshape(X_train.shape[0], X_train.shape[1], 1)
-            X_val_reshaped = X_val.values.reshape(X_val.shape[0], X_val.shape[1], 1)
+            X_train_reshaped = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
+            X_val_reshaped = X_val.reshape(X_val.shape[0], X_val.shape[1], 1)
 
         early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
         model.fit(X_train_reshaped, y_train, validation_data=(X_val_reshaped, y_val), epochs=epochs, batch_size=32, callbacks=[early_stopping])
@@ -236,16 +245,32 @@ class ModelTraining:
     def train_arima_model(self, close_prices, threshold=100):
         """Train an ARIMA model in the background."""
         def background_training(close_prices):
-            results = {'predictions': [], 'errors': [], 'parameters': {'order': (5, 1, 0)}, 'performance_metrics': {}}
+            self.display_message("Starting ARIMA training background process...", "INFO")
+            results = {'predictions': [], 'errors': [], 'parameters': {}, 'performance_metrics': {}}
             train_size = int(len(close_prices) * 0.8)
             train, test = close_prices[:train_size], close_prices[train_size:]
             history = list(train)
 
+            self.display_message(f"Train size: {train_size}, Test size: {len(test)}", "INFO")
+            self.display_message(f"Train data: {train.head()}", "DEBUG")
+            self.display_message(f"Test data: {test.head()}", "DEBUG")
+
+            # Automatically find the best ARIMA parameters
+            self.display_message("Finding the best ARIMA parameters...", "INFO")
+            try:
+                model = pm.auto_arima(history, start_p=1, start_q=1, test='adf', max_p=3, max_q=3, seasonal=False, trace=True, error_action='ignore', suppress_warnings=True)
+                results['parameters']['order'] = model.order
+                self.display_message(f"Selected ARIMA parameters: {model.order}", "INFO")
+            except Exception as e:
+                self.display_message(f"Error finding ARIMA parameters: {e}", "ERROR")
+                return
+
             for t in range(len(test)):
                 try:
-                    model = ARIMA(history, order=results['parameters']['order'])
-                    model_fit = model.fit()
-                    forecast = model_fit.forecast()[0]
+                    self.display_message(f"Training step {t}/{len(test)}", "DEBUG")
+                    model_fit = model.fit(history)
+                    forecast = model_fit.predict(n_periods=1)[0]
+                    self.display_message(f"Forecast at step {t}: {forecast}", "DEBUG")
                     results['predictions'].append(forecast)
                     obs = test[t]
                     history.append(obs)
@@ -253,16 +278,33 @@ class ModelTraining:
                     self.display_message(f"Error training ARIMA model at step {t}: {e}", "ERROR")
                     results['errors'].append(str(e))
             
-            mse = mean_squared_error(test, results['predictions'])
-            self.display_message(f"Test MSE: {mse:.2f}")
+            if len(results['predictions']) > 0:
+                mse = mean_squared_error(test, results['predictions'])
+                self.display_message(f"Test MSE: {mse:.2f}")
 
-            if mse < threshold:
-                self.display_message("Your ARIMA model seems promising for forecasting stock prices.", "INFO")
+                if mse < threshold:
+                    self.display_message("Your ARIMA model seems promising for forecasting stock prices.", "INFO")
+                else:
+                    self.display_message("Consider different ARIMA parameters or models for better forecasting accuracy.", "WARNING")
             else:
-                self.display_message("Consider different ARIMA parameters or models for better forecasting accuracy.", "WARNING")
+                self.display_message("No valid predictions were made by the ARIMA model. Please check the model configuration and data.", "ERROR")
 
-        threading.Thread(target=background_training, args=(close_prices,), daemon=True).start()
+            # Log final performance metrics
+            results['performance_metrics']['mse'] = mse
+            self.display_message(f"Final performance metrics: MSE = {mse:.2f}", "INFO")
+
+        if close_prices is None or close_prices.empty:
+            self.display_message("The provided close_prices data is empty or None.", "ERROR")
+            return
+
+        self.display_message("Initiating ARIMA model training...", "INFO")
+        training_thread = threading.Thread(target=background_training, args=(close_prices,), daemon=True)
+        training_thread.start()
         self.display_message("ARIMA model training started in background...", "INFO")
+
+        # Wait for the background thread to complete
+        training_thread.join()
+        self.display_message("ARIMA model training background process completed.", "INFO")
 
     def async_evaluate_model(self, model, X_test, y_test, model_type):
         """Asynchronously evaluate the model."""
@@ -308,27 +350,18 @@ class ModelTraining:
         self.logger.info(f'Saving model to {model_path}')
         return model_path
 
-    def start_training(self, data_file_path, model_type, epochs=50):
+    def start_training(self, X_train, y_train, X_val, y_val, model_type, epochs=50):
         """Start the training process."""
         try:
-            self.disable_training_button()
             self.display_message("Training started...", "INFO")
-
-            data = pd.read_csv(data_file_path)
-            self.display_message("Data loading and preprocessing started.", "INFO")
-            X_train, X_test, y_train, y_test = self.preprocess_data_with_feature_engineering(data)
-
-            if X_train is None or y_train is None or X_train.empty or y_train.empty:
-                self.display_message("Preprocessing resulted in empty data. Aborting training.", "ERROR")
-                return
 
             trained_model = None
             if model_type in ['neural_network', 'LSTM']:
-                trained_model = self.train_neural_network_or_lstm(X_train, y_train, X_test, y_test, model_type, epochs)
+                trained_model = self.train_neural_network_or_lstm(X_train, y_train, X_val, y_val, model_type, epochs)
             elif model_type == 'linear_regression':
-                trained_model = self.train_linear_regression(X_train, y_train, X_test, y_test)
+                trained_model = self.train_linear_regression(X_train, y_train, X_val, y_val)
             elif model_type == 'random_forest':
-                trained_model = self.train_random_forest(X_train, y_train, X_test, y_test)
+                trained_model = self.train_random_forest(X_train, y_train, X_val, y_val)
             elif model_type == "ARIMA":
                 self.train_arima_model(y_train)
 
@@ -340,5 +373,3 @@ class ModelTraining:
             error_message = f"Training failed: {str(e)}"
             self.display_message(error_message, "ERROR")
             return None
-        finally:
-            self.enable_training_button()

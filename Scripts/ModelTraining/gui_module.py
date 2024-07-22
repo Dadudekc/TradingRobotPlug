@@ -33,7 +33,6 @@ class ModelTrainingTab(tk.Frame):
         
         self.setup_gui()
 
-
     def toggle_debug_mode(self):
         self.is_debug_mode = not self.is_debug_mode
         if self.is_debug_mode:
@@ -83,7 +82,7 @@ class ModelTrainingTab(tk.Frame):
         self.settings_frame.pack()
 
     def setup_start_training_button(self):
-        self.start_training_button = ttk.Button(self, text="Start Training", command=self.start_training)
+        self.start_training_button = ttk.Button(self, text="Start Training", command=self.initiate_training)
         self.start_training_button.pack(pady=10)
 
     def setup_progress_and_logging(self):
@@ -133,7 +132,7 @@ class ModelTrainingTab(tk.Frame):
                     entry.pack()
                     setattr(self, f"{layer['type']}_activation_entry", entry)
 
-    def start_training(self):
+    def initiate_training(self):
         data_file = self.data_file_entry.get()
         model_type = self.model_type_var.get()
         scaler_type = self.scaler_type_var.get()
@@ -153,9 +152,12 @@ class ModelTrainingTab(tk.Frame):
         X_train, X_val, y_train, y_val = self.data_handler.preprocess_data(data, target_column='close', scaler_type=scaler_type)
         
         if X_train is not None and y_train is not None:
-            self.model_training.start_training(X_train, y_train, X_val, y_val, model_type, epochs)
+            threading.Thread(target=self.start_training, args=(X_train, y_train, X_val, y_val, model_type, epochs)).start()
         else:
             self.display_message("Data preprocessing failed. Training aborted.", level="ERROR")
+
+    def start_training(self, X_train, y_train, X_val, y_val, model_type, epochs):
+        self.model_training.start_training(X_train, y_train, X_val, y_val, model_type, epochs)
 
     def process_queue(self):
         try:

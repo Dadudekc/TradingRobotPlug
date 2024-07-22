@@ -1,0 +1,157 @@
+### Project Journal Entry
+**Date: July 20, 2024**
+
+#### Work Completed
+
+**1. Data Preprocessing and Initial Setup**
+   - Loaded the dataset `tsla_data.csv` from Alpha Vantage.
+   - Inspected the initial data preview and ensured the 'index' column was present, creating one if necessary.
+   - Dropped columns with more than 20% NaN values.
+   - Converted the 'date' column to datetime format and filled remaining NaNs for numeric columns.
+   - Applied label encoding to non-numeric columns except for the target column.
+
+**2. Feature Engineering**
+   - Implemented automated feature engineering using the `FeatureEngineering` class.
+   - Ensured unnecessary parameters (like `max_depth`) were not passed to the `automated_feature_engineering` method.
+   - Split the data into training and test sets.
+
+**3. Hyperparameter Tuning**
+   - Defined a `RandomForestRegressor` model and parameter grid.
+   - Utilized Optuna for hyperparameter tuning with TPESampler.
+   - Created an objective function to minimize the negative R^2 score.
+   - Performed optimization over 100 trials.
+
+**4. Model Training and Validation**
+   - Trained the best model found from hyperparameter tuning on the training set.
+   - Validated the model on a separate test set.
+   - Evaluated model performance using mean squared error (MSE) and R^2 score.
+
+**5. Marketing Efforts**
+   - Brainstormed the freemium model:
+     - Basic Plan: Ends with model predictions.
+     - Premium Plan: Includes full model deployment.
+     - Enterprise Plan: Features a custom reinforcement learning algorithm that users can train or start with a provided one.
+
+**6. Workstation and Version Control**
+   - Confirmed Git is added to the system PATH and recognized by PowerShell.
+   - Verified Git installation by running `git --version`.
+   - Cloned the repository:
+     ```sh
+     cd /path/to/your/desired/directory
+     git clone https://github.com/dadudekc/TradingRobotPlug.git
+     ```
+
+**7. Setting Up New Work Laptop**
+   - Generated a comprehensive list of installed packages using `pip freeze`.
+   - Created and updated `requirements.txt` to ensure compatibility across different environments.
+   - Resolved issues related to specific package versions by modifying `requirements.txt`.
+   - Explored the possibility of using Synergy software to share a single keyboard and mouse across multiple laptops.
+   - Initiated steps to download and install Synergy on both laptops.
+   - Planned the configuration of one laptop as the server and the other as the client.
+
+**8. Enhanced Error Handling and Logging for Trading Environment**
+   - Added detailed error handling and logging to the `TradingEnv` class.
+   - Configured logging to capture key events and exceptions.
+   - Improved methods for resetting the environment, executing steps, taking actions, and calculating rewards.
+
+**9. Enhanced Error Handling and Logging for Model Trainer**
+   - Added logging statements to capture the preprocessing of data, environment creation, and model training processes.
+   - Included try-except blocks in critical methods to catch and log exceptions.
+   - Ensured the `DRLModelTrainer` class logs detailed error messages for better issue diagnosis.
+
+**10. Improved MLRobotUtils Logging Utility**
+   - Added error handling to the logging initialization in the `MLRobotUtils` class.
+   - Included type checking for the log text widget to ensure it is a Tkinter `Text` widget.
+   - Provided detailed error messages for logging operations.
+
+**11. Resolved Module Import Issue**
+   - Diagnosed and provided steps to resolve the `ModuleNotFoundError` for the `stable_baselines3` package.
+   - Guided on how to install the required package using `pip`.
+
+**12. Best Model Parameters**
+   ```plaintext
+   Best trial: 9
+   Best value: 0.9998215387729971
+   Best parameters: {'n_estimators': 100, 'max_depth': 10}
+   Best Model Parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': 10, 'max_features': 1.0, 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'monotonic_cst': None, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': None, 'verbose': 0, 'warm_start': False}
+   ```
+
+**13. Resolved Module Import Issue**
+   - Diagnosed and provided steps to resolve the `ModuleNotFoundError` for the `Scripts.ModelTraining` package.
+   - Adjusted the script to dynamically set the Python path using `os` and `sys` modules.
+   - Verified the script structure and corrected the import paths to ensure smooth execution.
+
+### To-Do List
+
+1. **Complete GUI Setup for Model Training Tab**
+2. **Enhance Error Handling**
+3. **Debug Mode Enhancement**
+4. **Test Model Training Functionality**
+5. **Implement Additional Features**
+6. **Further Testing and Development**
+7. **Content Marketing**
+8. **Social Media Marketing**
+9. **Webinars and Workshops**
+10. **Email Marketing**
+11. **Create the First Newsletter**
+12. **Freemium Model Implementation**
+13. **Identify Potential Influencers**
+14. **Partnerships and Collaborations**
+15. **SEO Efforts**
+16. **Ensure Git is Recognized in PATH**
+17. **Verify Git Installation**
+18. **Clone Repository Again**
+19. **Complete Synergy Setup**
+    - Finish installing Synergy on both laptops.
+    - Configure one laptop as the server and the other as the client.
+    - Arrange the screen layout for seamless mouse cursor movement between screens.
+20. **Finalize Dependency Installation**
+    - Address any remaining issues with `requirements.txt`.
+    - Ensure all required packages are successfully installed on the new work laptop.
+    - Document any further modifications to `requirements.txt` for future reference.
+21. **Acquire Additional Work Laptop**
+    - Obtain another work laptop to complete our setup.
+    - Avoid using the Chromebook or Linux laptop for tasks other than website updates, as they are not preferred for general use.
+22. **Collaborate and Coordinate**
+    - Continue working closely with Aria to troubleshoot any additional issues.
+    - Plan the next steps for integrating both laptops into a unified working environment.
+23. **Documentation and Testing**
+    - Document the process of setting up the development environment on the new work laptop.
+    - Test the installed packages to ensure they work as expected.
+    - Verify the functionality of the Synergy setup across both laptops.
+24. **Further Debugging the `objective` function to ensure all parameter values are correctly specified**
+25. **Investigate and resolve any remaining issues with the `NoneType` comparison error**
+26. **Explore advanced feature engineering techniques to improve model performance**
+27. **Experiment with different parameter grids and tuning strategies**
+28. **Evaluate the impact of each parameter on model performance**
+29. **Document the changes made and the rationale behind them**
+
+#### Skills Used
+
+- **Technical Skills:**
+  - Python Programming
+  - GUI Design and Implementation
+  - Error Handling and Debugging
+  - Automated Model Selection and Hyperparameter Tuning
+  - Software Testing and Quality Assurance
+  - Version Control and Dependency Management
+  - Data Cleaning and Preprocessing
+  - Feature Engineering
+  - SQL and Data Management
+  - Configuration Management
+  - Logging
+
+- **Marketing Skills:**
+  - Content Creation and Marketing
+  - Social Media Marketing
+  - Webinar Planning and Execution
+  - Email Marketing
+  - SEO Optimization
+  - Partnership and Collaboration Building
+
+- **Project Management Skills:**
+  - Task Allocation and Time Management
+  - Strategic Planning and Execution
+  - Communication and Coordination within the Team
+
+By systematically addressing each of these tasks, Aria and I have ensured a balanced and productive day, making substantial progress towards our project's goals.

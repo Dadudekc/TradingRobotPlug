@@ -1,0 +1,108 @@
+import threading
+import logging
+import pandas as pd
+import pmdarima as pm
+from sklearn.metrics import mean_squared_error
+from datetime import datetime
+
+# Setup logger
+logger = logging.getLogger('ARIMA_Test')
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
+def display_message(message, level="INFO"):
+    """Log messages with timestamps."""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    message = f"[{timestamp}] {message}"
+    if level == "INFO":
+        logger.info(message)
+    elif level == "ERROR":
+        logger.error(message)
+    else:
+        logger.debug(message)
+
+def train_arima_model(close_prices, threshold=100):
+    """Train an ARIMA model in the background."""
+    def background_training(close_prices):
+        display_message("Starting ARIMA training background process...", "INFO")
+        results = {'predictions': [], 'errors': [], 'parameters': {}, 'performance_metrics': {}}
+        train_size = int(len(close_prices) * 0.8)
+        train, test = close_prices[:train_size], close_prices[train_size:]
+        history = list(train)
+
+        display_message(f"Train size: {train_size}, Test size: {len(test)}", "INFO")
+        display_message(f"Train data: {train.head()}", "DEBUG")
+        display_message(f"Test data: {test.head()}", "DEBUG")
+
+        # Automatically find the best ARIMA parameters
+        display_message("Finding the best ARIMA parameters...", "INFO")
+        try:
+            model = pm.auto_arima(history, start_p=1, start_q=1, test='adf', max_p=3, max_q=3, seasonal=False, trace=True, error_action='ignore', suppress_warnings=True)
+            results['parameters']['order'] = model.order
+            display_message(f"Selected ARIMA parameters: {model.order}", "INFO")
+        except Exception as e:
+            display_message(f"Error finding ARIMA parameters: {e}", "ERROR")
+            return
+
+        for t in range(len(test)):
+            try:
+                display_message(f"Training step {t}/{len(test)}", "DEBUG")
+                model_fit = model.fit(history)
+                forecast = model_fit.predict(n_periods=1)[0]
+                display_message(f"Forecast at step {t}: {forecast}", "DEBUG")
+                results['predictions'].append(forecast)
+                obs = test[t]
+                history.append(obs)
+            except Exception as e:
+                display_message(f"Error training ARIMA model at step {t}: {e}", "ERROR")
+                results['errors'].append(str(e))
+        
+        if len(results['predictions']) > 0:
+            mse = mean_squared_error(test, results['predictions'])
+            display_message(f"Test MSE: {mse:.2f}")
+
+            if mse < threshold:
+                display_message("Your ARIMA model seems promising for forecasting stock prices.", "INFO")
+            else:
+                display_message("Consider different ARIMA parameters or models for better forecasting accuracy.", "WARNING")
+        else:
+            display_message("No valid predictions were made by the ARIMA model. Please check the model configuration and data.", "ERROR")
+
+        # Log final performance metrics
+        results['performance_metrics']['mse'] = mse
+        display_message(f"Final performance metrics: MSE = {mse:.2f}", "INFO")
+
+        # Save the results
+        pd.DataFrame({'Actual': test, 'Predicted': results['predictions']}).to_csv('arima_predictions.csv', index=False)
+        display_message("Results saved to arima_predictions.csv", "INFO")
+
+    if close_prices is None or close_prices.empty:
+        display_message("The provided close_prices data is empty or None.", "ERROR")
+        return
+
+    display_message("Initiating ARIMA model training...", "INFO")
+    training_thread = threading.Thread(target=background_training, args=(close_prices,), daemon=True)
+    training_thread.start()
+    display_message("ARIMA model training started in background...", "INFO")
+
+    # Wait for the background thread to complete
+    training_thread.join()
+    display_message("ARIMA model training background process completed.", "INFO")
+
+# Example usage
+if __name__ == "__main__":
+    # Load your data here
+    data_file = 'C:/TheTradingRobotPlug/data/alpha_vantage/tsla_data.csv'
+    df = pd.read_csv(data_file)
+    df['date'] = pd.to_datetime(df['date'])
+    df.set_index('date', inplace=True)
+    close_prices = df['close']
+
+    display_message(f"Loaded data from {data_file}", "INFO")
+    display_message(f"Close prices: {close_prices.head()}", "DEBUG")
+
+    train_arima_model(close_prices)

@@ -1,0 +1,160 @@
+### Project Journal Entry: **Date:** July 22, 2024
+
+### Work Completed:
+
+1. **File Path Error Resolution:**
+   - Corrected the file path to ensure the correct location for the data file was used (`C:\TheTradingRobotPlug\data\alpha_vantage\tsla_data.csv`).
+   - Added functionality to browse for the data file using `tkinter`, setting the default directory to `C:\TheTradingRobotPlug\data\alpha_vantage`.
+
+2. **Integration of ARIMA Model Training:**
+   - Wrapped the ARIMA model training code into a class `ARIMAModelTrainer`.
+   - Integrated `ARIMAModelTrainer` into the `ModelTraining` class to handle the training process.
+   - Added functionality to save predictions to a CSV file.
+
+3. **Code Refactoring:**
+   - Improved the structure of the main script to allow for dynamic file selection.
+   - Ensured proper error handling and logging throughout the process.
+
+4. **Data Preprocessing Enhancements:**
+   - Ensured the data preprocessing script handled NaN values and feature engineering efficiently.
+   - Modified the `DataPreprocessing` class as necessary to integrate seamlessly with the ARIMA model.
+
+5. **Training Process:**
+   - Successfully executed the ARIMA model training, achieving the following steps:
+     - Training steps from 558/566 to 565/566.
+     - Final performance metrics recorded: Test MSE = 97042.73.
+     - Results saved to `arima_predictions.csv`.
+     - Logged information on the completion of the training process, including recommendations for better forecasting accuracy.
+
+6. **Modularization and Execution:**
+   - Modularized the code into separate files for better readability and maintainability:
+     - `data_preprocessing.py`
+     - `model_training.py`
+     - `main.py`
+   - Successfully ran the modularized code with the following outcomes:
+     - Data preprocessing steps handled efficiently.
+     - LSTM model training completed successfully with 50 epochs.
+     - Final validation metrics for LSTM: MSE = 15469.76, RMSE = 124.38, R² = 0.81.
+     - Model saved at `models/LSTM_20240722_070936.pkl`.
+
+### Skills Used:
+
+- **Python Programming:**
+  - Writing and refactoring Python scripts.
+  - Handling file paths and dynamic imports using `os` and `sys`.
+
+- **Data Handling:**
+  - Reading and preprocessing data using `pandas`.
+  - Feature engineering and handling missing values.
+
+- **Machine Learning:**
+  - Implementing and training ARIMA models.
+  - Integrating ARIMA model training into a larger training pipeline.
+
+- **Error Handling and Logging:**
+  - Using the `logging` module to track script progress and errors.
+  - Implementing try-except blocks to catch and handle exceptions.
+
+- **GUI Development:**
+  - Using `tkinter` to create a file browsing dialog for selecting data files.
+
+- **Documentation:**
+  - Organizing and documenting project progress.
+  - Structuring and presenting information clearly and consistently.
+
+### Lessons Learned:
+
+1. **Dynamic File Handling:**
+   - Using `tkinter` for file browsing enhances user experience and flexibility in selecting input files.
+
+2. **Modular Code Design:**
+   - Wrapping functionalities into classes (`ARIMAModelTrainer`, `DataPreprocessing`, `ModelTraining`) improves code maintainability and readability.
+   - Ensuring proper integration between different parts of the codebase is crucial for seamless functionality.
+
+3. **Error Handling:**
+   - Robust error handling and logging are essential for identifying and resolving issues quickly.
+   - Ensuring that all possible error points are covered helps in making the script more resilient.
+
+4. **Data Preprocessing:**
+   - Handling missing values and creating new features are critical steps that can significantly impact the performance of machine learning models.
+
+### To-Do:
+
+1. **Improve ARIMA Model Accuracy:**
+   - Experiment with different ARIMA parameters to improve forecasting accuracy.
+   - Consider integrating other time series forecasting models.
+
+2. **Enhance Data Preprocessing:**
+   - Implement additional feature engineering techniques.
+   - Optimize the handling of missing values.
+
+3. **Extend Model Training Pipeline:**
+   - Integrate more machine learning models for comparison.
+   - Implement hyperparameter tuning for all models.
+
+4. **User Interface Improvements:**
+   - Enhance the file browsing interface to be more intuitive.
+   - Add more options for user inputs and configurations.
+
+5. **Documentation and Testing:**
+   - Document the changes and new functionalities.
+   - Write and execute tests to ensure code reliability and accuracy.
+
+### Workflow Process Description for Interview
+
+**Overview:**
+My workflow process involves a systematic approach to handling data preprocessing, model training, and code organization. I ensure each step is well-documented, thoroughly tested, and optimized for performance.
+
+**1. Problem Identification and Planning:**
+   - **Objective:** Preprocess financial data, train an LSTM model, and ensure the codebase was modularized for better maintainability and readability.
+   - **Planning:** Outlined the key tasks, including data preprocessing, model training, and modularizing the code into distinct files.
+
+**2. Data Preprocessing:**
+   - **Initial Data Inspection:**
+     - Loaded the dataset and inspected the initial shape (3536, 46) and identified NaN values in various columns.
+     - Handled NaN values by investigating their presence and deciding on appropriate measures (e.g., filling with median values).
+   - **Data Cleaning:**
+     - Dropped non-numeric columns to ensure all data used was suitable for numerical computations.
+   - **Feature Engineering:**
+     - Created lag and rolling window features to capture temporal patterns in the financial data.
+     - Ensured all data was numeric and filled remaining NaN values with median values to prevent data loss during processing.
+     - Final dataset was ready for model training with the transformed shape of (3536, 58).
+
+**3. Model Training:**
+   - **Model Selection:**
+     - Chose the LSTM model for its suitability in handling time-series data.
+   - **Training Process:**
+     - Split the data into training and validation sets.
+     - Configured the LSTM model with appropriate layers and hyperparameters.
+     - Trained the model for 50 epochs, monitoring the training process and logging intermediate results.
+   - **Evaluation:**
+     - Calculated final validation metrics: MSE, RMSE, and R².
+     - Ensured the model's performance met the required benchmarks.
+   - **Model Saving:**
+     - Saved the trained model to a specified path for future use and deployment.
+
+**4. Code Modularization:**
+   - **Objective:** Enhance code readability and maintainability by breaking down the monolithic script into modular components.
+   - **Implementation:**
+     - Separated data preprocessing tasks into `data_preprocessing.py`.
+     - Moved model training functions to `model_training.py`.
+     - Created `main.py` to orchestrate the overall process, ensuring each module was correctly integrated.
+   - **Documentation and Testing:**
+     - Documented each module with clear explanations and usage examples.
+     - Thoroughly tested each component to ensure functionality and correctness.
+
+**5. Error Handling and Logging:**
+   - **Logging:**
+     - Implemented logging to track the process and facilitate debugging.
+     - Logged key events, such as data loading, preprocessing steps, model training progress, and final results.
+   - **Error Handling:**
+     - Added robust error handling to catch and log exceptions, ensuring smooth execution and easier debugging.
+
+**6. Continuous Improvement:**
+   - **Feedback and Iteration:**
+     - Continuously monitored the process for potential improvements.
+     - Iterated on feedback, refining data preprocessing steps, model configurations, and overall workflow.
+   - **Collaboration Tools:**
+     - Utilized ChatGPT for assistance in solving problems, improving code structure, and ensuring best practices.
+
+By demonstrating this structured and methodical approach to data science tasks, I ensure clarity, efficiency, and maintainability at each step of the project.
