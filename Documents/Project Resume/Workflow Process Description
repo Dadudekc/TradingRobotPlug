@@ -1,0 +1,58 @@
+## Workflow Process Description for Interview
+
+**Overview:**
+My workflow process involves a systematic approach to handling data preprocessing, model training, and code organization. I ensure each step is well-documented, thoroughly tested, and optimized for performance.
+
+**1. Problem Identification and Planning:**
+   - **Objective:** Preprocess financial data, train an LSTM model, and ensure the codebase was modularized for better maintainability and readability.
+   - **Planning:** Outlined the key tasks, including data preprocessing, model training, and modularizing the code into distinct files.
+
+**2. Data Preprocessing:**
+   - **Initial Data Inspection:**
+     - Loaded the dataset and inspected the initial shape (3536, 46) and identified NaN values in various columns.
+     - Handled NaN values by investigating their presence and deciding on appropriate measures (e.g., filling with median values).
+   - **Data Cleaning:**
+     - Dropped non-numeric columns to ensure all data used was suitable for numerical computations.
+   - **Feature Engineering:**
+     - Created lag and rolling window features to capture temporal patterns in the financial data.
+     - Ensured all data was numeric and filled remaining NaN values with median values to prevent data loss during processing.
+     - Final dataset was ready for model training with the transformed shape of (3536, 58).
+
+**3. Model Training:**
+   - **Model Selection:**
+     - Chose the LSTM model for its suitability in handling time-series data.
+   - **Training Process:**
+     - Split the data into training and validation sets.
+     - Configured the LSTM model with appropriate layers and hyperparameters.
+     - Trained the model for 50 epochs, monitoring the training process and logging intermediate results.
+   - **Evaluation:**
+     - Calculated final validation metrics: MSE, RMSE, and R².
+     - Ensured the model's performance met the required benchmarks.
+   - **Model Saving:**
+     - Saved the trained model to a specified path for future use and deployment.
+
+**4. Code Modularization:**
+   - **Objective:** Enhance code readability and maintainability by breaking down the monolithic script into modular components.
+   - **Implementation:**
+     - Separated data preprocessing tasks into `data_preprocessing.py`.
+     - Moved model training functions to `model_training.py`.
+     - Created `main.py` to orchestrate the overall process, ensuring each module was correctly integrated.
+   - **Documentation and Testing:**
+     - Documented each module with clear explanations and usage examples.
+     - Thoroughly tested each component to ensure functionality and correctness.
+
+**5. Error Handling and Logging:**
+   - **Logging:**
+     - Implemented logging to track the process and facilitate debugging.
+     - Logged key events, such as data loading, preprocessing steps, model training progress, and final results.
+   - **Error Handling:**
+     - Added robust error handling to catch and log exceptions, ensuring smooth execution and easier debugging.
+
+**6. Continuous Improvement:**
+   - **Feedback and Iteration:**
+     - Continuously monitored the process for potential improvements.
+     - Iterated on feedback, refining data preprocessing steps, model configurations, and overall workflow.
+   - **Collaboration Tools:**
+     - Utilized ChatGPT for assistance in solving problems, improving code structure, and ensuring best practices.
+
+By demonstrating this structured and methodical approach to data science tasks, I ensure clarity, efficiency, and maintainability at each step of the project.

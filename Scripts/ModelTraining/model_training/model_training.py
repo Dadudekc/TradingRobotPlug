@@ -1,149 +1,158 @@
-import sys
-import os
-from keras.regularizers import l1_l2
-from keras.optimizers import Adam
-
-# Add project root to the PYTHONPATH
-script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir, os.pardir))
-sys.path.append(project_root)
-
-from Scripts.ModelTraining.model_training.models.neural_network import train_neural_network
-from Scripts.ModelTraining.model_training.models.lstm import train_lstm
-from Scripts.ModelTraining.model_training.models.linear_regression import train_linear_regression
-from Scripts.ModelTraining.model_training.models.random_forest import RandomForestModel  # Updated import
-from Scripts.ModelTraining.model_training.models.arima_model import ARIMAModelTrainer
-
-import threading
-from datetime import datetime
-import pickle
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+from keras.models import Sequential, load_model
+from keras.layers import LSTM, Dense, Dropout, BatchNormalization, Input
+from keras.optimizers import Adam
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+from keras.regularizers import l1_l2
 from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import RobustScaler
+import tsfresh
+import logging
+import tensorflow as tf
+import joblib
 
-class ModelTraining:
-    def __init__(self, logger):
+class LSTMModelTrainer:
+    def __init__(self, logger, model_save_path='best_model.keras', scaler_save_path='scaler.pkl'):
         self.logger = logger
-        self.model_configs = self.initialize_model_configs()
+        self.model_save_path = model_save_path
+        self.scaler_save_path = scaler_save_path
 
-    def initialize_model_configs(self):
-        """Initialize model configurations for different model types."""
-        return {
-            'neural_network': {
-                'layers': [
-                    {'type': 'dense', 'units': 128, 'activation': 'relu', 'kernel_regularizer': l1_l2(l1=0.01, l2=0.01)},
-                    {'type': 'batch_norm'},
-                    {'type': 'dropout', 'rate': 0.2},
-                    {'type': 'dense', 'units': 64, 'activation': 'relu', 'kernel_regularizer': l1_l2(l1=0.01, l2=0.01)},
-                    {'type': 'dropout', 'rate': 0.2},
-                    {'type': 'dense', 'units': 1, 'activation': None, 'kernel_regularizer': None}
-                ],
-                'optimizer': Adam(learning_rate=1e-4),
-                'loss': 'mean_squared_error',
-                'epochs': 100
-            },
-            'LSTM': {
-                'layers': [
-                    {'type': 'lstm', 'units': 50, 'return_sequences': False, 'input_shape': (None, 1), 'kernel_regularizer': l1_l2(l1=0.01, l2=0.01)},
-                    {'type': 'batch_norm'},
-                    {'type': 'dropout', 'rate': 0.2},
-                    {'type': 'dense', 'units': 64, 'activation': 'relu', 'kernel_regularizer': l1_l2(l1=0.01, l2=0.01)},
-                    {'type': 'dense', 'units': 1, 'activation': None, 'kernel_regularizer': None}
-                ],
-                'optimizer': Adam(learning_rate=1e-4),
-                'loss': 'mean_squared_error',
-                'epochs': 100
-            }
-        }
+    def preprocess_data(self, X_train, X_val):
+        """Preprocess data by handling missing values and scaling."""
+        scaler = RobustScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_val_scaled = scaler.transform(X_val)
+        joblib.dump(scaler, self.scaler_save_path)  # Save the scaler
+        return X_train_scaled, X_val_scaled
 
-    def display_message(self, message, level="INFO"):
-        """Log messages with timestamps."""
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        message = f"[{timestamp}] {message}"
-        if level == "INFO":
-            self.logger.info(message)
-        elif level == "ERROR":
-            self.logger.error(message)
-        else:
-            self.logger.debug(message)
+    def extract_features(self, X_train, X_val):
+        """Automated feature extraction using tsfresh."""
+        def prepare_tsfresh_data(X):
+            """Prepare data for tsfresh."""
+            df = pd.DataFrame(X)
+            df['id'] = np.arange(len(df))
+            df = df.melt(id_vars=['id'], var_name='time', value_name='value')
+            return df
 
-    def start_training(self, X_train, y_train, X_val, y_val, model_type, epochs=50):
-        """Start the training process."""
+        X_train_tsfresh = prepare_tsfresh_data(X_train)
+        X_val_tsfresh = prepare_tsfresh_data(X_val)
+
+        X_train_features = tsfresh.extract_features(X_train_tsfresh, column_id='id', column_sort='time')
+        X_val_features = tsfresh.extract_features(X_val_tsfresh, column_id='id', column_sort='time')
+        
+        return X_train_features, X_val_features
+
+    def augment_data(self, X_train, y_train):
+        """Time series data augmentation."""
+        augmented_data = X_train.copy()
+        # Implement your data augmentation techniques here
+        return augmented_data, y_train
+
+    def train_lstm(self, X_train, y_train, X_val, y_val, model_config, epochs=100, pretrained_model_path=None):
+        """Train an LSTM model."""
+        self.logger.info("Starting LSTM model training...")
         try:
-            self.display_message("Training started...", "INFO")
+            if pretrained_model_path:
+                model = load_model(pretrained_model_path)
+                for layer in model.layers[:-5]:
+                    layer.trainable = False
+            else:
+                model = Sequential()
 
-            trained_model = None
-            if model_type == 'neural_network':
-                trained_model = train_neural_network(X_train, y_train, X_val, y_val, self.model_configs['neural_network'], epochs, logger=self.logger)
-            elif model_type == 'LSTM':
-                trained_model = train_lstm(X_train, y_train, X_val, y_val, self.model_configs['LSTM'], epochs, logger=self.logger)
-            elif model_type == 'linear_regression':
-                trained_model = train_linear_regression(X_train, y_train, X_val, y_val, logger=self.logger)
-            elif model_type == 'random_forest':
-                rf_model = RandomForestModel(logger=self.logger)
-                trained_model, best_params, mse, rmse, mae, mape, r2 = rf_model.train(X_train, y_train, random_state=42)
-                self.display_message(f"Best parameters: {best_params}", "INFO")
-                self.display_message(f"Validation MSE: {mse}, RMSE: {rmse}, MAE: {mae}, MAPE: {mape}, R²: {r2}", "INFO")
-            elif model_type == 'ARIMA':
-                arima_trainer = ARIMAModelTrainer(y_train, self.logger)
-                arima_trainer.train()
+            model.add(Input(shape=(X_train.shape[1], 1)))
+            for layer in model_config['layers']:
+                if layer['type'] == 'lstm':
+                    model.add(LSTM(units=layer['units'], return_sequences=layer['return_sequences'], kernel_regularizer=layer['kernel_regularizer']))
+                elif layer['type'] == 'batch_norm':
+                    model.add(BatchNormalization())
+                elif layer['type'] == 'dropout':
+                    model.add(Dropout(rate=layer['rate']))
+                elif layer['type'] == 'dense':
+                    model.add(Dense(units=layer['units'], activation=layer['activation'], kernel_regularizer=layer['kernel_regularizer']))
 
-            self.display_message("Training completed successfully.", "INFO")
-            if trained_model:
-                self.save_model(trained_model, model_type)
-            return trained_model
+            model.add(Dense(1))  # Output layer to match the target shape
+
+            model.compile(optimizer=model_config['optimizer'], loss=model_config['loss'])
+
+            X_train_reshaped = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
+            X_val_reshaped = X_val.reshape(X_val.shape[0], X_val.shape[1], 1)
+
+            early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+            reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-6)
+            checkpoint = ModelCheckpoint(self.model_save_path, monitor='val_loss', save_best_only=True)
+
+            model.fit(X_train_reshaped, y_train, validation_data=(X_val_reshaped, y_val), epochs=epochs, batch_size=32, callbacks=[early_stopping, reduce_lr, checkpoint])
+
+            y_pred_val = model.predict(X_val_reshaped).flatten()
+            mse = mean_squared_error(y_val, y_pred_val)
+            rmse = np.sqrt(mse)
+            r2 = r2_score(y_val, y_pred_val)
+
+            self.logger.info(f"Validation MSE: {mse:.2f}, RMSE: {rmse:.2f}, R²: {r2:.2f}")
+
+            return model
 
         except Exception as e:
-            error_message = f"Training failed: {str(e)}"
-            self.display_message(error_message, "ERROR")
+            self.logger.error(f"Error occurred during model training: {e}")
             return None
 
-    def save_model(self, model, model_type):
-        """Save the trained model to a file."""
-        model_dir = os.path.join(project_root, "models")
-        if not os.path.exists(model_dir):
-            self.display_message(f"Creating directory {model_dir}", "INFO")
-            os.makedirs(model_dir)
-        else:
-            self.display_message(f"Directory {model_dir} already exists", "INFO")
-            
-        model_path = os.path.join(model_dir, f"{model_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pkl")
-        self.display_message(f"Saving model to {model_path}", "INFO")
-        with open(model_path, 'wb') as f:
-            pickle.dump(model, f)
-        return model_path
+    def evaluate_model(self, X_test, y_test):
+        """Evaluate the model's performance on the test dataset."""
+        self.logger.info("Evaluating model on test data...")
+        try:
+            # Load the model
+            model = load_model(self.model_save_path)
+            scaler = joblib.load(self.scaler_save_path)
 
-    def visualize_training_results(self, y_test, y_pred):
-        """Visualize the training results."""
-        plt.figure(figsize=(10, 6))
-        sns.scatterplot(x=y_test, y=y_pred, edgecolor='k', alpha=0.7)
-        plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linestyle='--')
-        plt.xlabel('Actual Values')
-        plt.ylabel('Predicted Values')
-        plt.title('Actual vs. Predicted Values')
-        plt.grid(True)
-        plt.show()
+            # Preprocess the test data
+            X_test_scaled = scaler.transform(X_test)
+            X_test_reshaped = X_test_scaled.reshape(X_test_scaled.shape[0], X_test_scaled.shape[1], 1)
 
-        residuals = y_test - y_pred
-        plt.figure(figsize=(10, 6))
-        sns.histplot(residuals, kde=True, color='blue')
-        plt.xlabel('Residuals')
-        plt.title('Residuals Distribution')
-        plt.grid(True)
-        plt.show()
+            # Make predictions
+            y_pred_test = model.predict(X_test_reshaped).flatten()
+
+            # Calculate metrics
+            mse = mean_squared_error(y_test, y_pred_test)
+            rmse = np.sqrt(mse)
+            r2 = r2_score(y_test, y_pred_test)
+
+            self.logger.info(f"Test MSE: {mse:.2f}, RMSE: {rmse:.2f}, R²: {r2:.2f}")
+
+        except Exception as e:
+            self.logger.error(f"Error occurred during model evaluation: {e}")
 
 # Example usage
 if __name__ == "__main__":
-    import logging
+    # Initialize logging
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
 
-    # Replace with actual data
-    X_train, y_train = np.random.rand(100, 10), np.random.rand(100)
-    X_val, y_val = np.random.rand(20, 10), np.random.rand(20)
+    # Example data
+    X_train = np.random.rand(100, 10)
+    y_train = np.random.rand(100)
+    X_val = np.random.rand(20, 10)
+    y_val = np.random.rand(20)
+    X_test = np.random.rand(20, 10)
+    y_test = np.random.rand(20)
 
-    training_instance = ModelTraining(logger=logger)
-    model = training_instance.start_training(X_train, y_train, X_val, y_val, model_type='random_forest', epochs=50)
+    trainer = LSTMModelTrainer(logger)
+
+    # Preprocess data
+    X_train_scaled, X_val_scaled = trainer.preprocess_data(X_train, X_val)
+
+    # Train model
+    model_config = {
+        'layers': [
+            {'type': 'lstm', 'units': 100, 'return_sequences': False, 'kernel_regularizer': l1_l2(l1=0.01, l2=0.01)},
+            {'type': 'batch_norm'},
+            {'type': 'dropout', 'rate': 0.3},
+            {'type': 'dense', 'units': 20, 'activation': 'relu', 'kernel_regularizer': l1_l2(l1=0.01, l2=0.01)}
+        ],
+        'optimizer': 'adam',
+        'loss': 'mean_squared_error'
+    }
+    trainer.train_lstm(X_train_scaled, y_train, X_val_scaled, y_val, model_config, epochs=50)
+
+    # Evaluate model
+    trainer.evaluate_model(X_test, y_test)

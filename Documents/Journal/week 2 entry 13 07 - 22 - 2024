@@ -1,4 +1,6 @@
-### Project Journal Entry: **Date:** July 22, 2024
+### Project Journal Entry
+
+**Date:** July 22, 2024
 
 ### Work Completed:
 
@@ -100,61 +102,68 @@
    - Document the changes and new functionalities.
    - Write and execute tests to ensure code reliability and accuracy.
 
-### Workflow Process Description for Interview
+### Project Journal Entry
 
-**Overview:**
-My workflow process involves a systematic approach to handling data preprocessing, model training, and code organization. I ensure each step is well-documented, thoroughly tested, and optimized for performance.
+**Date:** July 23, 2024
 
-**1. Problem Identification and Planning:**
-   - **Objective:** Preprocess financial data, train an LSTM model, and ensure the codebase was modularized for better maintainability and readability.
-   - **Planning:** Outlined the key tasks, including data preprocessing, model training, and modularizing the code into distinct files.
+### Accomplishments:
 
-**2. Data Preprocessing:**
-   - **Initial Data Inspection:**
-     - Loaded the dataset and inspected the initial shape (3536, 46) and identified NaN values in various columns.
-     - Handled NaN values by investigating their presence and deciding on appropriate measures (e.g., filling with median values).
-   - **Data Cleaning:**
-     - Dropped non-numeric columns to ensure all data used was suitable for numerical computations.
-   - **Feature Engineering:**
-     - Created lag and rolling window features to capture temporal patterns in the financial data.
-     - Ensured all data was numeric and filled remaining NaN values with median values to prevent data loss during processing.
-     - Final dataset was ready for model training with the transformed shape of (3536, 58).
+1. **LSTM Model Training:**
+   - Successfully trained the LSTM model multiple times, ensuring the training process is robust and stable.
+   - Achieved the following metrics:
+     - Validation MSE: 0.08, RMSE: 0.29, R²: -0.00
+     - Test MSE: 0.09, RMSE: 0.30, R²: -0.25
 
-**3. Model Training:**
-   - **Model Selection:**
-     - Chose the LSTM model for its suitability in handling time-series data.
-   - **Training Process:**
-     - Split the data into training and validation sets.
-     - Configured the LSTM model with appropriate layers and hyperparameters.
-     - Trained the model for 50 epochs, monitoring the training process and logging intermediate results.
-   - **Evaluation:**
-     - Calculated final validation metrics: MSE, RMSE, and R².
-     - Ensured the model's performance met the required benchmarks.
-   - **Model Saving:**
-     - Saved the trained model to a specified path for future use and deployment.
+2. **Identified Next Steps for Model Improvement:**
+   - Focus on refining hyperparameters.
+   - Experiment with different model architectures.
+   - Implement learning rate scheduling.
 
-**4. Code Modularization:**
-   - **Objective:** Enhance code readability and maintainability by breaking down the monolithic script into modular components.
-   - **Implementation:**
-     - Separated data preprocessing tasks into `data_preprocessing.py`.
-     - Moved model training functions to `model_training.py`.
-     - Created `main.py` to orchestrate the overall process, ensuring each module was correctly integrated.
-   - **Documentation and Testing:**
-     - Documented each module with clear explanations and usage examples.
-     - Thoroughly tested each component to ensure functionality and correctness.
+### Lessons Learned:
 
-**5. Error Handling and Logging:**
-   - **Logging:**
-     - Implemented logging to track the process and facilitate debugging.
-     - Logged key events, such as data loading, preprocessing steps, model training progress, and final results.
-   - **Error Handling:**
-     - Added robust error handling to catch and log exceptions, ensuring smooth execution and easier debugging.
+1. **Hyperparameter Tuning:**
+   - Importance of systematically optimizing hyperparameters to improve model performance.
+   - Utilization of tools like Optuna can automate and streamline the hyperparameter tuning process.
 
-**6. Continuous Improvement:**
-   - **Feedback and Iteration:**
-     - Continuously monitored the process for potential improvements.
-     - Iterated on feedback, refining data preprocessing steps, model configurations, and overall workflow.
-   - **Collaboration Tools:**
-     - Utilized ChatGPT for assistance in solving problems, improving code structure, and ensuring best practices.
+2. **Model Architecture:**
+   - Exploring different architectures, such as adding more layers, using GRU layers, or Bidirectional LSTM, can potentially lead to performance improvements.
+   - Keeping the architecture flexible allows for iterative experimentation and fine-tuning.
 
-By demonstrating this structured and methodical approach to data science tasks, I ensure clarity, efficiency, and maintainability at each step of the project.
+3. **Learning Rate Scheduling:**
+   - Dynamic adjustment of the learning rate during training can help achieve better convergence and prevent overfitting.
+   - Implementing schedulers like `ReduceLROnPlateau` can automatically adjust the learning rate based on validation performance.
+
+### To-Do List:
+
+1. **Refine Hyperparameters:**
+   - Integrate Optuna for automated hyperparameter optimization.
+   - Define the search space for key hyperparameters (e.g., learning rate, number of LSTM units, batch size, number of layers).
+   - Run Optuna to find the optimal hyperparameters.
+
+2. **Experiment with Model Architectures:**
+   - Modify the current model architecture to include different configurations (e.g., additional LSTM layers, GRU layers, Bidirectional LSTM).
+   - Evaluate the performance of each modified architecture to identify the best-performing model.
+
+3. **Implement Learning Rate Scheduling:**
+   - Choose a suitable learning rate scheduler (e.g., `ReduceLROnPlateau`).
+   - Integrate the scheduler into the training process and monitor its impact on model performance.
+
+4. **Monitor and Iterate:**
+   - Continuously monitor the performance metrics (MSE, RMSE, R²) during training and validation.
+   - Make necessary adjustments based on the results and iterate on the model architecture and hyperparameters.
+
+### Action Plan:
+
+1. **Update the Training Script:**
+   - Integrate hyperparameter optimization using Optuna.
+   - Experiment with different model architectures and learning rate scheduling.
+
+2. **Run Experiments:**
+   - Conduct multiple training sessions with different configurations.
+   - Record and analyze the results to determine the best approach.
+
+3. **Document Findings:**
+   - Keep detailed notes on the performance of each model configuration.
+   - Document any challenges encountered and how they were addressed.
+
+By following this structured approach, we aim to improve the LSTM model's performance and achieve better predictive accuracy. This iterative process will help refine our model and optimize its parameters for the best results.
