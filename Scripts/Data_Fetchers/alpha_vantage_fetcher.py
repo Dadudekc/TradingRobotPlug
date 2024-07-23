@@ -6,8 +6,6 @@ import os
 import sys
 from pathlib import Path
 from typing import Optional, List, Dict, Any
-
-import aiohttp
 import pandas as pd
 from aiohttp import ClientSession, ClientTimeout, ClientConnectionError, ContentTypeError
 
@@ -21,22 +19,57 @@ from Scripts.Data_Fetchers.base_fetcher import DataFetcher
 from Scripts.Utilities.DataLakeHandler import DataLakeHandler  # Add this import if `DataLakeHandler` is being used
 
 class AlphaVantageDataFetcher(DataFetcher):
+    """
+    Fetches data from Alpha Vantage API and processes it.
+
+    Attributes:
+        data_lake_handler (Optional[DataLakeHandler]): Handler for storing data in a data lake.
+    """
+
     def __init__(self, data_lake_handler: Optional[DataLakeHandler] = None):
-        super().__init__('ALPHAVANTAGE_API_KEY', 'https://www.alphavantage.co/query', 
-                         'C:/TheTradingRobotPlug/data/alpha_vantage', 
-                         'C:/TheTradingRobotPlug/data/processed_alpha_vantage', 
-                         'C:/TheTradingRobotPlug/data/trading_data.db', 
-                         'C:/TheTradingRobotPlug/logs/alpha_vantage.log', 
+        """
+        Initializes the AlphaVantageDataFetcher with the given parameters.
+        
+        Args:
+            data_lake_handler (Optional[DataLakeHandler]): Handler for storing data in a data lake.
+        """
+        super().__init__('ALPHAVANTAGE_API_KEY', 'https://www.alphavantage.co/query',
+                         'C:/TheTradingRobotPlug/data/alpha_vantage',
+                         'C:/TheTradingRobotPlug/data/processed_alpha_vantage',
+                         'C:/TheTradingRobotPlug/data/trading_data.db',
+                         'C:/TheTradingRobotPlug/logs/alpha_vantage.log',
                          'AlphaVantage', data_lake_handler)
         self.utils = DataFetchUtils("C:/TheTradingRobotPlug/logs/alpha_vantage_fetcher.log").logger
 
     def construct_api_url(self, symbol: str, function: str = "TIME_SERIES_DAILY", interval: str = "1min") -> str:
+        """
+        Constructs the API URL for fetching data from Alpha Vantage.
+        
+        Args:
+            symbol (str): The stock symbol to fetch data for.
+            function (str): The function type for the API call. Defaults to "TIME_SERIES_DAILY".
+            interval (str): The interval for intraday data. Defaults to "1min".
+        
+        Returns:
+            str: The constructed API URL.
+        """
         return f"{self.base_url}?function={function}&symbol={symbol}&interval={interval}&apikey={self.api_key}&outputsize=full&datatype=json"
 
     async def fetch_data(self, url: str, session: ClientSession, retries: int = 3) -> Dict[str, Any]:
+        """
+        Fetches data from the provided URL with retries on failure.
+        
+        Args:
+            url (str): The API URL to fetch data from.
+            session (ClientSession): The aiohttp client session.
+            retries (int): The number of retries on failure. Defaults to 3.
+        
+        Returns:
+            Dict[str, Any]: The fetched data as a dictionary.
+        """
         for attempt in range(retries):
             try:
-                self.utils.debug(f"Fetching data from URL: {url}, Attempt: {attempt+1}")
+                self.utils.debug(f"Fetching data from URL: {url}, Attempt: {attempt + 1}")
                 async with session.get(url) as response:
                     response.raise_for_status()
                     data = await response.json()
@@ -54,6 +87,16 @@ class AlphaVantageDataFetcher(DataFetcher):
                 raise
 
     def extract_results(self, data: dict, time_series_key: str) -> list:
+        """
+        Extracts results from the fetched data.
+        
+        Args:
+            data (dict): The fetched data dictionary.
+            time_series_key (str): The key for the time series data in the dictionary.
+        
+        Returns:
+            list: A list of dictionaries containing the extracted results.
+        """
         time_series = data.get(time_series_key, {})
         if not time_series:
             self.utils.debug(f"No data found for key: {time_series_key}")
@@ -72,6 +115,17 @@ class AlphaVantageDataFetcher(DataFetcher):
         return results
 
     async def fetch_data_for_symbol(self, symbol: str, start_date: str, end_date: str) -> Optional[pd.DataFrame]:
+        """
+        Fetches historical data for a given symbol within the specified date range.
+        
+        Args:
+            symbol (str): The stock symbol to fetch data for.
+            start_date (str): The start date for fetching data.
+            end_date (str): The end date for fetching data.
+        
+        Returns:
+            Optional[pd.DataFrame]: The fetched data as a pandas DataFrame, or None if no data was fetched.
+        """
         url = self.construct_api_url(symbol)
         timeout = ClientTimeout(total=60)
 
@@ -111,6 +165,15 @@ class AlphaVantageDataFetcher(DataFetcher):
         return None
 
     async def fetch_real_time_data(self, symbol: str) -> pd.DataFrame:
+        """
+        Fetches real-time intraday data for a given symbol.
+        
+        Args:
+            symbol (str): The stock symbol to fetch data for.
+        
+        Returns:
+            pd.DataFrame: The fetched real-time data as a pandas DataFrame.
+        """
         url = self.construct_api_url(symbol, function="TIME_SERIES_INTRADAY", interval="1min")
         timeout = ClientTimeout(total=60)
         
@@ -135,6 +198,17 @@ class AlphaVantageDataFetcher(DataFetcher):
             return pd.DataFrame()
 
     async def fetch_data_for_multiple_symbols(self, symbols: List[str], start_date: str, end_date: str) -> Dict[str, Optional[pd.DataFrame]]:
+        """
+        Fetches historical data for multiple symbols within the specified date range.
+        
+        Args:
+            symbols (List[str]): The list of stock symbols to fetch data for.
+            start_date (str): The start date for fetching data.
+            end_date (str): The end date for fetching data.
+        
+        Returns:
+            Dict[str, Optional[pd.DataFrame]]: A dictionary mapping symbols to their fetched data as pandas DataFrames.
+        """
         timeout = ClientTimeout(total=60)
         async with ClientSession(timeout=timeout) as session:
             tasks = [self.fetch_data_for_symbol(symbol, start_date, end_date) for symbol in symbols]

@@ -25,12 +25,34 @@ logger = DataFetchUtils("C:/TheTradingRobotPlug/logs/data_fetch_main.log").logge
 load_dotenv()
 
 async def fetch_data(symbols, start_date, end_date):
+    """
+    Asynchronously fetches historical data for multiple symbols from Alpha Vantage and Polygon APIs,
+    and saves the data to CSV files.
+
+    Args:
+        symbols (list): List of stock symbols to fetch data for.
+        start_date (str): Start date for data fetching in 'YYYY-MM-DD' format.
+        end_date (str): End date for data fetching in 'YYYY-MM-DD' format.
+
+    Returns:
+        list: List of filenames of the fetched and saved CSV files.
+    """
     alpha_vantage_fetcher = AlphaVantageDataFetcher()
     polygon_fetcher = PolygonDataFetcher()
     data_store = DataStore()
     fetched_files = []
 
     async def fetch_and_save(fetcher, symbol):
+        """
+        Fetches data for a given symbol using the specified fetcher and saves it to a CSV file.
+
+        Args:
+            fetcher: The data fetcher object (AlphaVantageDataFetcher or PolygonDataFetcher).
+            symbol (str): The stock symbol to fetch data for.
+
+        Returns:
+            pd.DataFrame: The fetched data as a pandas DataFrame, or None if no data was fetched.
+        """
         df = await fetcher.fetch_data_for_symbol(symbol, start_date, end_date)
         if df is not None and not df.empty:
             filename = f"{symbol}_{fetcher.source.lower()}_data_{start_date}_to_{end_date}.csv"
@@ -59,6 +81,17 @@ async def fetch_data(symbols, start_date, end_date):
     return fetched_files
 
 def fetch_data_from_yfinance(symbol, start_date, end_date):
+    """
+    Fetches historical data for a given symbol from Yahoo Finance and returns it as a pandas DataFrame.
+
+    Args:
+        symbol (str): The stock symbol to fetch data for.
+        start_date (str): Start date for data fetching in 'YYYY-MM-DD' format.
+        end_date (str): End date for data fetching in 'YYYY-MM-DD' format.
+
+    Returns:
+        pd.DataFrame: The fetched data as a pandas DataFrame, or an empty DataFrame if no data was fetched.
+    """
     try:
         yf_ticker = yf.Ticker(symbol)
         data = yf_ticker.history(start=start_date, end=end_date)
@@ -78,6 +111,17 @@ def fetch_data_from_yfinance(symbol, start_date, end_date):
     return pd.DataFrame()
 
 async def main(symbols, start_date=None, end_date=None):
+    """
+    Main function to fetch data for given symbols within the specified date range.
+
+    Args:
+        symbols (list): List of stock symbols to fetch data for.
+        start_date (str, optional): Start date for data fetching in 'YYYY-MM-DD' format. Defaults to one year ago from today.
+        end_date (str, optional): End date for data fetching in 'YYYY-MM-DD' format. Defaults to today's date.
+
+    Returns:
+        list: List of filenames of the fetched and saved CSV files.
+    """
     # Set default dates to one year from today if not provided
     if not start_date or not end_date:
         end_date = datetime.now().strftime('%Y-%m-%d')
@@ -86,6 +130,8 @@ async def main(symbols, start_date=None, end_date=None):
     return await fetch_data(symbols, start_date, end_date)
 
 if __name__ == "__main__":
+    # List of stock symbols to fetch data for
     symbols = ["AAPL", "MSFT", "GOOG"]
+    # Fetch data and print the filenames of the saved CSV files
     fetched_data = asyncio.run(main(symbols))
     print(fetched_data)
