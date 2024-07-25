@@ -1,3 +1,5 @@
+# C:\TheTradingRobotPlug\Scripts\ModelTraining\model_training\models\linear_regression.py
+
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge

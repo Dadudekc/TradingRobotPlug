@@ -1,74 +1,59 @@
 # C:\TheTradingRobotPlug\Scripts\Utilities\config_handling.py
 
-import configparser
 import os
 import logging
 
+# Function to safely get an environment variable with a default
+def get_env_value(key, default=None):
+    return os.getenv(key, default)
+
+# Safely get the environment variables
+loading_path = get_env_value('LOADING_PATH', 'default/loading/path')
+api_key = get_env_value('API_KEY', 'default_api_key')
+base_url = get_env_value('BASE_URL', 'https://api.example.com')
+timeout = int(get_env_value('TIMEOUT', 30))
+db_name = get_env_value('DB_NAME', 'default_db')
+db_user = get_env_value('DB_USER', 'default_user')
+
+# Print statements for debugging
+print(f"Loading Path: {loading_path}")
+print(f"API Key: {api_key}")
+print(f"Base URL: {base_url}")
+print(f"Timeout: {timeout}")
+print(f"Database Name: {db_name}")
+print(f"Database User: {db_user}")
+
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Example usage of the logger
+logger.info(f"Configuration loaded successfully: API Key={api_key}, Base URL={base_url}, Timeout={timeout}, DB Name={db_name}, DB User={db_user}")
+
 class ConfigManager:
-    def __init__(self, config_file='config.ini', defaults=None):
-        self.config_file = config_file
-        self.config = configparser.ConfigParser()
+    def __init__(self):
         self.logger = logging.getLogger(__name__)
-        
-        if os.path.exists(self.config_file):
-            self.config.read(self.config_file)
-        else:
-            self.config['DEFAULT'] = defaults if defaults else {}
+        self.config = {
+            'loading_path': loading_path,
+            'api_key': api_key,
+            'base_url': base_url,
+            'timeout': timeout,
+            'db_name': db_name,
+            'db_user': db_user,
+        }
 
-        self.load_environment_variables()
-
-    def load_environment_variables(self):
-        for section in self.config.sections():
-            for key in self.config[section]:
-                env_var = os.getenv(f"{section.upper()}_{key.upper()}")
-                if env_var:
-                    self.logger.debug(f"Overriding {section}.{key} with environment variable.")
-                    self.config.set(section, key, env_var)
-
-    def get(self, section, option, fallback=None):
-        value = self.config.get(section, option, fallback=fallback)
-        self.logger.debug(f"Retrieving {section}.{option}: {value}")
+    def get(self, key):
+        value = self.config.get(key)
+        self.logger.debug(f"Retrieving {key}: {value}")
         return value
 
-    def set(self, section, option, value):
-        if not self.config.has_section(section):
-            self.config.add_section(section)
-            self.logger.debug(f"Adding section: {section}")
-        self.config.set(section, option, value)
-        self.logger.debug(f"Setting {section}.{option} to {value}")
-        self.save()
-
-    def save(self):
-        with open(self.config_file, 'w') as configfile:
-            self.config.write(configfile)
-        self.logger.debug(f"Configuration saved to {self.config_file}")
-
-    def load_defaults(self, defaults):
-        for section, options in defaults.items():
-            if not self.config.has_section(section):
-                self.config.add_section(section)
-            for option, value in options.items():
-                if not self.config.has_option(section, option):
-                    self.config.set(section, option, value)
-                    self.logger.debug(f"Loading default {section}.{option} = {value}")
-
-# Example usage
+# Example usage of ConfigManager
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    
-    defaults = {
-        'API': {
-            'api_key': 'default_api_key',
-            'base_url': 'https://api.example.com'
-        },
-        'DATABASE': {
-            'db_name': 'default_db',
-            'db_user': 'default_user'
-        }
-    }
-    
-    config_manager = ConfigManager(config_file='config.ini', defaults=defaults)
-    config_manager.load_defaults(defaults)
-    api_key = config_manager.get('API', 'api_key')
-    base_url = config_manager.get('API', 'base_url')
-    config_manager.set('API', 'timeout', '30')
+    config_manager = ConfigManager()
+    loading_path = config_manager.get('loading_path')
+    api_key = config_manager.get('api_key')
+    base_url = config_manager.get('base_url')
+    timeout = config_manager.get('timeout')
+    db_name = config_manager.get('db_name')
+    db_user = config_manager.get('db_user')
+    print(f"ConfigManager loaded values: Loading Path={loading_path}, API Key={api_key}, Base URL={base_url}, Timeout={timeout}, DB Name={db_name}, DB User={db_user}")

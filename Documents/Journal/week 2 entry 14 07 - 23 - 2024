@@ -1,0 +1,113 @@
+### Project Journal Entry
+
+**Date:** July 23, 2024
+
+#### **Accomplishments:**
+
+1. **LSTM Model Training:**
+   - Successfully trained the LSTM model multiple times, ensuring the training process is robust and stable.
+   - Achieved the following metrics:
+     - Validation MSE: 0.08, RMSE: 0.29, R²: -0.00
+     - Test MSE: 0.09, RMSE: 0.30, R²: -0.25
+
+2. **Git Repository Management:**
+   - Pulled updates from the remote repository and resolved merge conflicts.
+   - Updated local files and ensured synchronization with the remote repository.
+   - Successfully pushed local changes to the remote repository.
+
+3. **Code Improvement and Integration:**
+   - Improved code for handling model training and file management.
+   - Ensured that code changes are properly tracked and synchronized with the repository.
+
+4. **Data Preprocessing for Neural Network Training:**
+   - Added a preprocessing step to convert `date` columns to numerical values and drop any non-numerical columns.
+   - Ensured data is correctly formatted for TensorFlow tensor conversion, resolving the `ValueError` related to `Timestamp`.
+
+5. **Debugging TensorFlow Model Training:**
+   - Enhanced the `DataHandler` class to preprocess data, ensuring all columns used in training are numeric.
+   - Implemented logging to track and debug the types of data being passed to the TensorFlow model.
+   - Addressed the `ValueError` issue by converting non-numeric data to numeric and dropping non-numeric columns before training.
+
+6. **Neural Network Model Training and Explainability:**
+   - Built and trained a neural network model using TensorFlow with a MirroredStrategy for distributed training.
+   - Successfully integrated SHAP for model explainability, using KernelExplainer to analyze feature importance.
+
+7. **Improving Neural Network Training Script:**
+   - Corrected the optimizer configuration by removing the unrecognized `'type'` key.
+   - Added regularization and dropout for better generalization.
+   - Incorporated learning rate scheduler and model checkpointing.
+   - Normalized input data before training.
+   - Improved logging for better tracking.
+
+#### **Lessons Learned:**
+
+1. **Hyperparameter Tuning:**
+   - Importance of systematically optimizing hyperparameters to improve model performance.
+   - Utilization of tools like Optuna can automate and streamline the hyperparameter tuning process.
+
+2. **Model Architecture:**
+   - Exploring different architectures, such as adding more layers, using GRU layers, or Bidirectional LSTM, can potentially lead to performance improvements.
+   - Keeping the architecture flexible allows for iterative experimentation and fine-tuning.
+
+3. **Learning Rate Scheduling:**
+   - Dynamic adjustment of the learning rate during training can help achieve better convergence and prevent overfitting.
+   - Implementing schedulers like `ReduceLROnPlateau` can automatically adjust the learning rate based on validation performance.
+
+4. **Git Workflow:**
+   - Need to regularly pull changes from the remote repository to avoid conflicts.
+   - Understanding the merge process and resolving conflicts are essential for maintaining a clean and synchronized codebase.
+
+5. **Data Preprocessing:**
+   - Ensuring all input features are numerical is crucial for TensorFlow compatibility.
+   - Properly handling `Timestamp` objects and other non-numerical data types is necessary for seamless model training.
+
+6. **Model Checkpointing:**
+   - The importance of using the correct file extensions for model checkpointing in TensorFlow/Keras.
+   - Adapting to new changes in libraries and frameworks ensures smooth functionality.
+
+#### **To-Do List:**
+
+1. **Refine Hyperparameters:**
+   - Integrate Optuna for automated hyperparameter optimization.
+   - Define the search space for key hyperparameters (e.g., learning rate, number of LSTM units, batch size, number of layers).
+   - Run Optuna to find the optimal hyperparameters.
+
+2. **Experiment with Model Architectures:**
+   - Modify the current model architecture to include different configurations (e.g., additional LSTM layers, GRU layers, Bidirectional LSTM).
+   - Evaluate the performance of each modified architecture to identify the best-performing model.
+
+3. **Implement Learning Rate Scheduling:**
+   - Choose a suitable learning rate scheduler (e.g., `ReduceLROnPlateau`).
+   - Integrate the scheduler into the training process and monitor its impact on model performance.
+
+4. **Monitor and Iterate:**
+   - Continuously monitor the performance metrics (MSE, RMSE, R²) during training and validation.
+   - Make necessary adjustments based on the results and iterate on the model architecture and hyperparameters.
+
+5. **Update the Repository:**
+   - Ensure that all recent changes are committed and pushed to the remote repository.
+   - Regularly check for any updates from the remote repository to avoid conflicts.
+
+6. **Document Findings:**
+   - Keep detailed notes on the performance of each model configuration.
+   - Document any challenges encountered and how they were addressed.
+
+7. **Preprocess Data:**
+   - Ensure that all features used for training are numerical.
+   - Implement a robust data preprocessing pipeline that handles timestamps and other non-numerical data types.
+
+#### **Action Plan:**
+
+1. **Update the Training Script:**
+   - Integrate hyperparameter optimization using Optuna.
+   - Experiment with different model architectures and learning rate scheduling.
+
+2. **Run Experiments:**
+   - Conduct multiple training sessions with different configurations.
+   - Record and analyze the results to determine the best approach.
+
+3. **Document Findings:**
+   - Keep detailed notes on the performance of each model configuration.
+   - Document any challenges encountered and how they were addressed.
+
+By following this structured approach, we aim to improve the LSTM and neural network models' performance and achieve better predictive accuracy. This iterative process will help refine our models and optimize their parameters for the best results. Additionally, maintaining an updated and synchronized codebase will facilitate smooth collaboration and continuous development.

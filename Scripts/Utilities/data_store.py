@@ -1,4 +1,4 @@
-# C:\TheTradingRobotPlug\Scripts\Utilities\data_store.py
+# C:\TheTradingRobotPlug\Utilities\data_store.py
 
 import os
 import pandas as pd
@@ -12,30 +12,34 @@ import talib  # Ensure TA-Lib is imported
 if __name__ == "__main__" and __package__ is None:
     script_dir = Path(__file__).resolve().parent
     project_root = script_dir.parent.parent
-    sys.path.append(str(project_root))
+    sys.path.append(str(project_root / 'Scripts' / 'Utilities'))
 
-from Scripts.Utilities.config_handling import ConfigManager
+try:
+    from config_handling import ConfigManager
+    from data_fetch_utils import DataFetchUtils
+except ImportError as e:
+    print(f"Error importing modules: {e}")
+    raise
 
 
 class DataStore:
     def __init__(self, csv_dir: str = 'C:/TheTradingRobotPlug/data/alpha_vantage',
-                 db_path: str = 'C:/TheTradingRobotPlug/data/trading_data.db',
-                 config_file: str = 'config.ini') -> None:
+                 db_path: str = 'C:/TheTradingRobotPlug/data/trading_data.db') -> None:
         self.csv_dir = Path(csv_dir)
         self.processed_csv_dir = self.csv_dir / 'processed'
         self.raw_csv_dir = self.csv_dir / 'raw'
         self.db_path = Path(db_path)
         self.data: Dict[str, dict] = {}
-        self.utils = self._get_data_fetch_utils(config_file)
+        self.utils = self._get_data_fetch_utils()
         self.utils.ensure_directory_exists(self.csv_dir)
         self.utils.ensure_directory_exists(self.processed_csv_dir)
         self.utils.ensure_directory_exists(self.raw_csv_dir)
-        self.config_manager = ConfigManager(config_file=config_file)  # Assuming you will use this for some configuration settings
+        self.config_manager = ConfigManager()  # Assuming you will use this for some configuration settings
 
-    def _get_data_fetch_utils(self, config_file: str):
+    def _get_data_fetch_utils(self):
         # Import here to avoid circular import
-        from Scripts.Utilities.data_fetch_utils import DataFetchUtils
-        return DataFetchUtils(config_file=config_file, log_file="C:/TheTradingRobotPlug/logs/data_store.log")
+        return DataFetchUtils(log_file="C:/TheTradingRobotPlug/logs/data_store.log")
+
 
     def add_data(self, ticker: str, data: dict) -> None:
         if not data:

@@ -5,8 +5,10 @@ from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense, Dropout, BatchNormalization, Input, LSTM
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, LearningRateScheduler
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
 import shap
+import pandas as pd
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -14,14 +16,6 @@ logger = logging.getLogger(__name__)
 
 class NeuralNetworkTrainer:
     def __init__(self, model_config, epochs=100, pretrained_model_path=None):
-        """
-        Initialize the NeuralNetworkTrainer class.
-
-        Parameters:
-        - model_config: dict, configuration for the model layers and compilation
-        - epochs: int, number of epochs to train (default=100)
-        - pretrained_model_path: str, path to a pretrained model (default=None)
-        """
         self.model_config = model_config
         self.epochs = epochs
         self.pretrained_model_path = pretrained_model_path
@@ -32,15 +26,9 @@ class NeuralNetworkTrainer:
         if epoch < 10:
             return lr
         else:
-            return lr * tf.math.exp(-0.1)
+            return float(lr * tf.math.exp(-0.1))
 
     def build_model(self, input_shape):
-        """
-        Build or load the model based on the configuration.
-        
-        Parameters:
-        - input_shape: tuple, shape of the input data
-        """
         with self.strategy.scope():
             if self.pretrained_model_path:
                 self.model = load_model(self.pretrained_model_path)
@@ -62,27 +50,16 @@ class NeuralNetworkTrainer:
                 logger.info("Initialized new model.")
 
             optimizer_config = self.model_config.get('optimizer', {})
+            optimizer_config.pop('type', None)  # Remove 'type' if it exists
             optimizer = Adam(**optimizer_config)
             self.model.compile(optimizer=optimizer, loss=self.model_config.get('loss', 'mse'))
             logger.info("Compiled model with optimizer and loss.")
 
     def train(self, X_train, y_train, X_val, y_val):
-        """
-        Train the neural network model.
-
-        Parameters:
-        - X_train: np.array, training features
-        - y_train: np.array, training labels
-        - X_val: np.array, validation features
-        - y_val: np.array, validation labels
-
-        Returns:
-        - model: trained Keras model
-        """
         try:
             self.build_model(X_train.shape[1:])
 
-            early_stopping = EarlyStopping(monitor='val_loss', patience=self.model_config.get('patience', 10), restore_best_weights=True)
+            early_stopping = EarlyStopping(monitor='val_loss', patience=self.model_config.get('patience', 20), restore_best_weights=True)
             model_checkpoint = ModelCheckpoint("best_model.h5", save_best_only=True, monitor='val_loss', mode='min')
             tensorboard = TensorBoard(log_dir="logs")
             lr_scheduler = LearningRateScheduler(self.scheduler)
@@ -90,8 +67,13 @@ class NeuralNetworkTrainer:
             callbacks = [early_stopping, model_checkpoint, tensorboard, lr_scheduler]
             logger.info("Initialized callbacks.")
 
-            train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train)).batch(self.model_config.get('batch_size', 32))
-            val_dataset = tf.data.Dataset.from_tensor_slices((X_val, y_val)).batch(self.model_config.get('batch_size', 32))
+            # Normalize the data
+            scaler = StandardScaler()
+            X_train = scaler.fit_transform(X_train)
+            X_val = scaler.transform(X_val)
+
+            train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train)).batch(self.model_config.get('batch_size', 64))
+            val_dataset = tf.data.Dataset.from_tensor_slices((X_val, y_val)).batch(self.model_config.get('batch_size', 64))
 
             self.model.fit(train_dataset, validation_data=val_dataset, epochs=self.epochs, callbacks=callbacks)
             logger.info("Model training completed.")
@@ -103,8 +85,7 @@ class NeuralNetworkTrainer:
 
             logger.info(f"Validation MSE: {mse:.2f}, RMSE: {rmse:.2f}, R²: {r2:.2f}")
 
-            # Explainability using SHAP
-            explainer = shap.DeepExplainer(self.model, X_train[:100])  # Sampled to reduce computation
+            explainer = shap.KernelExplainer(self.model.predict, X_train[:100])
             shap_values = explainer.shap_values(X_val[:10])
             shap.summary_plot(shap_values, X_val[:10])
 
@@ -118,35 +99,33 @@ class ModelConfig:
     def dense_model():
         return {
             'layers': [
-                {'type': 'dense', 'units': 64, 'activation': 'relu'},
-                {'type': 'dropout', 'rate': 0.5},
+                {'type': 'dense', 'units': 128, 'activation': 'relu', 'kernel_regularizer': 'l2'},
+                {'type': 'dropout', 'rate': 0.3},
                 {'type': 'batch_norm'},
-                {'type': 'dense', 'units': 32, 'activation': 'relu'},
+                {'type': 'dense', 'units': 64, 'activation': 'relu', 'kernel_regularizer': 'l2'},
+                {'type': 'dropout', 'rate': 0.3},
+                {'type': 'dense', 'units': 32, 'activation': 'relu', 'kernel_regularizer': 'l2'},
                 {'type': 'dense', 'units': 1, 'activation': 'linear'}
             ],
-            'optimizer': {'learning_rate': 0.001},
+            'optimizer': {'learning_rate': 0.001},  # Removed 'type': 'adam'
             'loss': 'mse',
-            'batch_size': 32,
-            'patience': 10
+            'batch_size': 64,
+            'patience': 20
         }
 
     @staticmethod
     def lstm_model():
         return {
             'layers': [
-                {'type': 'lstm', 'units': 50, 'activation': 'tanh', 'return_sequences': True},
+                {'type': 'lstm', 'units': 100, 'activation': 'tanh', 'return_sequences': True, 'kernel_regularizer': 'l2'},
                 {'type': 'dropout', 'rate': 0.2},
-                {'type': 'lstm', 'units': 50, 'activation': 'tanh'},
+                {'type': 'lstm', 'units': 100, 'activation': 'tanh', 'return_sequences': False, 'kernel_regularizer': 'l2'},
+                {'type': 'dropout', 'rate': 0.2},
+                {'type': 'dense', 'units': 50, 'activation': 'relu', 'kernel_regularizer': 'l2'},
                 {'type': 'dense', 'units': 1, 'activation': 'linear'}
             ],
-            'optimizer': {'learning_rate': 0.001},
+            'optimizer': {'learning_rate': 0.001},  # Removed 'type': 'adam'
             'loss': 'mse',
-            'batch_size': 32,
-            'patience': 10
+            'batch_size': 64,
+            'patience': 20
         }
-
-# Example usage:
-# Choose model configuration
-model_config = ModelConfig.dense_model()  # or ModelConfig.lstm_model()
-trainer = NeuralNetworkTrainer(model_config, epochs=50)
-model = trainer.train(X_train, y_train, X_val, y_val)

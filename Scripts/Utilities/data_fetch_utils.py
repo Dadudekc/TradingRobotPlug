@@ -16,17 +16,9 @@ sys.path.append(project_root)
 from Scripts.Utilities.config_handling import ConfigManager
 
 class DataFetchUtils:
-    def __init__(self, config_file='config.ini', log_file='logs/data_fetch_utils.log', log_text_widget=None):
+    def __init__(self, log_file='logs/data_fetch_utils.log', log_text_widget=None):
         # Initialize ConfigManager
-        defaults = {
-            'LOGGING': {
-                'log_level': 'DEBUG'
-            },
-            'DIRECTORIES': {
-                'data_dir': 'data/csv'
-            }
-        }
-        self.config_manager = ConfigManager(config_file=config_file, defaults=defaults)
+        self.config_manager = ConfigManager()
 
         # Set up logger
         self.logger = logging.getLogger(__name__)
@@ -34,8 +26,8 @@ class DataFetchUtils:
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
-        log_level = self.config_manager.get('LOGGING', 'log_level', 'DEBUG')
-        self.logger.setLevel(getattr(logging, log_level))
+        log_level = self.config_manager.get('LOGGING_LOG_LEVEL') or 'DEBUG'
+        self.logger.setLevel(getattr(logging, log_level.upper()))
 
         self.log_text_widget = log_text_widget
 
@@ -131,9 +123,8 @@ class DataFetchUtils:
 
 # Example of how to use the DataFetchUtils class
 if __name__ == "__main__":
-    config_file = 'config.ini'
-    utils = DataFetchUtils(config_file=config_file)
-    data_dir = utils.config_manager.get('DIRECTORIES', 'data_dir')
+    utils = DataFetchUtils()
+    data_dir = utils.config_manager.get('DIRECTORIES_DATA_DIR') or 'data/csv'
     print(f"Configured data directory: {data_dir}")  # Debugging print
     utils.ensure_directory_exists(data_dir)
     print("Logger and utility functions initialized.")

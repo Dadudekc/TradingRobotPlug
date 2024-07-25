@@ -23,19 +23,12 @@ if __name__ == "__main__" and __package__ is None:
     sys.path.append(str(project_root))
 
 from Scripts.Utilities.config_handling import ConfigManager
+from Scripts.Utilities.data_store import DataStore
 
 class DataHandler:
-    def __init__(self, config_file='config.ini', log_text_widget=None, data_store=None):
+    def __init__(self, log_text_widget=None, data_store=None):
         # Initialize ConfigManager
-        defaults = {
-            'SCALING': {
-                'default_scaler': 'StandardScaler'
-            },
-            'DIRECTORIES': {
-                'data_dir': 'data/csv'
-            }
-        }
-        self.config_manager = ConfigManager(config_file=config_file, defaults=defaults)
+        self.config_manager = ConfigManager()
         
         self.config = self.config_manager.config
         self.log_text_widget = log_text_widget
@@ -75,10 +68,15 @@ class DataHandler:
             if isinstance(data, str):
                 raise ValueError("Expected data to be a DataFrame, got string instead.")
 
+            # Convert all date columns to numerical values
+            for col in data.select_dtypes(include=['datetime64', 'datetime64[ns]']).columns:
+                data[col] = pd.to_numeric(data[col].view('int64'))
+
             if date_column in data.columns:
                 data[date_column] = pd.to_datetime(data[date_column])
                 reference_date = data[date_column].min()
                 data['days_since_reference'] = (data[date_column] - reference_date).dt.days
+                data.drop(columns=[date_column], inplace=True)
 
             if 'index' not in data.columns:
                 data.reset_index(inplace=True, drop=True)
@@ -94,7 +92,7 @@ class DataHandler:
 
             if target_column in data.columns:
                 y = data[target_column]
-                X = data.drop(columns=[target_column, date_column], errors='ignore')
+                X = data.drop(columns=[target_column], errors='ignore')
             else:
                 self.log(f"The '{target_column}' column is missing from the dataset. Please check the dataset.", "ERROR")
                 return None, None, None, None
@@ -106,12 +104,19 @@ class DataHandler:
             X_imputed = imputer.fit_transform(X)
 
             if scaler_type is None:
-                scaler_type = self.config_manager.get('SCALING', 'default_scaler', 'StandardScaler')
+                scaler_type = self.config_manager.get('SCALING_DEFAULT_SCALER') or 'StandardScaler'
             scaler = self.scalers.get(scaler_type, StandardScaler())
             X_scaled = scaler.fit_transform(X_imputed)
             X_train, X_val, y_train, y_val = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
             self.log("Data preprocessing completed.")
+            self.log(f"Features after preprocessing: {list(X.columns)}")
+            self.log(f"Types of features: {dict(X.dtypes)}")
+            
+            # Additional logging to debug the issue
+            self.log(f"X_train types: {dict(pd.DataFrame(X_train).dtypes)}")
+            self.log(f"y_train type: {y_train.dtype}")
+            
             return X_train, X_val, y_train, y_val
         except Exception as e:
             error_message = f"Error during data preprocessing: {str(e)}\n{traceback.format_exc()}"
@@ -253,12 +258,8 @@ class DataHandler:
             self.log(error_message, "ERROR")
             return None, None, None, None
 
-
 # Example usage
 if __name__ == "__main__":
-    from Scripts.Utilities.data_store import DataStore
-
-    config_file = 'config.ini'
     data_store = DataStore()
-    data_handler = DataHandler(config_file=config_file, data_store=data_store)
+    data_handler = DataHandler(data_store=data_store)
     data_handler.preview_data('C:/TheTradingRobotPlug/data/alpha_vantage/tsla_data.csv')
