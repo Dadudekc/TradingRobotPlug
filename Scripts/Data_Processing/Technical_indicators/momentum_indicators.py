@@ -1,20 +1,45 @@
-# C:\TheTradingRobotPlug\Scripts\Data_Processing\Technical_indicators\momentum_indicators.py
-import talib
+# File: momentum_indicators.py
+# Location: Scripts/Data_Processing/Technical_indicators
+# Description: This script provides momentum indicators such as Stochastic Oscillator, RSI, Williams %R, ROC, and TRIX.
+
+import os
+import sys
+import logging
 import pandas as pd
 from ta.momentum import StochasticOscillator, RSIIndicator, WilliamsRIndicator, ROCIndicator
-import time
+from time import time as timer
+
+# Add project root to the Python path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir, os.pardir, os.pardir))
+sys.path.append(project_root)
+
+# Set up relative paths for resources and logs
+resources_path = os.path.join(project_root, 'resources')
+log_path = os.path.join(project_root, 'logs')
+
+# Ensure the directories exist
+if not os.path.exists(resources_path):
+    os.makedirs(resources_path)
+if not os.path.exists(log_path):
+    os.makedirs(log_path)
+
+# Logging configuration
+log_file = os.path.join(log_path, 'momentum_indicators.log')
+logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Conditional imports based on execution context
+try:
+    from Scripts.Utilities.config_handling import ConfigManager
+except ImportError:
+    from unittest.mock import Mock as ConfigManager
 
 class MomentumIndicators:
     @staticmethod
     def add_stochastic_oscillator(df, window_size=14, user_defined_window=None):
-        """
-        Adds Stochastic Oscillator and its signal line to the DataFrame.
-
-        :param df: pandas DataFrame containing high, low, and close price data
-        :param window_size: Integer, default window size for the Stochastic Oscillator
-        :param user_defined_window: Integer, user-defined window size, overrides default if provided
-        :return: DataFrame with Stochastic Oscillator and Signal columns added
-        """
+        logger.info(f"Adding Stochastic Oscillator with window size {window_size}")
+        
         if not isinstance(df, pd.DataFrame):
             raise ValueError("The input 'df' must be a pandas DataFrame.")
         for column in ['low', 'high', 'close']:
@@ -37,22 +62,13 @@ class MomentumIndicators:
         df['Stochastic'] = 100 * ((df['close'] - lowest_low) / denominator)
         df['Stochastic_Signal'] = df['Stochastic'].rolling(window=3, min_periods=1).mean()
 
+        logger.info("Successfully added Stochastic Oscillator")
         return df
 
     @staticmethod
     def add_relative_strength_index(df, window=14, user_defined_window=None, calculation_type="default"):
-        """
-        Adds the Relative Strength Index (RSI) to the DataFrame.
+        logger.info(f"Adding RSI with window {window} and calculation type {calculation_type}")
 
-        Args:
-            df (DataFrame): DataFrame containing stock price data.
-            window (int): Default window size for RSI calculation.
-            user_defined_window (int): Optional, user-defined window size for RSI.
-            calculation_type (str): Type of RSI calculation ('default' or 'custom').
-
-        Returns:
-            DataFrame: Modified DataFrame with the RSI column added.
-        """
         if not isinstance(df, pd.DataFrame):
             raise ValueError("The input 'df' must be a pandas DataFrame.")
         if 'close' not in df.columns:
@@ -78,21 +94,14 @@ class MomentumIndicators:
         rsi = 100 - (100 / (1 + rs))
 
         df['RSI'] = rsi.fillna(0)
+
+        logger.info("Successfully added RSI")
         return df
 
     @staticmethod
     def add_williams_r(df, window=14, user_defined_window=None):
-        """
-        Adds the Williams %R indicator to the DataFrame.
+        logger.info(f"Adding Williams %R with window size {window}")
 
-        Args:
-            df (DataFrame): DataFrame containing stock price data.
-            window (int): Default window size for Williams %R calculation.
-            user_defined_window (int): Optional, user-defined window size for Williams %R.
-
-        Returns:
-            DataFrame: Modified DataFrame with the Williams %R column added.
-        """
         if not isinstance(df, pd.DataFrame):
             raise ValueError("The input 'df' must be a pandas DataFrame.")
         for column in ['high', 'low', 'close']:
@@ -112,21 +121,14 @@ class MomentumIndicators:
 
         df['Williams_R'] = -100 * (highest_high - df['close']) / denominator
         df['Williams_R'] = df['Williams_R'].fillna(0)
+
+        logger.info("Successfully added Williams %R")
         return df
 
     @staticmethod
     def add_rate_of_change(df, window=10, user_defined_window=None):
-        """
-        Adds the Rate of Change (ROC) indicator to the DataFrame.
+        logger.info(f"Adding Rate of Change with window size {window}")
 
-        Args:
-            df (DataFrame): DataFrame containing stock price data.
-            window (int): Default window size for ROC calculation.
-            user_defined_window (int): Optional, user-defined window size for ROC.
-
-        Returns:
-            DataFrame: Modified DataFrame with the ROC column added.
-        """
         if not isinstance(df, pd.DataFrame):
             raise ValueError("The input 'df' must be a pandas DataFrame.")
         if 'close' not in df.columns:
@@ -141,24 +143,13 @@ class MomentumIndicators:
         df['ROC'] = ((df['close'] - shifted_close) / shifted_close) * 100
         df['ROC'] = df['ROC'].fillna(0)
 
+        logger.info("Successfully added Rate of Change")
         return df
 
     @staticmethod
     def add_trix(df, span=15, signal_line_span=9):
-        """
-        Add TRIX and its signal line to the DataFrame.
+        logger.info(f"Adding TRIX with span {span} and signal line span {signal_line_span}")
 
-        TRIX is a momentum indicator that shows the percentage change in a triple exponentially smoothed moving average.
-        The signal line is an EMA of the TRIX.
-
-        Args:
-            df (DataFrame): DataFrame with a 'close' column.
-            span (int): The span for calculating TRIX. Default is 15.
-            signal_line_span (int): The span for calculating the signal line. Default is 9.
-
-        Returns:
-            pd.DataFrame: DataFrame with TRIX and signal line columns added.
-        """
         if not isinstance(df, pd.DataFrame):
             raise ValueError("The input 'df' must be a pandas DataFrame.")
         if 'close' not in df.columns:
@@ -181,4 +172,35 @@ class MomentumIndicators:
         # Calculate the signal line (EMA of TRIX)
         df['TRIX_signal'] = df['TRIX'].ewm(span=signal_line_span, adjust=False).mean()
 
+        logger.info("Successfully added TRIX")
         return df
+
+# Example usage of MomentumIndicators
+if __name__ == "__main__":
+    # Create a sample DataFrame
+    data = {
+        'date': pd.date_range(start='2022-01-01', periods=100),
+        'high': pd.Series(range(100, 200)),
+        'low': pd.Series(range(50, 150)),
+        'close': pd.Series(range(75, 175))
+    }
+    df = pd.DataFrame(data)
+
+    # Initialize MomentumIndicators
+    indicators = MomentumIndicators()
+
+    # Apply and print each indicator
+    df = indicators.add_stochastic_oscillator(df)
+    print("Stochastic Oscillator:\n", df[['date', 'Stochastic', 'Stochastic_Signal']].head(10))
+
+    df = indicators.add_relative_strength_index(df)
+    print("RSI:\n", df[['date', 'RSI']].head(10))
+
+    df = indicators.add_williams_r(df)
+    print("Williams %R:\n", df[['date', 'Williams_R']].head(10))
+
+    df = indicators.add_rate_of_change(df)
+    print("Rate of Change:\n", df[['date', 'ROC']].head(10))
+
+    df = indicators.add_trix(df)
+    print("TRIX:\n", df[['date', 'TRIX', 'TRIX_signal']].head(10))

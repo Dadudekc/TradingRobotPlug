@@ -1,0 +1,201 @@
+# Project Journal Entry
+
+**Catch_Up_Entry_Resolving_Git_Path_Issues_and_Renaming_Files**
+
+---
+
+## Work Completed
+
+### Objectives and Goals:
+- Resolve invalid path errors in the repository.
+- Rename files to remove special characters and spaces.
+- Ensure changes are successfully committed and pushed to the remote repository.
+- Pull the changes on a different computer without encountering errors.
+
+### Actions Taken:
+- Identified files with invalid paths and renamed them to remove special characters and spaces using a Python script.
+- Cleared the Git cache to ensure all files are correctly re-indexed.
+- Committed the changes and pushed them to the remote repository.
+- Pulled the changes on a different computer to verify the resolution of the path issues.
+
+### Challenges and Breakthroughs:
+- **Challenges:** Encountered persistent invalid path errors when pulling changes on a different computer.
+- **Breakthroughs:** Successfully renamed files using a Python script and cleared the Git cache, which resolved the path issues.
+
+### Results and Impact:
+- The invalid path errors were resolved, allowing seamless collaboration across different systems.
+- Improved the maintainability and consistency of file names in the repository.
+
+```python
+# Python script to rename files
+import os
+import re
+
+def rename_files(directory):
+    for root, dirs, files in os.walk(directory):
+        for filename in files:
+            new_filename = re.sub(r'[^\w\-_\.]', '_', filename)  # Replace special characters with underscores
+            new_filename = new_filename.replace(' ', '_')  # Replace spaces with underscores
+            old_file = os.path.join(root, filename)
+            new_file = os.path.join(root, new_filename)
+            if old_file != new_file:
+                print(f'Renaming: {old_file} -> {new_file}')
+                os.rename(old_file, new_file)
+
+if __name__ == "__main__":
+    directory = "/home/dadudekc/project/TradingRobotPlug/Documents/Journal/week 3/catchups"
+    rename_files(directory)
+```
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Utilized for scripting and automating the renaming of files.
+- **Version Control (Git):** Used for tracking changes, clearing the cache, and pushing updates to the remote repository.
+- **Shell Scripting:** Employed for navigating directories and executing commands in the terminal.
+
+---
+
+## Lessons Learned
+
+### Learning Outcomes:
+- **Debugging Techniques:** Learned efficient methods for troubleshooting and resolving path-related issues in Git.
+- **File Naming Conventions:** Recognized the importance of adhering to consistent and compatible file naming conventions to avoid cross-platform issues.
+
+### Unexpected Challenges:
+- Persistent invalid path errors required multiple iterations of troubleshooting and script adjustments.
+
+### Future Application:
+- Improved understanding of file system compatibility will influence future file naming and project structuring practices.
+- Enhanced problem-solving strategies for addressing similar issues in other projects.
+
+---
+
+## To-Do
+
+- **Verify Repository Integrity:** Double-check all renamed files to ensure they are functioning correctly.
+- **Complete Unit Tests:** Finalize the remaining unit tests for the data fetch scripts by [specific date].
+- **Documentation:** Update project documentation to reflect recent changes and improvements.
+- **Feature Implementation:** Start working on the caching mechanism for API responses.
+
+---
+
+## Code Snippets and Context
+
+### Data Fetch Script
+
+```python
+# C:\TheTradingRobotPlug\Scripts\Data_Fetch\alpha_vantage_df
+# Scripts\Data_Fetch\alpha_vantage_df
+
+import os
+import sys
+
+# Add project root to the Python path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
+sys.path.append(project_root)
+
+# Function to fetch data from Alpha Vantage API
+def fetch_data(api_key, symbol):
+    # Detailed implementation here
+    pass
+```
+
+### Unit Test for Data Fetch Script
+
+```python
+# C:\TheTradingRobotPlug\Tests\Data_Fetch\test_alpha_vantage_df.py
+# Tests\Data_Fetch\test_alpha_vantage_df.py
+# To Run:
+# 1st: cd C:\TheTradingRobotPlug\Tests
+# 2nd: python -m unittest Data_Fetch.test_alpha_vantage_df
+
+import unittest
+
+class TestAlphaVantageDF(unittest.TestCase):
+    def test_fetch_data(self):
+        # Test implementation here
+        pass
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+---
+
+## Additional Notes and Reflections
+
+### Brainstorming:
+- Consider adding a feature to cache API responses to reduce redundant data fetches and improve efficiency.
+
+### Improvements:
+- Enhance error handling in the data fetch script to better manage API rate limits and provide more informative error messages.
+
+### Reflections:
+- The project is progressing well, but regular team check-ins could further enhance collaboration and ensure alignment on goals.
+
+### Feedback:
+- Positive feedback on the recent improvements to the data fetch script from team members.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Data fetch module implementation - In Progress
+- **Milestone 3:** Unit testing and validation - Pending
+- **Milestone 4:** Final integration and deployment - Pending
+
+---
+
+## Resource Links
+
+- [Alpha Vantage API Documentation](https://www.alphavantage.co/documentation/)
+- [Python unittest Documentation](https://docs.python.org/3/library/unittest.html)
+- [GitHub Repository](https://github.com/user/repo)
+
+---
+
+## Collaboration and Communication
+
+### Meetings and Discussions:
+- Discussed the implementation of the caching mechanism. Decided to prioritize this feature in the next sprint.
+
+### Decisions Made:
+- Agreed to refactor the data fetch script for better maintainability and scalability.
+
+### Action Items:
+- Alice to draft the initial caching mechanism implementation by [specific date].
+- Bob to review and update the project documentation by [specific date].
+
+---
+
+## Risk Management
+
+### Risk:
+- **API rate limits could affect data retrieval.**
+  - **Mitigation Strategy:** Implement caching to reduce the number of API calls.
+  
+### Risk:
+- **Potential delays in completing unit tests.**
+  - **Mitigation Strategy:** Allocate additional resources to ensure tests are completed on time.
+
+---
+
+## Retrospective
+
+### What Went Well:
+- The invalid path issues were successfully resolved, allowing for smooth collaboration across different systems.
+
+### What Could Be Improved:
+- Need to improve time management for troubleshooting and resolving unexpected issues.
+
+### Actionable Insights:
+- Allocate specific time blocks for testing and debugging to ensure consistent progress.
+- Regularly review and adhere to file naming conventions to avoid similar issues in the future.
+
+---
+
+This journal entry provides a detailed account of the work completed, skills used, lessons learned, and next steps for the project. It ensures that all aspects of the project are documented and tracked for future reference and improvement.

@@ -1,22 +1,40 @@
-import talib
+# File: custom_indicators.py
+# Location: Scripts/Indicators
+# Description: This script provides custom technical indicators with caching support for trading algorithms.
+
 import os
 import sys
-import pandas as pd
 import logging
+import pandas as pd
+import joblib
 from typing import Callable, List, Tuple, Dict, Any
 from time import time as timer
-import joblib
 
 # Add project root to the Python path
 script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir, os.pardir))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
-from Scripts.Utilities.config_handling import ConfigManager
+# Set up relative paths for resources and logs
+resources_path = os.path.join(project_root, 'resources')
+log_path = os.path.join(project_root, 'logs')
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Ensure the directories exist
+if not os.path.exists(resources_path):
+    os.makedirs(resources_path)
+if not os.path.exists(log_path):
+    os.makedirs(log_path)
+
+# Logging configuration
+log_file = os.path.join(log_path, 'custom_indicators.log')
+logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Conditional imports based on execution context
+try:
+    from Scripts.Utilities.config_handling import ConfigManager
+except ImportError:
+    from unittest.mock import Mock as ConfigManager
 
 class CustomIndicators:
     _cache = {}
@@ -76,8 +94,10 @@ class CustomIndicators:
             start_time = timer()
             indicator_params = CustomIndicators.config_manager.get('INDICATORS', indicator_name, fallback=None)
             if indicator_params:
-                indicator_params = eval(indicator_params)
-                kwargs.update(indicator_params)
+                if isinstance(indicator_params, str):
+                    indicator_params = eval(indicator_params)
+                if isinstance(indicator_params, dict):
+                    kwargs.update(indicator_params)
             cache_strategy = CustomIndicators.config_manager.get('CACHE', 'strategy', fallback='memory')
             df[indicator_name] = CustomIndicators.cached_indicator_function(
                 df, indicator_function, *args, cache_strategy=cache_strategy, **kwargs
@@ -140,12 +160,26 @@ if __name__ == "__main__":
     }
     df = pd.DataFrame(data)
 
-    df = CustomIndicators.add_custom_indicator(df, 'Sample_Custom_Indicator', CustomIndicators.sample_custom_indicator, window_size=5)
+    # Mock ConfigManager to provide sample parameters
+    class MockConfigManager:
+        @staticmethod
+        def get(section, option, fallback=None):
+            if section == 'INDICATORS' and option == 'Sample_Custom_Indicator':
+                return "{'window_size': 3}"  # Example of string representation of a dictionary
+            if section == 'CACHE' and option == 'strategy':
+                return 'memory'
+            return fallback
+
+    CustomIndicators.config_manager = MockConfigManager()
+
+    # Adding a custom indicator
+    df = CustomIndicators.add_custom_indicator(df, 'Sample_Custom_Indicator', CustomIndicators.sample_custom_indicator)
     print(df.head(10))
 
+    # Adding multiple custom indicators
     indicators = [
-        ('Sample_Custom_Indicator', CustomIndicators.sample_custom_indicator, [5], {}),
-        ('Another_Custom_Indicator', CustomIndicators.another_custom_indicator, [10], {})
+        ('Sample_Custom_Indicator', CustomIndicators.sample_custom_indicator, [], {'window_size': 5}),
+        ('Another_Custom_Indicator', CustomIndicators.another_custom_indicator, [], {'window_size': 10})
     ]
     df = CustomIndicators.add_multiple_custom_indicators(df, indicators)
     print(df.head(10))
