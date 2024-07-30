@@ -1,0 +1,25 @@
+### Catch Up Entry: Automating Stock Comments Analysis
+
+#### Work Completed
+- Investigated automated methods for scraping and analyzing comments on Tesla's worth from StockTwits.
+- Developed a Python script using BeautifulSoup and requests to extract numerical values from comments.
+- Script includes functions to fetch comments, extract values, and calculate the average worth mentioned.
+
+#### Skills Used
+- Python programming
+- Web scraping with BeautifulSoup
+- Regular expressions for text extraction
+- HTTP requests handling
+- Data processing and calculation
+
+#### Lessons Learned
+- The importance of respecting `robots.txt` when scraping websites.
+- Handling dynamic webpage structures and adjusting scraping logic accordingly.
+- The value of automated data extraction for financial analysis.
+
+#### To-Do
+- Integrate the scraping script with the main financial analysis application.
+- Add error handling and logging to the script for robustness.
+- Explore alternative methods for dynamic content scraping, such as using Selenium.
+- Validate and clean extracted data to ensure accuracy.
+- Set up a regular schedule to run the script and update the average worth calculations.
