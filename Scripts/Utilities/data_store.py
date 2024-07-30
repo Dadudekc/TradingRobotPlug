@@ -1,5 +1,3 @@
-# C:\TheTradingRobotPlug\Utilities\data_store.py
-
 import os
 import pandas as pd
 import pickle
@@ -15,8 +13,8 @@ if __name__ == "__main__" and __package__ is None:
     sys.path.append(str(project_root / 'Scripts' / 'Utilities'))
 
 try:
-    from config_handling import ConfigManager
-    from data_fetch_utils import DataFetchUtils
+    from Scripts.Utilities.config_handling import ConfigManager
+    from Scripts.Utilities.data_fetch_utils import DataFetchUtils
 except ImportError as e:
     print(f"Error importing modules: {e}")
     raise
@@ -39,7 +37,6 @@ class DataStore:
     def _get_data_fetch_utils(self):
         # Import here to avoid circular import
         return DataFetchUtils(log_file="C:/TheTradingRobotPlug/logs/data_store.log")
-
 
     def add_data(self, ticker: str, data: dict) -> None:
         if not data:

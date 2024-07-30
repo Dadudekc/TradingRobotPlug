@@ -8,11 +8,20 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoa
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score
 import shap
-import pandas as pd
+import os
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+log_dir = 'C:/TheTradingRobotPlug/logs'
+os.makedirs(log_dir, exist_ok=True)
+log_file = os.path.join(log_dir, 'model_training.log')
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    handlers=[
+                        logging.FileHandler(log_file),
+                        logging.StreamHandler()
+                    ])
+model_logger = logging.getLogger('neural_network')
 
 class NeuralNetworkTrainer:
     def __init__(self, model_config, epochs=100, pretrained_model_path=None):
@@ -34,7 +43,7 @@ class NeuralNetworkTrainer:
                 self.model = load_model(self.pretrained_model_path)
                 for layer in self.model.layers[:-5]:
                     layer.trainable = False
-                logger.info("Loaded pretrained model and froze initial layers.")
+                model_logger.info("Loaded pretrained model and froze initial layers.")
             else:
                 self.model = Sequential()
                 self.model.add(Input(shape=input_shape))
@@ -47,25 +56,28 @@ class NeuralNetworkTrainer:
                         self.model.add(Dropout(rate=layer['rate']))
                     elif layer['type'] == 'lstm':
                         self.model.add(LSTM(units=layer['units'], activation=layer['activation'], return_sequences=layer.get('return_sequences', False)))
-                logger.info("Initialized new model.")
+                model_logger.info("Initialized new model.")
 
-            optimizer_config = self.model_config.get('optimizer', {})
-            optimizer_config.pop('type', None)  # Remove 'type' if it exists
-            optimizer = Adam(**optimizer_config)
+            optimizer = Adam(learning_rate=self.model_config.get('optimizer', {}).get('learning_rate', 0.001))
             self.model.compile(optimizer=optimizer, loss=self.model_config.get('loss', 'mse'))
-            logger.info("Compiled model with optimizer and loss.")
+            model_logger.info("Compiled model with optimizer and loss.")
 
     def train(self, X_train, y_train, X_val, y_val):
         try:
+            model_logger.info(f"X_train shape: {X_train.shape}")
+            model_logger.info(f"y_train shape: {y_train.shape}")
+            model_logger.info(f"X_val shape: {X_val.shape}")
+            model_logger.info(f"y_val shape: {y_val.shape}")
+
             self.build_model(X_train.shape[1:])
 
             early_stopping = EarlyStopping(monitor='val_loss', patience=self.model_config.get('patience', 20), restore_best_weights=True)
-            model_checkpoint = ModelCheckpoint("best_model.h5", save_best_only=True, monitor='val_loss', mode='min')
+            model_checkpoint = ModelCheckpoint("best_model.keras", save_best_only=True, monitor='val_loss', mode='min')
             tensorboard = TensorBoard(log_dir="logs")
             lr_scheduler = LearningRateScheduler(self.scheduler)
 
             callbacks = [early_stopping, model_checkpoint, tensorboard, lr_scheduler]
-            logger.info("Initialized callbacks.")
+            model_logger.info("Initialized callbacks.")
 
             # Normalize the data
             scaler = StandardScaler()
@@ -76,14 +88,14 @@ class NeuralNetworkTrainer:
             val_dataset = tf.data.Dataset.from_tensor_slices((X_val, y_val)).batch(self.model_config.get('batch_size', 64))
 
             self.model.fit(train_dataset, validation_data=val_dataset, epochs=self.epochs, callbacks=callbacks)
-            logger.info("Model training completed.")
+            model_logger.info("Model training completed.")
 
             y_pred_val = self.model.predict(X_val).flatten()
             mse = mean_squared_error(y_val, y_pred_val)
             rmse = np.sqrt(mse)
             r2 = r2_score(y_val, y_pred_val)
 
-            logger.info(f"Validation MSE: {mse:.2f}, RMSE: {rmse:.2f}, R²: {r2:.2f}")
+            model_logger.info(f"Validation MSE: {mse:.2f}, RMSE: {rmse:.2f}, R²: {r2:.2f}")
 
             explainer = shap.KernelExplainer(self.model.predict, X_train[:100])
             shap_values = explainer.shap_values(X_val[:10])
@@ -91,10 +103,10 @@ class NeuralNetworkTrainer:
 
             return self.model
         except Exception as e:
-            logger.error("Error during model training.", exc_info=True)
+            model_logger.error("Error during model training.", exc_info=True)
             raise e
 
-class ModelConfig:
+class NNModelConfig:
     @staticmethod
     def dense_model():
         return {
@@ -107,7 +119,7 @@ class ModelConfig:
                 {'type': 'dense', 'units': 32, 'activation': 'relu', 'kernel_regularizer': 'l2'},
                 {'type': 'dense', 'units': 1, 'activation': 'linear'}
             ],
-            'optimizer': {'learning_rate': 0.001},  # Removed 'type': 'adam'
+            'optimizer': {'learning_rate': 0.001},
             'loss': 'mse',
             'batch_size': 64,
             'patience': 20
@@ -124,7 +136,7 @@ class ModelConfig:
                 {'type': 'dense', 'units': 50, 'activation': 'relu', 'kernel_regularizer': 'l2'},
                 {'type': 'dense', 'units': 1, 'activation': 'linear'}
             ],
-            'optimizer': {'learning_rate': 0.001},  # Removed 'type': 'adam'
+            'optimizer': {'learning_rate': 0.001},
             'loss': 'mse',
             'batch_size': 64,
             'patience': 20
