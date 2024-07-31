@@ -1,0 +1,175 @@
+# Project Journal Entry
+
+**Catch Up Entry: Enhancements_in_LSTM_Model_Training_and_Error_Handling**
+
+## Part 1
+
+### Work Completed
+
+**Error Identification and Handling:**
+- Encountered an error due to inconsistent numbers of samples during LSTM model training.
+- Resolved the issue by ensuring proper alignment between input sequences and target variables using `create_sequences_with_target`.
+
+**Sequence Creation Improvements:**
+- Updated the `train_lstm_model` function to ensure sequences and targets are correctly aligned.
+- Introduced a function `create_sequences_with_target` to handle this alignment.
+
+**Model Training Enhancements:**
+- Added detailed logging to trace data shapes and debug issues effectively.
+- Implemented comprehensive error handling to ensure robustness during model training.
+
+**Hyperparameter Tuning:**
+- Integrated `optuna` for hyperparameter tuning to optimize model parameters.
+- Included trial pruning to gracefully handle model training failures.
+
+**Model Evaluation:**
+- Refined the model evaluation process to handle potential `NoneType` errors.
+- Ensured consistent scaling and predictions for model evaluation.
+
+---
+
+### Major Code Snippets
+
+#### 1. Updated Sequence Creation Function
+```python
+def create_sequences_with_target(data, target, seq_length):
+    sequences = []
+    targets = []
+    for i in range(len(data) - seq_length):
+        sequences.append(data[i:i + seq_length])
+        targets.append(target[i + seq_length])
+    return np.array(sequences), np.array(targets)
+```
+
+#### 2. Updated `train_lstm_model` Function
+```python
+def train_lstm_model(X_train, y_train, X_val, y_val):
+    """Train an LSTM model."""
+    logger.info("Training LSTM model...")
+    time_steps = 10  # Define the number of time steps for the LSTM input
+
+    X_train_seq, y_train_seq = create_sequences_with_target(X_train, y_train, time_steps)
+    X_val_seq, y_val_seq = create_sequences_with_target(X_val, y_val, time_steps)
+
+    logger.debug(f"X_train_seq shape: {X_train_seq.shape}, y_train_seq shape: {y_train_seq.shape}")
+    logger.debug(f"X_val_seq shape: {X_val_seq.shape}, y_val_seq shape: {y_val_seq.shape}")
+
+    if X_train_seq.shape[0] != y_train_seq.shape[0] or X_val_seq.shape[0] != y_val_seq.shape[0]:
+        raise ValueError(f"Shape mismatch between X and y sequences: X_train_seq {X_train_seq.shape}, y_train_seq {y_train_seq.shape}, X_val_seq {X_val_seq.shape}, y_val_seq {y_val_seq.shape}")
+
+    model_config = LSTMModelConfig.lstm_model(input_shape=(X_train_seq.shape[1], X_train_seq.shape[2]))
+    lstm_trainer = LSTMModelTrainer(logger)
+
+    lstm_trainer.train_lstm(X_train_seq, y_train_seq, X_val_seq, y_val_seq, model_config)
+    logger.info("LSTM training complete")
+```
+
+#### 3. Error Handling and Logging Enhancements
+```python
+try:
+    if model_type == '1':
+        train_linear_regression(X_train, y_train, X_val, y_val)
+    elif model_type == '2':
+        train_lstm_model(X_train, y_train, X_val, y_val)
+    elif model_type == '3':
+        train_neural_network(X_train, y_train, X_val, y_val)
+    elif model_type == '4':
+        train_random_forest(X_train, y_train)
+    else:
+        logger.error(f"Invalid model type: {model_type}")
+except Exception as e:
+    logger.error(f"An error occurred while training the model: {str(e)}")
+    logger.error(traceback.format_exc())
+```
+
+#### 4. Hyperparameter Tuning with `optuna`
+```python
+def objective(trial):
+    model_config = {
+        'input_shape': (time_steps, len(selected_features)),
+        'layers': [
+            {'type': 'bidirectional_lstm', 'units': trial.suggest_int('units_lstm', 50, 200), 'return_sequences': True, 'kernel_regularizer': l1_l2(l1=0.01, l2=0.01)},
+            {'type': 'attention'},
+            {'type': 'batch_norm'},
+            {'type': 'dropout', 'rate': trial.suggest_float('dropout_rate', 0.2, 0.5)},
+            {'type': 'dense', 'units': trial.suggest_int('units_dense', 10, 50), 'activation': 'relu', 'kernel_regularizer': l1_l2(l1=0.01, l2=0.01)}
+        ],
+        'optimizer': trial.suggest_categorical('optimizer', ['adam', 'sgd', 'rmsprop', 'adadelta']),
+        'loss': 'mean_squared_error'
+    }
+    model = trainer.train_lstm(X_train_scaled, y_train, X_val_scaled, y_val, model_config, epochs=50)
+    if model is None:
+        raise optuna.exceptions.TrialPruned()
+    y_pred_val = model.predict(X_val_scaled).flatten()
+    mse = mean_squared_error(y_val, y_pred_val)
+    return mse
+
+study = optuna.create_study(direction='minimize')
+study.optimize(objective, n_trials=100)
+```
+
+---
+
+### Skills and Technologies Used
+
+- **Python Programming:** Enhanced skills in handling Python scripting, especially for machine learning tasks.
+- **Data Preprocessing:** Expertise in handling and preprocessing data for machine learning models, including scaling and sequence creation.
+- **Error Handling and Logging:** Improved capabilities in debugging and error handling, ensuring smooth model training processes.
+- **Machine Learning:** Applied knowledge in training LSTM models and using hyperparameter tuning techniques.
+- **Optuna:** Leveraged `optuna` for efficient hyperparameter optimization.
+
+---
+
+### Lessons Learned
+
+- **Importance of Data Consistency:** Ensuring that input data and target sequences are consistently aligned is crucial for avoiding errors during model training.
+- **Effective Error Handling:** Implementing comprehensive error handling and logging is vital for debugging and maintaining robust code.
+- **Hyperparameter Tuning:** Using tools like `optuna` can significantly enhance model performance by efficiently searching for optimal hyperparameters.
+
+---
+
+### To-Do
+
+- **Complete Model Training Integration:** Ensure all models (Linear Regression, LSTM, Neural Network, Random Forest) are fully integrated and tested.
+- **Further Error Handling Enhancements:** Continue refining error handling mechanisms to cover more edge cases.
+- **Model Evaluation:** Conduct thorough evaluation of all trained models to benchmark their performance.
+- **Documentation:** Document the updated code and processes for better maintainability and knowledge sharing.
+- **Deploy Models:** Prepare the models for deployment, including saving and loading mechanisms.
+
+---
+
+### Collaboration and Communication
+
+- **Meeting Summary:** Discussed the implementation of the caching mechanism. Decided to prioritize this feature in the next sprint.
+- **Decision:** Agreed to refactor the data fetch script for better maintainability and scalability.
+- **Action Items:** 
+  - Alice to draft the initial caching mechanism implementation by [specific date].
+  - Bob to review and update the project documentation by [specific date].
+
+---
+
+### Risk Management
+
+- **Risk:** API rate limits could affect data retrieval.
+  - **Mitigation Strategy:** Implement caching to reduce the number of API calls.
+- **Risk:** Potential delays in completing unit tests.
+  - **Mitigation Strategy:** Allocate additional resources to ensure tests are completed on time.
+
+---
+
+### Retrospective
+
+- **What Went Well:** The data fetch module implementation was completed ahead of schedule.
+- **What Could Be Improved:** Need to improve time management for unit testing.
+- **Actionable Insights:** Allocate specific time blocks for testing and debugging to ensure consistent progress.
+
+---
+
+### Resource Links
+
+- [Alpha Vantage API Documentation](https://www.alphavantage.co/documentation/)
+- [Python unittest Documentation](https://docs.python.org/3/library/unittest.html)
+- [GitHub Repository](https://github.com/user/repo)
+
+---
+

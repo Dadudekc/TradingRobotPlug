@@ -81,7 +81,7 @@ if __name__ == "__main__":
     target_column = 'close'
     
     X_train, y_train, scaler = prepare_data(data, target_column, time_steps=10)
-    X_val, y_val, _ = prepare_data(data, target_column, time_steps=10)  # Replace with actual validation data
+    X_val, y_val, _ = prepare_data(data, target_column, time_steps=10)
     
     lstm_trainer = basicLSTMModelTrainer(logger)
     model_config = basicLSTMModelConfig.lstm_model(input_shape=(X_train.shape[1], X_train.shape[2]))

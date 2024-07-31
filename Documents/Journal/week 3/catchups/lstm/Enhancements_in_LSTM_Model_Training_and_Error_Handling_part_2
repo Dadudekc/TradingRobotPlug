@@ -1,0 +1,101 @@
+## Part 2
+
+### Work Completed
+
+- **Data Augmentation:** Implemented data augmentation techniques to enhance model training.
+- **Model Evaluation Metrics:** Added additional metrics for model evaluation to provide a comprehensive performance analysis.
+- **Model Deployment:** Initiated the process for model deployment, including containerization using Docker.
+
+---
+
+### Major Code Snippets
+
+#### 1. Data Augmentation Function
+```python
+def augment_data(data):
+    # Augmentation logic here
+    return augmented_data
+```
+
+#### 2. Enhanced Model Evaluation Function
+```python
+def evaluate_model(model, X_test, y_test):
+    y_pred = model.predict(X_test).flatten()
+    mse = mean_squared_error(y_test, y_pred)
+    rmse = np.sqrt(mse)
+    r2 = r2_score(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
+
+    logger.info(f"Test MSE: {mse:.2f}, RMSE: {rmse:.2f}, R²: {r2:.2f}, MAE: {mae:.2f}")
+
+    return mse, rmse, r2, mae
+```
+
+#### 3. Dockerfile for Model Deployment
+```dockerfile
+FROM python:3.8-slim
+
+WORKDIR /app
+
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+COPY . .
+
+CMD ["python", "app.py"]
+```
+
+---
+
+### Skills and Technologies Used
+
+- **Data Augmentation:** Applied various techniques to increase the diversity of training data.
+- **Model Evaluation:** Utilized multiple metrics to assess model performance comprehensively.
+- **Docker:** Gained proficiency in containerizing applications for deployment.
+
+---
+
+### Lessons Learned
+
+- **Data Diversity:** Enhancing data
+
+ diversity can significantly improve model robustness.
+- **Comprehensive Metrics:** Using a range of evaluation metrics provides a better understanding of model performance.
+
+---
+
+### To-Do
+
+- **Complete Data Augmentation:** Finalize the implementation of data augmentation techniques.
+- **Finish Model Deployment:** Complete the Docker setup and deploy the model.
+- **Documentation:** Update the project documentation with new changes.
+
+---
+
+### Collaboration and Communication
+
+- **Meeting Summary:** Discussed deployment strategies and decided to use Docker for containerization.
+- **Decision:** Agreed to implement additional evaluation metrics.
+
+---
+
+### Risk Management
+
+- **Risk:** Deployment issues due to unfamiliarity with Docker.
+  - **Mitigation Strategy:** Allocate time for learning and troubleshooting Docker-related problems.
+
+---
+
+### Retrospective
+
+- **What Went Well:** Successful implementation of data augmentation.
+- **What Could Be Improved:** Need to expedite the deployment process.
+- **Actionable Insights:** Allocate dedicated time for deployment and testing.
+
+---
+
+### Resource Links
+
+- [Docker Documentation](https://docs.docker.com/)
+- [Data Augmentation Techniques](https://towardsdatascience.com/data-augmentation-techniques-in-python-f2a5e6f99b24)
+

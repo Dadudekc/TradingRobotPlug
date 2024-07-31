@@ -1,0 +1,21 @@
+### Problems_Encountered_and_Solutions
+
+1. **Inconsistent Sequence Lengths:**
+   - **Problem:** Encountered errors during LSTM model training due to inconsistent numbers of samples between input sequences and target variables.
+   - **Solution:** Updated the `create_sequences_with_target` function to ensure proper alignment between sequences and target variables. Added validation checks to ensure input and target sequences are correctly aligned before training.
+
+2. **Shape Mismatch:**
+   - **Problem:** Errors due to shape mismatches between training and validation sequences and their respective targets.
+   - **Solution:** Implemented detailed logging to capture the shapes of data at various stages. Added validation checks to raise errors if there's a mismatch in sequence shapes.
+
+3. **Data Consistency Issues:**
+   - **Problem:** Inconsistencies in data handling and sequence creation caused model training failures.
+   - **Solution:** Enhanced sequence creation functions to handle data more efficiently and consistently. Ensured sequences and targets are correctly aligned.
+
+4. **Hyperparameter Tuning Failures:**
+   - **Problem:** Failures during the hyperparameter tuning process due to model training errors and inconsistencies.
+   - **Solution:** Integrated `optuna` for hyperparameter tuning with improved error handling. Included trial pruning to gracefully handle model training failures.
+
+5. **Error Logging and Traceability:**
+   - **Problem:** Difficulty in tracing errors and understanding the root causes due to insufficient logging.
+   - **Solution:** Enhanced logging mechanisms to provide comprehensive insights during model training and debugging. Ensured logs capture key steps, data shapes, and errors for better traceability.
