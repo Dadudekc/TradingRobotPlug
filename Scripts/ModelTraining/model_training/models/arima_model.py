@@ -133,3 +133,48 @@ class ARIMAModelTrainer:
         # Wait for the background thread to complete
         training_thread.join()
         self.display_message("ARIMA model training background process completed.", "INFO")
+
+# models/arima_model_trainer.py
+
+# (The code you already have above remains unchanged)
+
+import unittest
+import os
+
+class TestARIMAModelTrainer(unittest.TestCase):
+    def setUp(self):
+        # Define the path to your data file
+        self.data_path = "C:/TheTradingRobotPlug/data/alpha_vantage/tsla_data.csv"
+        
+        # Check if the file exists
+        if not os.path.exists(self.data_path):
+            self.fail(f"Data file {self.data_path} not found.")
+
+        # Load the data
+        self.data = pd.read_csv(self.data_path)
+
+        # Ensure 'close' column exists
+        if 'close' not in self.data.columns:
+            self.fail(f"'close' column not found in data file {self.data_path}.")
+
+        # Extract the close prices
+        self.close_prices = self.data['close']
+
+    def test_arima_training(self):
+        """Test the ARIMA model training."""
+        try:
+            trainer = ARIMAModelTrainer(self.close_prices, threshold=100)
+            trainer.train()
+
+            # Check if the ARIMA model training was completed and results were saved
+            self.assertTrue(os.path.exists('arima_predictions.csv'), "arima_predictions.csv not found.")
+            results_df = pd.read_csv('arima_predictions.csv')
+            self.assertFalse(results_df.empty, "Results file is empty.")
+            self.assertIn('Actual', results_df.columns, "Results file missing 'Actual' column.")
+            self.assertIn('Predicted', results_df.columns, "Results file missing 'Predicted' column.")
+        except Exception as e:
+            self.fail(f"ARIMA model training failed with exception: {e}")
+
+if __name__ == '__main__':
+    unittest.main()
+

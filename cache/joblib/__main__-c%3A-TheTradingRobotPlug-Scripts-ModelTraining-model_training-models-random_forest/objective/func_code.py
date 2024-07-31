@@ -1,4 +1,4 @@
-# first line: 20
+# first line: 22
     def objective(self, trial: optuna.Trial, X_train: np.ndarray, y_train: np.ndarray, cv_folds: int = 3) -> float:
         """
         Objective function for Optuna to minimize the mean squared error using cross-validation.

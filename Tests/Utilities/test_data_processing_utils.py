@@ -19,7 +19,7 @@ print(f"Checking if module exists at: {module_path}")
 print(f"Module exists: {os.path.exists(module_path)}")
 
 try:
-    from Scripts.Utilities.data_processing_utils import DataValidation, DataCleaning, DataTransformation, DataHandling
+    from Scrap.data_processing_utils import DataValidation, DataCleaning, DataTransformation, DataHandling
 except ModuleNotFoundError as e:
     print(f"ModuleNotFoundError: {e}")
     sys.exit(1)

@@ -141,3 +141,30 @@ class NNModelConfig:
             'batch_size': 64,
             'patience': 20
         }
+# models/neural_network_trainer.py
+
+# (The existing code remains unchanged)
+
+import unittest
+
+class TestNeuralNetworkTrainer(unittest.TestCase):
+    def setUp(self):
+        # Create a small dataset for testing
+        self.X_train = np.random.rand(100, 10)  # 100 samples, 10 features
+        self.y_train = np.random.rand(100)  # 100 target values
+        self.X_val = np.random.rand(20, 10)  # 20 validation samples, 10 features
+        self.y_val = np.random.rand(20)  # 20 validation target values
+
+        self.model_config = NNModelConfig.dense_model()  # Using the dense model configuration for the test
+        self.trainer = NeuralNetworkTrainer(model_config=self.model_config, epochs=2)
+
+    def test_train(self):
+        """Test the training process."""
+        try:
+            model = self.trainer.train(self.X_train, self.y_train, self.X_val, self.y_val)
+            self.assertIsNotNone(model, "The model training did not return a valid model.")
+        except Exception as e:
+            self.fail(f"Model training failed with exception: {e}")
+
+if __name__ == '__main__':
+    unittest.main()
