@@ -1,0 +1,22 @@
+Paths:
+  data_folder: 'Scripts/Data_Fetch/data'
+  loading_path: 'Scripts/Data_Fetch/data'
+  saving_path: 'Scripts/Data_Fetch/data'
+  logs: 'Scripts/Logs'
+
+API:
+  api_key: 'your_api_key'
+  base_url: 'https://api.example.com'
+  timeout: 30
+
+DATABASE:
+  db_name: 'default_db'
+  db_user: 'default_user'
+
+stocks:
+  - symbol: 'TSLA'
+    threshold: 100
+  - symbol: 'AAPL'
+    threshold: 100
+  - symbol: 'AMZN'
+    threshold: 100

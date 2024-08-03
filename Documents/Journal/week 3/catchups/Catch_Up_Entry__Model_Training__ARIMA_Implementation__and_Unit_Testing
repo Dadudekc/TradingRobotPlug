@@ -1,0 +1,142 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Model_Training__ARIMA_Implementation__and_Unit_Testing"**
+
+---
+
+## Work Completed
+### Objectives and Goals:
+- The main objective of this session was to enhance the model training process within the project by implementing and testing both ARIMA and neural network models. Additionally, unit tests were to be added to ensure the reliability and accuracy of these models.
+
+### Actions Taken:
+- **ARIMA Model Implementation:** Developed the `ARIMAModelTrainer` class, which automates ARIMA model training on stock price data. This involved loading data, scaling features, identifying optimal ARIMA parameters, and performing predictions.
+- **Neural Network Training Framework:** Created the `NeuralNetworkTrainer` class to facilitate the building and training of dense and LSTM-based neural networks. The class was designed with flexibility, allowing for easy configuration and integration of pretrained models.
+- **Unit Test Development:** Added unit tests to ensure the correct functionality of the ARIMA model trainer and the neural network trainer. The tests were structured to verify model initialization, training processes, and output generation.
+- **Logging and Debugging:** Implemented logging within both models to capture key events and errors during training, aiding in debugging and providing a detailed training log.
+
+### Challenges and Breakthroughs:
+- **Challenge:** Handling missing or incomplete data during ARIMA model training led to issues, particularly with the `symbol` column in the dataset, which had missing values.
+- **Breakthrough:** The introduction of error handling mechanisms within the `ARIMAModelTrainer` allowed for the graceful management of these issues, ensuring the model continued training without crashing.
+- **Challenge:** Ensuring that the neural network training process was adaptable to different model configurations (dense vs. LSTM) while maintaining efficient resource use across multiple GPUs.
+- **Breakthrough:** The use of TensorFlow’s `MirroredStrategy` effectively distributed the workload across GPUs, allowing for smoother training processes even with large datasets.
+
+### Results and Impact:
+- **ARIMA Model Performance:** The ARIMA model demonstrated stable performance, producing reasonable predictions, though some room for parameter tuning remains. The results were saved for further analysis and comparison with neural network outputs.
+- **Neural Network Flexibility:** The neural network trainer proved versatile, successfully handling both dense and LSTM architectures. This flexibility will allow for broader experimentation with model types in future work.
+- **Unit Test Validation:** The unit tests confirmed the robustness of the training processes, ensuring that both ARIMA and neural network models are functioning as intended. This added layer of validation is crucial as the project scales.
+
+```python
+# Example from NeuralNetworkTrainer class
+def scheduler(self, epoch, lr):
+    if epoch < 10:
+        return lr
+    else:
+        return float(lr * tf.math.exp(-0.1))
+
+# Example from ARIMAModelTrainer class
+def background_training(self):
+    try:
+        model = pm.auto_arima(history, start_p=1, start_q=1, max_p=3, max_q=3, seasonal=False, maxiter=1000)
+        model_fit = pm.ARIMA(order=model.order, maxiter=1000).fit(history)
+        self.display_message(f"Selected ARIMA parameters: {model.order}", "INFO")
+    except Exception as e:
+        self.display_message(f"Error finding ARIMA parameters: {e}", "ERROR")
+```
+
+---
+
+## Skills and Technologies Used
+- **Python Programming:** Essential for developing the ARIMA and neural network training scripts.
+- **TensorFlow and Keras:** Utilized for building, training, and managing deep learning models, including the use of distribution strategies across multiple GPUs.
+- **pmdarima:** Applied for automated ARIMA model parameter selection and fitting.
+- **Unit Testing (unittest):** Employed to ensure that all code, particularly model training processes, operates correctly under expected conditions.
+- **Logging:** Integrated to monitor and debug the training processes efficiently.
+- **SHAP:** Used for model explainability, providing insights into the feature importance within neural network predictions.
+
+---
+
+## Lessons Learned
+- **Learning Outcomes:** The session underscored the importance of robust error handling and logging in model training pipelines, particularly when dealing with large datasets and complex models.
+- **Unexpected Challenges:** Handling missing data in the ARIMA model’s training process was more complex than anticipated, necessitating enhanced error management techniques.
+- **Future Application:** Future sessions will include further refinement of model parameters and more extensive testing of different neural network architectures, leveraging the flexibility and stability achieved in this session.
+
+---
+
+## To-Do
+- **Tune ARIMA Parameters:** Further refine the ARIMA model parameters to improve forecasting accuracy.
+- **Experiment with LSTM:** Conduct deeper experimentation with LSTM networks, including variations in sequence lengths and architecture complexity.
+- **Expand Unit Testing:** Broaden the scope of unit tests to include edge cases and stress testing for both ARIMA and neural network models.
+- **Document Processes:** Update project documentation to reflect the latest developments in model training and testing.
+
+---
+
+## Code Snippets and Context
+
+### ARIMA Model Trainer
+
+```python
+# Automatically find the best ARIMA parameters
+model = pm.auto_arima(history, start_p=1, start_q=1, max_p=3, max_q=3, seasonal=False, maxiter=1000)
+results['parameters']['order'] = model.order
+```
+
+### Neural Network Training Framework
+
+```python
+# Scheduler for learning rate adjustments during training
+def scheduler(self, epoch, lr):
+    if epoch < 10:
+        return lr
+    else:
+        return float(lr * tf.math.exp(-0.1))
+```
+
+---
+
+## Additional Notes and Reflections
+- **Brainstorming:** Consider integrating an ensemble approach that combines ARIMA and neural network predictions to potentially enhance overall model accuracy.
+- **Improvements:** Enhance the existing logging system to include more granular details, such as layer-wise performance metrics during neural network training.
+- **Reflection:** The project is progressing steadily, with a solid foundation now in place for advanced model experimentation and testing.
+
+---
+
+## Project Milestones
+- **Milestone 1:** Initial model implementations - Completed
+- **Milestone 2:** Unit testing for model trainers - Completed
+- **Milestone 3:** Parameter tuning and model refinement - In Progress
+- **Milestone 4:** Final evaluation and integration - Pending
+
+---
+
+## Resource Links
+- [TensorFlow Documentation](https://www.tensorflow.org/guide)
+- [pmdarima Documentation](http://alkaline-ml.com/pmdarima/0.9.0/)
+- [SHAP Documentation](https://shap.readthedocs.io/en/latest/)
+
+---
+
+## Collaboration and Communication
+- **Meeting Summary:** Discussed the current status of model implementations, particularly the ARIMA model’s performance, and agreed to focus next on tuning and validation.
+- **Decision:** Decided to prioritize LSTM experimentation in the next phase, leveraging the flexibility of the `NeuralNetworkTrainer` class.
+- **Action Items:** 
+  - John to focus on ARIMA parameter tuning by [specific date].
+  - Alice to expand unit testing coverage by [specific date].
+
+---
+
+## Risk Management
+- **Risk:** Overfitting of neural network models due to complex architectures.
+  - **Mitigation Strategy:** Implement early stopping and cross-validation to monitor and prevent overfitting.
+- **Risk:** ARIMA model's inability to capture non-linear patterns.
+  - **Mitigation Strategy:** Consider hybrid models or integrating machine learning techniques alongside ARIMA for better performance.
+
+---
+
+## Retrospective
+- **What Went Well:** The integration of unit tests provided confidence in the robustness of the model training processes.
+- **What Could Be Improved:** Additional time should be allocated for parameter tuning to fully optimize model performance.
+- **Actionable Insights:** Future sessions will benefit from allocating specific phases for tuning, testing, and integrating hybrid model approaches.
+
+---

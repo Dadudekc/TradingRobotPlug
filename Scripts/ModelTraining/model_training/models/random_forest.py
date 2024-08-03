@@ -11,6 +11,9 @@ import logging
 import shap
 from joblib import Memory
 import os
+import pandas as pd
+
+
 
 class RandomForestModel:
     def __init__(self, cache_location: Optional[str] = 'cache', logger: Optional[logging.Logger] = None):
@@ -147,8 +150,30 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
 
-    # Replace with actual data
-    X, y = np.random.rand(100, 10), np.random.rand(100)
+    # Replace with the actual path to your data
+    data_path = r"C:\TheTradingRobotPlug\data\alpha_vantage\tsla_data.csv"
+
+    # Load the data (assuming the file contains a target column named 'close')
+    data = pd.read_csv(data_path)
+
+    # Convert the 'date' column to datetime format
+    data['date'] = pd.to_datetime(data['date'])
+
+    # Extract useful features from the date
+    data['day_of_week'] = data['date'].dt.dayofweek
+    data['day_of_month'] = data['date'].dt.day
+    data['month'] = data['date'].dt.month
+    data['year'] = data['date'].dt.year
+
+    # Drop columns that contain non-numeric data
+    data = data.drop(columns=['date', 'symbol'])  # Assuming 'symbol' column contains 'tsla'
+
+    # Alternatively, you can encode the 'symbol' column using one-hot encoding
+    # data = pd.get_dummies(data, columns=['symbol'], drop_first=True)
+
+    # Now, prepare the features (X) and target (y)
+    X = data.drop(columns=['close']).values  # Convert to NumPy array
+    y = data['close'].values  # Convert to NumPy array
 
     model = RandomForestModel(logger=logger)
     best_model, best_params, mse, rmse, mae, mape, r2 = model.train(X, y, random_state=42)

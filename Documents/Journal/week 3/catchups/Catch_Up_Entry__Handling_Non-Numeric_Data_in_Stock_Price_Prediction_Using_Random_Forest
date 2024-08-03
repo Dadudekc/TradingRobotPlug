@@ -1,0 +1,148 @@
+# Project Journal Entry
+
+**Catch_Up_Entry__Handling_Non-Numeric_Data_in_Stock_Price_Prediction_Using_Random_Forest"**
+
+---
+
+## Work Completed
+
+### Objectives and Goals
+The primary goal was to configure and train a Random Forest model to predict stock prices using historical data. The specific objectives were to handle non-numeric data issues in the dataset, convert date-related information into useful features, and successfully run the model training process without errors.
+
+### Actions Taken
+1. **Data Preparation**:
+   - Loaded the stock price data from a CSV file.
+   - Identified non-numeric columns in the dataset, including a `date` column and a `symbol` column containing the string `'tsla'`.
+
+2. **Feature Engineering**:
+   - Converted the `date` column into datetime format.
+   - Extracted new features from the `date` column, including `day_of_week`, `day_of_month`, `month`, and `year`.
+   - Dropped or encoded non-numeric columns, specifically removing the `symbol` column that contained non-numeric values.
+
+3. **Model Training**:
+   - Attempted to train a Random Forest model using the processed data.
+   - Encountered and resolved errors related to non-numeric data by ensuring all features were numeric.
+
+### Challenges and Breakthroughs
+- **Challenges**:
+  - The model initially failed due to the presence of non-numeric data, specifically the date and symbol columns.
+  - Converting date strings and handling categorical data such as stock symbols posed difficulties in the data preprocessing stage.
+
+- **Breakthroughs**:
+  - Successfully extracted numeric features from the date column, which allowed the model to utilize temporal information effectively.
+  - Eliminated the errors related to non-numeric data by either dropping irrelevant columns or encoding them appropriately.
+
+### Results and Impact
+- The processed data was successfully converted into a format suitable for model training.
+- The Random Forest model was able to run without errors after data preprocessing, bringing the project closer to achieving accurate stock price predictions.
+- The extraction of temporal features from the date column improved the model’s ability to capture time-based patterns in stock prices.
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming**: Used extensively for scripting, data manipulation, and model training.
+- **Pandas**: Employed for data loading, preprocessing, and feature engineering, particularly in handling date and categorical data.
+- **Scikit-Learn**: Utilized for implementing the Random Forest model, cross-validation, and hyperparameter tuning.
+- **Optuna**: Applied for automated hyperparameter optimization to improve model performance.
+- **Logging**: Implemented to track the training process and record model performance metrics.
+
+---
+
+## Lessons Learned
+
+### Learning Outcomes
+- Gained a deeper understanding of how to preprocess non-numeric data, particularly when handling date and categorical data in machine learning projects.
+- Improved skills in feature engineering, especially in extracting and utilizing temporal features for predictive modeling.
+
+### Unexpected Challenges
+- The presence of non-numeric data like stock symbols and dates caused initial failures in model training, which required additional preprocessing steps that were not initially anticipated.
+
+### Future Application
+- Future projects will benefit from a more systematic approach to handling non-numeric data from the start, ensuring that all features are properly prepared before model training.
+- The experience highlighted the importance of robust data preprocessing, which will be applied to improve the efficiency and accuracy of future models.
+
+---
+
+## To-Do
+
+- **Refine Feature Engineering**: Further refine the feature engineering process, possibly incorporating more advanced techniques like lag features or moving averages.
+- **Model Evaluation**: Evaluate the current model’s performance and compare it against other models or configurations.
+- **Documentation**: Update the project documentation to reflect the changes made to data preprocessing and model training.
+- **Error Handling**: Implement more sophisticated error handling in the data preprocessing pipeline to catch and resolve similar issues more efficiently in the future.
+
+---
+
+## Code Snippets and Context
+
+### Data Preparation and Feature Engineering
+
+```python
+import pandas as pd
+
+# Load the data and convert the 'date' column to datetime format
+data = pd.read_csv(r"C:\TheTradingRobotPlug\data\alpha_vantage\tsla_data.csv")
+data['date'] = pd.to_datetime(data['date'])
+
+# Extract features from the 'date' column
+data['day_of_week'] = data['date'].dt.dayofweek
+data['day_of_month'] = data['date'].dt.day
+data['month'] = data['date'].dt.month
+data['year'] = data['date'].dt.year
+
+# Drop non-numeric columns
+data = data.drop(columns=['date', 'symbol'])
+
+# Prepare features and target for model training
+X = data.drop(columns=['close']).values
+y = data['close'].values
+```
+
+---
+
+## Additional Notes and Reflections
+
+- **Brainstorming**: Consider exploring other temporal features like rolling averages or volatility metrics that might improve model performance.
+- **Improvements**: The data preprocessing steps could be modularized into reusable functions to streamline the process for future datasets.
+- **Reflection**: The importance of early and thorough data exploration was reinforced, as it directly impacts the success of subsequent modeling efforts.
+
+---
+
+## Project Milestones
+
+- **Milestone 1**: Initial data loading and exploration - Completed
+- **Milestone 2**: Data preprocessing and feature engineering - Completed
+- **Milestone 3**: Model training and hyperparameter optimization - In Progress
+- **Milestone 4**: Model evaluation and refinement - Pending
+
+---
+
+## Resource Links
+
+- [Pandas Documentation](https://pandas.pydata.org/pandas-docs/stable/)
+- [Scikit-Learn Documentation](https://scikit-learn.org/stable/documentation.html)
+- [Optuna Documentation](https://optuna.readthedocs.io/en/stable/)
+
+---
+
+## Collaboration and Communication
+
+- **Meetings and Discussions**: A discussion is planned with team members to review the preprocessing steps and explore additional features that could enhance model performance.
+- **Decisions Made**: Decided to focus on feature engineering from date columns and to drop irrelevant non-numeric columns like stock symbols for the initial model iteration.
+
+---
+
+## Risk Management
+
+- **Risk**: Potential overfitting due to complex feature engineering.
+  - **Mitigation Strategy**: Implement cross-validation and monitor performance metrics closely to avoid overfitting.
+- **Risk**: Data preprocessing errors that could lead to model failure.
+  - **Mitigation Strategy**: Improve error handling and validation checks during preprocessing.
+
+---
+
+## Retrospective
+
+- **What Went Well**: Successfully addressed the issues with non-numeric data, allowing the model to run without errors.
+- **What Could Be Improved**: The initial handling of non-numeric data could have been more proactive, anticipating potential issues earlier in the process.
+- **Actionable Insights**: Incorporate a checklist for data types and preprocessing steps in future projects to prevent similar issues from arising.

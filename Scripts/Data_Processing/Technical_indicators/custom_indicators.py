@@ -38,7 +38,7 @@ except ImportError:
 
 class CustomIndicators:
     _cache = {}
-    config_manager = ConfigManager(config_file='config.ini')
+    config_manager = ConfigManager()  # Corrected instantiation
 
     @staticmethod
     def file_cache(key: str, function: Callable, *args: Any, **kwargs: Any) -> pd.Series:

@@ -1,0 +1,230 @@
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Data_Handling__Validation__Cleaning_and_Code_Refactoring**
+
+---
+
+## Work Completed
+
+### Objectives and Goals
+The primary goals were to streamline and refactor the data handling, validation, and preprocessing code, while integrating new functionalities like ARIMA model training. This involved merging redundant scripts into a single, cohesive module to improve maintainability, organization, and scalability.
+
+### Actions Taken
+
+1. **Merged Scripts and Refactoring**:
+   - Combined multiple scripts related to data handling, validation, cleaning, and preprocessing into a unified module.
+   - Organized the code into logical classes, including `LoggerHandler`, `DataLoader`, `DataPreprocessor`, `DataValidation`, `DataCleaning`, `DataTransformation`, and `VisualizationHandler`.
+   - Resolved redundancies by identifying and removing unnecessary functionalities, ensuring only essential code was retained.
+   - Enhanced the `DataProcessor` class to utilize the newly refactored utility classes.
+   - Improved logging consistency across the module to facilitate better debugging and monitoring.
+
+2. **Integration of ARIMA Model Training**:
+   - Wrapped the ARIMA model training code into a new class named `ARIMAModelTrainer`.
+   - Integrated `ARIMAModelTrainer` into the `ModelTraining` class to streamline the training process.
+   - Added functionality to save ARIMA model predictions to a CSV file, ensuring results are documented.
+
+3. **Data Preprocessing Enhancements**:
+   - Enhanced the data preprocessing script to handle NaN values efficiently and perform advanced feature engineering.
+   - Modified the `DataPreprocessor` class to seamlessly integrate with the ARIMA model and other machine learning models.
+
+4. **Code Modularization and Execution**:
+   - Modularized the code into separate files for better readability and maintainability: `data_preprocessing.py`, `model_training.py`, and `main.py`.
+   - Successfully executed the modularized code, achieving the following outcomes:
+     - Efficient handling of data preprocessing steps.
+     - Successful LSTM model training with 50 epochs.
+     - Recorded final validation metrics for LSTM: MSE = 15,469.76, RMSE = 124.38, R² = 0.81.
+     - Saved the model at `models/LSTM_20240722_070936.pkl`.
+
+### Challenges and Breakthroughs
+
+- **Challenge**: Managing the consolidation of overlapping functionalities without introducing errors was complex and required careful analysis.
+- **Breakthrough**: Successfully refactored and merged the scripts, maintaining all required functionality while improving the codebase's scalability and maintainability.
+
+### Results and Impact
+
+- **Improved Maintainability**: The refactoring effort resulted in a more organized and easier-to-maintain codebase.
+- **Enhanced Scalability**: The new modular structure allows for easier expansion of features and functionality.
+- **Consistent Logging**: Improved logging practices provide better insights into the code’s execution and facilitate quicker debugging.
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming**: Utilized for refactoring, merging scripts, and enhancing functionality.
+- **Logging**: Implemented consistent logging practices using Python’s logging module.
+- **Data Handling**: Applied advanced data handling techniques, including preprocessing, validation, and transformation.
+- **Machine Learning**: Integrated ARIMA model training into the pipeline and enhanced preprocessing for improved model performance.
+- **GUI Development**: Used `tkinter` to create a user-friendly file browsing interface.
+- **Error Handling and Documentation**: Ensured robust error handling and updated documentation to reflect code changes.
+
+---
+
+## Lessons Learned
+
+### Learning Outcomes
+
+- **Effective Refactoring**: Gained insights into effectively refactoring a large codebase, ensuring that redundant functionalities are removed while maintaining overall system integrity.
+- **Modular Design**: Recognized the importance of a modular design that enhances scalability and maintainability.
+
+### Unexpected Challenges
+
+- **Complexity in Merging**: The merging of overlapping functionalities proved to be more complex than anticipated, requiring careful analysis to avoid introducing new issues.
+
+### Future Application
+
+- **Improved Workflow**: Future refactoring tasks will benefit from a more structured approach, ensuring that modularity and maintainability are prioritized from the start.
+- **Better Documentation**: Enhancing documentation during the refactoring process to track changes and their impact on the overall system.
+
+---
+
+## To-Do
+
+### Next Steps
+
+1. **Complete Unit Tests**: Develop and finalize unit tests for the newly refactored module by the end of the week.
+2. **Enhance Documentation**: Update project documentation to reflect the recent changes and ensure all team members are aligned.
+3. **Improve ARIMA Model Accuracy**: Experiment with different ARIMA parameters to enhance forecasting accuracy, and consider integrating other time series forecasting models.
+4. **Extend Model Training Pipeline**: Integrate more machine learning models for comparison and implement hyperparameter tuning for all models.
+5. **Review and Finalize**: Schedule a code review session to ensure the refactored module meets all project requirements and standards.
+
+---
+
+## Code Snippets and Context
+
+### LoggerHandler Class
+
+```python
+class LoggerHandler:
+    def __init__(self, log_text_widget=None, logger=None):
+        self.log_text_widget = log_text_widget
+        self.logger = logger or logging.getLogger(__name__)
+
+    def log(self, message, level="INFO"):
+        if self.log_text_widget:
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            formatted_message = f"[{timestamp} - {level}] {message}\n"
+            self.log_text_widget.config(state='normal')
+            self.log_text_widget.insert('end', formatted_message)
+            self.log_text_widget.config(state='disabled')
+            self.log_text_widget.see('end')
+        else:
+            log_method = getattr(self.logger, level.lower(), self.logger.info)
+            log_method(message)
+```
+
+**Context**: This class provides consistent logging functionality across the entire module, enabling both GUI-based and console-based logging.
+
+### DataPreprocessor Class
+
+```python
+class DataPreprocessor:
+    def __init__(self, logger_handler, config_manager):
+        self.logger = logger_handler
+        self.config_manager = config_manager
+        self.scalers = {
+            'StandardScaler': StandardScaler(),
+            'MinMaxScaler': MinMaxScaler(),
+            'RobustScaler': RobustScaler(),
+            'Normalizer': Normalizer(),
+            'MaxAbsScaler': MaxAbsScaler()
+        }
+
+    def preprocess_data(self, data, target_column='close', date_column='date', lag_sizes=[1, 2, 3, 5, 10], window_sizes=[5, 10, 20], scaler_type=None):
+        try:
+            data = self._handle_dates(data, date_column)
+            data = self._create_lag_features(data, target_column, lag_sizes)
+            data = self._create_rolling_window_features(data, target_column, window_sizes)
+            X = self._impute_and_scale(data, scaler_type)
+            return X
+        except Exception as e:
+            self.logger.log(f"Error during data preprocessing: {str(e)}", "ERROR")
+            return None
+```
+
+**Context**: The `DataPreprocessor` class handles the entire preprocessing pipeline, including date handling, feature engineering, and scaling.
+
+### Corrected Main Script Initialization
+
+```python
+# model_training_main.py
+
+def train_neural_network(X_train, y_train, X_val, y_val, epochs=50):
+    """Train a Neural Network model."""
+    logger.info("Training Neural Network model...")
+    model_config = NNModelConfig.dense_model()
+    nn_trainer = NeuralNetworkTrainer(model_config, logger, epochs=epochs)
+    nn_trainer.train(X_train, y_train, X_val, y_val)
+    logger.info("Neural Network training complete")
+```
+
+---
+
+## Additional Notes and Reflections
+
+- **Brainstorming**: Consider developing a more automated way to handle different types of data transformations based on configuration settings.
+- **Improvements**: Introduce more robust error handling and validation checks during data loading and preprocessing to catch potential issues early.
+- **Reflections**: The refactoring process highlighted the importance of maintaining a clean and modular codebase, especially as the project scales.
+
+---
+
+## Project Milestones
+
+- **Milestone 1**: Initial setup and configuration - Completed
+- **Milestone 2**: Data handling and preprocessing module - Completed
+- **Milestone 3**: Unit testing and validation - In Progress
+- **Milestone 4**: Final integration and deployment - Pending
+
+---
+
+## Resource Links
+
+- [Python Logging Documentation](https://docs.python.org/3/library/logging.html)
+- [Pandas Documentation](https://pandas.pydata.org/pandas-docs/stable/)
+- [Scikit-learn Preprocessing](https://scikit-learn.org/stable/modules/preprocessing.html)
+
+---
+
+## Collaboration and Communication
+
+### Meetings and Discussions
+
+- Discussed the benefits of merging overlapping scripts and the need for consistent logging and error handling.
+
+### Decisions Made
+
+- Agreed on the final structure of the refactored module and the priority of unit testing.
+
+### Action Items
+
+- **Alice** to complete the unit tests for the module by Friday.
+- **Bob** to review the updated documentation by the end of the week.
+
+---
+
+## Risk Management
+
+### Identified Risks
+
+- **Risk**: Potential integration issues after merging scripts.
+  - **Mitigation Strategy**: Conduct thorough testing and code reviews to ensure all components work seamlessly together.
+
+---
+
+## Retrospective
+
+### What Went Well
+
+- The refactoring and merging of scripts were completed successfully, resulting in a more organized and maintainable codebase.
+
+### What Could Be Improved
+
+- The process could have benefited from better initial planning to anticipate complexities in merging functionalities.
+
+### Actionable Insights
+
+- In future ref
+
+actoring tasks, involve the entire team early on to ensure alignment and smooth integration.
+
+---

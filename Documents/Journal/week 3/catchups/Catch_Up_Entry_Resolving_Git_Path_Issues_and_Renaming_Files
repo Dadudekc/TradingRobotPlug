@@ -1,33 +1,98 @@
+Here's the merged and improved project journal entry combining all the provided entries:
+
+---
+
 # Project Journal Entry
 
-**Catch_Up_Entry_Resolving_Git_Path_Issues_and_Renaming_Files**
+**Catch_Up_Entry__Troubleshooting_LSTM_Model_Input_Handling_and_Resolving_Git_Path_Issues**
 
 ---
 
 ## Work Completed
 
-### Objectives and Goals:
-- Resolve invalid path errors in the repository.
-- Rename files to remove special characters and spaces.
-- Ensure changes are successfully committed and pushed to the remote repository.
-- Pull the changes on a different computer without encountering errors.
+### Objectives and Goals
+- Troubleshoot and resolve input shape mismatches in the LSTM model for stock price prediction.
+- Fix invalid path errors in the Git repository and rename files to remove special characters and spaces.
+- Enhance the LSTM model configuration, including the integration of an Attention layer, and improve error handling.
 
-### Actions Taken:
-- Identified files with invalid paths and renamed them to remove special characters and spaces using a Python script.
-- Cleared the Git cache to ensure all files are correctly re-indexed.
-- Committed the changes and pushed them to the remote repository.
-- Pulled the changes on a different computer to verify the resolution of the path issues.
+### Actions Taken
 
-### Challenges and Breakthroughs:
-- **Challenges:** Encountered persistent invalid path errors when pulling changes on a different computer.
-- **Breakthroughs:** Successfully renamed files using a Python script and cleared the Git cache, which resolved the path issues.
+1. **LSTM Model Input Handling:**
+   - **Debugging Input Shape Errors:** Addressed input shape mismatches in the LSTM model by explicitly defining the input shape using an `Input` layer. This resolved errors during model training and evaluation.
+   - **Model Configuration Adjustments:** Updated the `lstm_config.py` script to register custom layers and handle input shapes properly, ensuring the model could process input sequences correctly.
+   - **Code Refinement:** Re-ran the model training with the corrected configuration, confirming that the data was appropriately scaled and sequenced.
 
-### Results and Impact:
-- The invalid path errors were resolved, allowing seamless collaboration across different systems.
-- Improved the maintainability and consistency of file names in the repository.
+2. **Resolving Git Path Issues:**
+   - **File Renaming:** Used a Python script to rename files with invalid paths, removing special characters and spaces. Cleared the Git cache to ensure all files were re-indexed correctly.
+   - **Validation:** Committed and pushed the changes to the remote repository, then pulled them on a different computer to verify the resolution of path issues.
+
+3. **Enhancing LSTM Configuration:**
+   - **Attention Layer Integration:** Successfully integrated an Attention layer within the LSTM model, ensuring it received the correct input format.
+   - **Error Handling Improvements:** Enhanced error logging to provide more informative messages, assisting in troubleshooting.
+   - **Model Compilation and Training:** Tested the updated model configuration and observed its behavior during the compilation and training phases.
+
+### Challenges and Breakthroughs
+
+- **Input Shape Handling:** Encountered challenges with incorrect input shape assumptions, leading to errors during model training. Successfully resolved these by explicitly defining the input shape, ensuring the model trained and evaluated correctly.
+- **Git Path Issues:** Persistent invalid path errors required multiple iterations of troubleshooting. Successfully resolved these by renaming files and clearing the Git cache, allowing seamless collaboration across different systems.
+- **TensorFlow Model Configuration:** Faced a significant hurdle with the 'Functional' object is not subscriptable error, which was resolved by restructuring the LSTM model and correctly integrating the Attention layer.
+
+### Results and Impact
+
+- **LSTM Model Stability:** The modifications ensured the LSTM model processed input sequences correctly, allowing for smooth training and evaluation. These changes improved the model's stability and reliability.
+- **Git Repository Maintenance:** The path issues were resolved, improving the maintainability and consistency of file names in the repository, which enhanced collaboration across different systems.
+- **Advanced Model Configuration:** The integration of the Attention layer and improved error handling led to more robust model performance, setting a solid foundation for future experiments and model enhancements.
+
+---
+
+## Skills and Technologies Used
+
+- **TensorFlow and Keras:** Used for building and training the LSTM model, handling custom layers, and managing input shapes.
+- **Python Programming:** Utilized for scripting, debugging, model configuration, and automating the renaming of files.
+- **Optuna for Hyperparameter Tuning:** Implemented to optimize the LSTM model's hyperparameters, improving performance.
+- **Git and Version Control:** Used for tracking changes, clearing the cache, and pushing updates to the remote repository.
+- **Logging and Error Handling:** Enhanced logging to provide detailed insights into the model's training process and debug issues effectively.
+
+---
+
+## Lessons Learned
+
+### Summary of Lessons Learned
+
+1. **Data Consistency:** Ensuring consistent alignment between input data and target sequences is crucial to avoid errors during model training.
+2. **Effective Error Handling:** Comprehensive error handling and detailed logging are vital for debugging and maintaining robust code.
+3. **Hyperparameter Tuning:** Tools like Optuna can significantly enhance model performance by efficiently optimizing hyperparameters.
+4. **File Naming Conventions:** Recognized the importance of adhering to consistent and compatible file naming conventions to avoid cross-platform issues.
+5. **TensorFlow Configuration:** Understanding the importance of correctly structuring inputs to advanced layers like Attention is crucial for configuring complex models.
+
+### Unexpected Challenges
+
+- **Input Shape and TensorFlow Errors:** The need to explicitly define input shapes in the model was not initially anticipated, leading to errors that required debugging and reconfiguration. The 'Functional' object is not subscriptable error also required a deep dive into the model configuration.
+
+### Future Application
+
+- **Model Configuration and Testing:** These lessons will guide future model configurations, ensuring that input shapes and advanced layers like Attention are correctly handled from the outset. This will improve the efficiency of the model development process and reduce time spent on debugging.
+- **Repository Maintenance:** Improved understanding of file system compatibility will influence future file naming and project structuring practices.
+- **Regular Documentation Updates:** Ensure continuous updates to documentation to reflect the latest changes and improvements in the project.
+
+---
+
+## To-Do
+
+### Next Steps
+
+1. **Complete Model Testing:** Run additional tests on the LSTM model to ensure robustness across various datasets.
+2. **Refine Model Configuration:** Fine-tune the hyperparameters of the LSTM model, particularly the Attention layer, to optimize performance.
+3. **Enhance Documentation:** Update project documentation to reflect recent changes in model configuration, error handling, and file naming conventions.
+4. **Explore Alternative Models:** Investigate the potential of other model architectures, such as GRUs or Transformers, for the project.
+
+---
+
+## Code Snippets and Context
+
+### Python Script for Renaming Files
 
 ```python
-# Python script to rename files
 import os
 import re
 
@@ -47,155 +112,277 @@ if __name__ == "__main__":
     rename_files(directory)
 ```
 
----
-
-## Skills and Technologies Used
-
-- **Python Programming:** Utilized for scripting and automating the renaming of files.
-- **Version Control (Git):** Used for tracking changes, clearing the cache, and pushing updates to the remote repository.
-- **Shell Scripting:** Employed for navigating directories and executing commands in the terminal.
-
----
-
-## Lessons Learned
-
-### Learning Outcomes:
-- **Debugging Techniques:** Learned efficient methods for troubleshooting and resolving path-related issues in Git.
-- **File Naming Conventions:** Recognized the importance of adhering to consistent and compatible file naming conventions to avoid cross-platform issues.
-
-### Unexpected Challenges:
-- Persistent invalid path errors required multiple iterations of troubleshooting and script adjustments.
-
-### Future Application:
-- Improved understanding of file system compatibility will influence future file naming and project structuring practices.
-- Enhanced problem-solving strategies for addressing similar issues in other projects.
-
----
-
-## To-Do
-
-- **Verify Repository Integrity:** Double-check all renamed files to ensure they are functioning correctly.
-- **Complete Unit Tests:** Finalize the remaining unit tests for the data fetch scripts by [specific date].
-- **Documentation:** Update project documentation to reflect recent changes and improvements.
-- **Feature Implementation:** Start working on the caching mechanism for API responses.
-
----
-
-## Code Snippets and Context
-
-### Data Fetch Script
+### LSTM Model Configuration with Attention
 
 ```python
-# C:\TheTradingRobotPlug\Scripts\Data_Fetch\alpha_vantage_df
-# Scripts\Data_Fetch\alpha_vantage_df
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout, BatchNormalization, Bidirectional, Input
+from tensorflow.keras.optimizers import Adam
+from .attention_layer import Attention, Attention2  # Adjust this import for the relative path
+import tensorflow as tf
 
-import os
-import sys
+# Register the custom layers
+tf.keras.utils.get_custom_objects().update({
+    'Attention': Attention,
+    'Attention2': Attention2
+})
 
-# Add project root to the Python path
-script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
-sys.path.append(project_root)
-
-# Function to fetch data from Alpha Vantage API
-def fetch_data(api_key, symbol):
-    # Detailed implementation here
-    pass
+class LSTMModelConfig:
+    @staticmethod
+    def lstm_model(input_shape, params):
+        model = Sequential()
+        model.add(Input(shape=input_shape))  # Ensure the input shape is explicitly specified here
+        for layer in params['layers']:
+            if layer['type'] == 'bidirectional_lstm':
+                model.add(Bidirectional(LSTM(layer['units'], return_sequences=layer['return_sequences'])))
+            elif layer['type'] == 'attention':
+                model.add(Attention())
+            elif layer['type'] == 'attention2':
+                model.add(Attention2())
+            elif layer['type'] == 'batch_norm':
+                model.add(BatchNormalization())
+            elif layer['type'] == 'dropout':
+                model.add(Dropout(layer['rate']))
+            elif layer['type'] == 'dense':
+                model.add(Dense(layer['units'], activation=layer['activation']))
+        model.add(Dense(1))  # Ensure the final layer produces a single output per sequence
+        model.compile(optimizer=params['optimizer'], loss=params['loss'])
+        return model
 ```
 
-### Unit Test for Data Fetch Script
+### Advanced LSTM Trainer with Error Handling
 
 ```python
-# C:\TheTradingRobotPlug\Tests\Data_Fetch\test_alpha_vantage_df.py
-# Tests\Data_Fetch\test_alpha_vantage_df.py
-# To Run:
-# 1st: cd C:\TheTradingRobotPlug\Tests
-# 2nd: python -m unittest Data_Fetch.test_alpha_vantage_df
+import sys
+from pathlib import Path
+import logging
+import joblib
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import RobustScaler
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.models import load_model
+from tensorflow.keras.regularizers import l1_l2
+import optuna
 
-import unittest
+# Adjust the Python path dynamically for independent execution
+if __name__ == "__main__" and __package__ is None:
+    script_dir = Path(__file__).resolve().parent
+    project_root = script_dir.parents[3]  # Adjust this according to the correct level
+    sys.path.append(str(project_root))
 
-class TestAlphaVantageDF(unittest.TestCase):
-    def test_fetch_data(self):
-        # Test implementation here
-        pass
+from Scripts.Utilities.DataHandler import DataHandler
+from Scripts.ModelTraining.model_training.models.lstm.lstm_config import LSTMModelConfig
 
-if __name__ == '__main__':
-    unittest.main()
+# Set up logging
+log_dir = Path("C:/TheTradingRobotPlug/logs")
+log_dir.mkdir(parents=True, exist_ok=True)
+log_file = log_dir / "lstm_model_trainer.log"
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', handlers=[
+    logging.FileHandler(log_file),
+    logging.StreamHandler()
+])
+logger = logging.getLogger('AdvancedLSTMModelTrainer')
+
+class AdvancedLSTMModelTrainer:
+    def __init__(self, logger=None, model_save_path="best_model.keras", scaler_save_path="scaler.pkl"):
+        self.logger = logger if logger else logging.getLogger(__name__)
+        self.model_save_path = Path(model_save_path)
+        self.scaler_save_path = Path(scaler_save_path)
+
+    def preprocess_data(self, X_train,
+
+ X_val):
+        self.logger.info("Preprocessing data...")
+        self.logger.debug(f"Initial X_train shape: {X_train.shape}, X_val shape: {X_val.shape}")
+
+        scaler = RobustScaler()
+        X_train_scaled = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
+        X_val_scaled = scaler.transform(X_val.reshape(-1, X_val.shape[-1])).reshape(X_val.shape)
+
+        joblib.dump(scaler, self.scaler_save_path)
+
+        self.logger.debug(f"Scaled X_train shape: {X_train_scaled.shape}, X_val shape: {X_val_scaled.shape}")
+        return X_train_scaled, X_val_scaled
+
+    def train_lstm(self, X_train, y_train, X_val, y_val, model, epochs=100, callbacks=None):
+        self.logger.info("Starting LSTM model training...")
+        try:
+            X_train_scaled, X_val_scaled = self.preprocess_data(X_train, X_val)
+
+            if callbacks is None:
+                callbacks = []
+
+            self.logger.info(f"X_train_scaled shape: {X_train_scaled.shape}")
+            self.logger.info(f"y_train shape: {y_train.shape}")
+            self.logger.info(f"X_val_scaled shape: {X_val_scaled.shape}")
+            self.logger.info(f"y_val shape: {y_val.shape}")
+
+            model.fit(X_train_scaled, y_train, validation_data=(X_val_scaled, y_val), epochs=epochs, batch_size=32,
+                      callbacks=callbacks)
+
+            y_pred_val = model.predict(X_val_scaled).flatten()
+            self.logger.info(f"Predicted y_val shape: {y_pred_val.shape}")
+            mse = mean_squared_error(y_val, y_pred_val)
+            rmse = np.sqrt(mse)
+            r2 = r2_score(y_val, y_pred_val)
+
+            self.logger.info(f"Validation MSE: {mse:.2f}, RMSE: {rmse:.2f}, R²: {r2:.2f}")
+
+            return model
+
+        except Exception as e:
+            self.logger.error(f"Error occurred during LSTM model training: {e}")
+            return None
+
+    def evaluate_model(self, X_test, y_test):
+        self.logger.info("Evaluating model on test data...")
+        try:
+            if X_test.size == 0 or y_test.size == 0:
+                raise ValueError("Test data is empty. Cannot evaluate model.")
+            
+            model = load_model(self.model_save_path)
+            scaler = joblib.load(self.scaler_save_path)
+
+            X_test_scaled = scaler.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
+            y_pred_test = model.predict(X_test_scaled).flatten()
+
+            mse = mean_squared_error(y_test, y_pred_test)
+            rmse = np.sqrt(mse)
+            r2 = r2_score(y_test, y_pred_test)
+
+            self.logger.info(f"Test MSE: {mse:.2f}, RMSE: {rmse:.2f}, R²: {r2:.2f}")
+
+        except Exception as e:
+            self.logger.error(f"Error occurred during model evaluation: {e}")
+
+    @staticmethod
+    def create_sequences(data, target, time_steps=10):
+        xs, ys = [], []
+        for i in range(len(data) - time_steps):
+            x = data[i:(i + time_steps)]
+            try:
+                y = target.iloc[i + time_steps]
+                xs.append(x)
+                ys.append(y)
+            except IndexError as e:
+                logger.error(f"IndexError at position {i}: {e}")
+        return np.array(xs), np.array(ys)
+
+    def objective(self, trial, X_train, y_train, X_val, y_val):
+        self.logger.info(f"X_train shape: {X_train.shape}")
+        self.logger.info(f"X_val shape: {X_val.shape}")
+        
+        model_config = {
+            'layers': [
+                {'type': 'bidirectional_lstm', 'units': trial.suggest_int('units_lstm', 50, 200), 'return_sequences': True, 'kernel_regularizer': l1_l2(l1=0.01, l2=0.01)},
+                {'type': 'attention'},
+                {'type': 'batch_norm'},
+                {'type': 'dropout', 'rate': trial.suggest_float('dropout_rate', 0.2, 0.5)},
+                {'type': 'dense', 'units': trial.suggest_int('units_dense', 10, 50), 'activation': 'relu', 'kernel_regularizer': l1_l2(l1=0.01, l2=0.01)}
+            ],
+            'optimizer': trial.suggest_categorical('optimizer', ['adam', 'sgd', 'rmsprop', 'adadelta']),
+            'loss': 'mean_squared_error'
+        }
+
+        model = LSTMModelConfig.lstm_model((X_train.shape[1], X_train.shape[2]), model_config)
+        model = self.train_lstm(X_train, y_train, X_val, y_val, model, epochs=50)
+
+        if model is None:
+            raise optuna.exceptions.TrialPruned()
+        
+        y_pred_val = model.predict(X_val).flatten()
+        mse = mean_squared_error(y_val, y_pred_val)
+        return mse
+
+    def optimize_hyperparameters(self, X_train, y_train, X_val, y_val, n_trials=100):
+        study = optuna.create_study(direction='minimize')
+        study.optimize(lambda trial: self.objective(trial, X_train, y_train, X_val, y_val), n_trials=n_trials)
+        self.logger.info(f"Best hyperparameters: {study.best_params}")
+        return study.best_params
 ```
 
 ---
 
 ## Additional Notes and Reflections
 
-### Brainstorming:
-- Consider adding a feature to cache API responses to reduce redundant data fetches and improve efficiency.
-
-### Improvements:
-- Enhance error handling in the data fetch script to better manage API rate limits and provide more informative error messages.
-
-### Reflections:
-- The project is progressing well, but regular team check-ins could further enhance collaboration and ensure alignment on goals.
-
-### Feedback:
-- Positive feedback on the recent improvements to the data fetch script from team members.
+- **Brainstorming:** Consider adding a feature to cache API responses to reduce redundant data fetches and improve efficiency. Additionally, explore implementing attention mechanisms in other parts of the model to enhance interpretability and performance.
+- **Improvements:** Enhance the preprocessing step to handle missing data more effectively, possibly integrating more advanced imputation techniques. Also, explore using more sophisticated regularization techniques to prevent overfitting in the LSTM model.
+- **Reflection:** The project is progressing well, with significant improvements in model stability and repository maintenance. These advancements should be standardized across similar projects to ensure consistency and reliability.
 
 ---
 
 ## Project Milestones
 
 - **Milestone 1:** Initial setup and configuration - Completed
-- **Milestone 2:** Data fetch module implementation - In Progress
-- **Milestone 3:** Unit testing and validation - Pending
-- **Milestone 4:** Final integration and deployment - Pending
+- **Milestone 2:** Model training and debugging - In Progress
+- **Milestone 3:** Resolve Git path issues and refine LSTM model - Completed
+- **Milestone 4:** Finalize model training and evaluation - Pending
 
 ---
 
 ## Resource Links
 
-- [Alpha Vantage API Documentation](https://www.alphavantage.co/documentation/)
-- [Python unittest Documentation](https://docs.python.org/3/library/unittest.html)
-- [GitHub Repository](https://github.com/user/repo)
+- [TensorFlow Keras Documentation](https://www.tensorflow.org/api_docs/python/tf/keras)
+- [Optuna Documentation](https://optuna.readthedocs.io/en/stable/)
+- [Python Logging Documentation](https://docs.python.org/3/library/logging.html)
 
 ---
 
 ## Collaboration and Communication
 
-### Meetings and Discussions:
-- Discussed the implementation of the caching mechanism. Decided to prioritize this feature in the next sprint.
+### Meetings and Discussions
 
-### Decisions Made:
-- Agreed to refactor the data fetch script for better maintainability and scalability.
+- Discussed the integration of the Attention mechanism and Optuna for hyperparameter tuning, and agreed on steps to resolve the 'Functional' object is not subscriptable error.
+- Discussed the implementation of the caching mechanism and decided to prioritize this feature in the next sprint.
 
-### Action Items:
-- Alice to draft the initial caching mechanism implementation by [specific date].
-- Bob to review and update the project documentation by [specific date].
+### Decisions Made
+
+- Prioritized logging and refactoring before diving into extensive hyperparameter tuning.
+- Agreed to update all LSTM-related scripts to include explicit input shape definitions and ensure compatibility across different training and evaluation scenarios.
+
+### Action Items
+
+- **John:** Finalize the Optuna integration by [specific date].
+- **Alice:** Enhance the logging system and document the changes by [specific date].
+- **Team Member A:** Test the refined model on additional datasets.
+- **Team Member B:** Update the project documentation with the latest changes.
 
 ---
 
 ## Risk Management
 
-### Risk:
-- **API rate limits could affect data retrieval.**
+### Identified Risks
+
+- **Model Performance:** Potential underperformance due to improper input shape handling and TensorFlow configuration.
+  - **Mitigation Strategy:** Implement thorough testing and validation processes to catch issues early.
+- **Git Repository Issues:** Persistent invalid path errors could reoccur.
+  - **Mitigation Strategy:** Regularly review and adhere to file naming conventions to prevent similar issues.
+- **API Rate Limits:** Could affect data retrieval in the data fetch module.
   - **Mitigation Strategy:** Implement caching to reduce the number of API calls.
-  
-### Risk:
-- **Potential delays in completing unit tests.**
-  - **Mitigation Strategy:** Allocate additional resources to ensure tests are completed on time.
 
 ---
 
 ## Retrospective
 
-### What Went Well:
-- The invalid path issues were successfully resolved, allowing for smooth collaboration across different systems.
+### What Went Well
 
-### What Could Be Improved:
-- Need to improve time management for troubleshooting and resolving unexpected issues.
+- **Model Stability:** Successfully adjusted the LSTM model to handle input shapes correctly, resolving a critical error.
+- **Git Maintenance:** The path issues were successfully resolved, allowing for smooth collaboration across different systems.
 
-### Actionable Insights:
-- Allocate specific time blocks for testing and debugging to ensure consistent progress.
-- Regularly review and adhere to file naming conventions to avoid similar issues in the future.
+### What Could Be Improved
+
+- **Time Management:** Need to improve time management for troubleshooting and resolving unexpected issues.
+- **Proactive Testing:** More proactive testing and validation during model configuration to catch issues earlier.
+
+### Actionable Insights
+
+- **Testing and Debugging:** Allocate specific time blocks for testing and debugging to ensure consistent progress. Implement a more structured approach to model configuration and testing to ensure robustness and reliability.
+- **File Naming Conventions:** Regularly review and adhere to file naming conventions to avoid similar issues in the future.
 
 ---
 
-This journal entry provides a detailed account of the work completed, skills used, lessons learned, and next steps for the project. It ensures that all aspects of the project are documented and tracked for future reference and improvement.
+This comprehensive journal entry documents the troubleshooting and enhancement efforts for the LSTM model input handling, resolution of Git path issues, and overall improvements in the project. It outlines the work completed, challenges faced, and the impact of these enhancements on the project's progress.

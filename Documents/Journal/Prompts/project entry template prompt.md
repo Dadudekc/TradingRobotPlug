@@ -1,14 +1,12 @@
-Use this conversavation to make a project journal entry following the standards and guides of template below
+Use this conversavation to make a project journal entry following the standards and guides of template below base the title of the entry off of the conversation
 
 ---
 
 # Project Journal Entry Template
 
 **Catch Up Entry: "title"**
-example:
-Catch_Up_Entry__Enhancements_in_LSTM_Model_Training_and_Error_Handling__
-Catch_Up_Entry__Automating_Credit_Repair_and_Pulling_Credit_Reports
-Catch_Up_Entry__Automating_Stock_Comments_Analysis
+example:(use this format ensuring underscores in the title)
+
 Catch_Up_Entry__Comprehensive_Project_Overview_and_Model_Calculation
 Catch_Up_Entry__Data_Handling__Model_Training__and_Code_Refactoring
 Catch_Up_Entry__Demonstrating_Advanced_Prompting_and_Ethical_Hacking_Skills

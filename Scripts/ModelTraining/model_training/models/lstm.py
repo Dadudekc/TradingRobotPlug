@@ -2,51 +2,66 @@ import logging
 import pandas as pd
 from pathlib import Path
 import sys
+import os
+import numpy as np
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
 # Adjust the Python path dynamically for independent execution
 if __name__ == "__main__" and __package__ is None:
     script_dir = Path(__file__).resolve().parent
-    project_root = script_dir.parents[0]  # Adjust this according to the correct level
-    sys.path.append(str(project_root))
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Move three levels up to the project root (adjust based on your directory structure)
+    project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir, os.pardir, os.pardir))
+
+    # Add the project root to the Python path
+    sys.path.append(project_root)
+
+    print("Corrected Project root path:", project_root)
 
 from advanced_lstm_trainer import AdvancedLSTMModelTrainer
-from basic_lstm_trainer import basicLSTMModelTrainer, basicLSTMModelConfig, prepare_data
+from basiclstm import basicLSTMModelTrainer, basicLSTMModelConfig, prepare_data
+from Scripts.Utilities.model_training_utils import LoggerHandler, DataLoader, DataPreprocessor
+from Scripts.Utilities.config_handling import ConfigManager  # Import ConfigManager
 
 def main():
-    # Set up logging
-    logger = logging.getLogger("LSTM_Training")
-    logger.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
+    # Initialize logger
+    logger_handler = LoggerHandler()
 
-    # Example data preparation
-    data = pd.DataFrame({
-        'date': pd.date_range(start='1/1/2020', periods=100),
-        'symbol': ['AAPL'] * 100,
-        'close': np.random.rand(100) * 100,
-        'open': np.random.rand(100) * 100,
-        'high': np.random.rand(100) * 100,
-        'low': np.random.rand(100) * 100,
-        'volume': np.random.randint(1000, 10000, size=100)
-    })
+    # Load and preprocess data
+    data_loader = DataLoader(logger_handler)
+    config_manager = ConfigManager()  # Assuming ConfigManager is properly defined elsewhere
+    data_preprocessor = DataPreprocessor(logger_handler, config_manager)
+
+    # Example path to your dataset
+    file_path = r"C:\TheTradingRobotPlug\data\alpha_vantage\tsla_data.csv"
+    data = data_loader.load_data(file_path)
+
+    if data is None:
+        logger_handler.log("Data loading failed. Exiting.", "ERROR")
+        return
+
     target_column = 'close'
     time_steps = 10
+
+    # Preprocess data
+    X_train, X_val, y_train, y_val = data_preprocessor.preprocess_data(data, target_column=target_column)
+
+    if X_train is None or X_val is None:
+        logger_handler.log("Data preprocessing failed. Exiting.", "ERROR")
+        return
 
     # Choose between advanced and basic model
     use_advanced = True  # Set this to False to use the basic model
 
     if use_advanced:
-        logger.info("Using Advanced LSTM Model Trainer")
-        trainer = AdvancedLSTMModelTrainer(logger)
+        logger_handler.log("Using Advanced LSTM Model Trainer")
+        trainer = AdvancedLSTMModelTrainer(logger_handler)
         
         # Data preparation for advanced model
-        # Assuming you have the data split logic defined elsewhere
-        X_train, X_val, y_train, y_val = ... # Define your data splitting logic here
-        X_train_seq, y_train_seq = trainer.create_sequences(X_train, y_train, time_steps)
-        X_val_seq, y_val_seq = trainer.create_sequences(X_val, y_val, time_steps)
+        X_train_seq, y_train_seq = trainer.create_sequences(X_train.values, y_train.values, time_steps)
+        X_val_seq, y_val_seq = trainer.create_sequences(X_val.values, y_val.values, time_steps)
         
         model_params = {
             'layers': [
@@ -59,17 +74,25 @@ def main():
             'optimizer': 'adam',
             'loss': 'mean_squared_error'
         }
-        model_config = LSTMModelConfig.lstm_model((X_train_seq.shape[1], X_train_seq.shape[2]), model_params)
-        trainer.train_lstm(X_train_seq, y_train_seq, X_val_seq, y_val_seq, model_config, epochs=50)
+
+        model_config = basicLSTMModelConfig.lstm_model(input_shape=(X_train_seq.shape[1], X_train_seq.shape[2]))
+
+        # Define the callbacks
+        early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+        reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, min_lr=1e-6)
+
+        # Train the advanced LSTM model with callbacks
+        trainer.train_lstm(X_train_seq, y_train_seq, X_val_seq, y_val_seq, epochs=50, callbacks=[early_stopping, reduce_lr])
+
     else:
-        logger.info("Using Basic LSTM Model Trainer")
-        trainer = basicLSTMModelTrainer(logger)
+        logger_handler.log("Using Basic LSTM Model Trainer")
+        trainer = basicLSTMModelTrainer(logger_handler)
         
-        X_train, y_train, scaler = prepare_data(data, target_column, time_steps)
-        X_val, y_val, _ = prepare_data(data, target_column, time_steps)  # Replace with actual validation data
+        X_train_seq, y_train_seq, scaler = prepare_data(X_train, target_column, time_steps)
+        X_val_seq, y_val_seq, _ = prepare_data(X_val, target_column, time_steps)  # Use the same function for validation
         
-        model_config = basicLSTMModelConfig.lstm_model(input_shape=(X_train.shape[1], X_train.shape[2]))
-        trainer.train_lstm(X_train, y_train, X_val, y_val, model_config, epochs=50)
+        model_config = basicLSTMModelConfig.lstm_model(input_shape=(X_train_seq.shape[1], X_train_seq.shape[2]))
+        trainer.train_lstm(X_train_seq, y_train_seq, X_val_seq, y_val_seq, model_config, epochs=50)
 
 if __name__ == "__main__":
     main()

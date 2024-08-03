@@ -14,12 +14,21 @@ if __name__ == "__main__" and __package__ is None:
     project_root = script_dir.parent.parent
     sys.path.append(str(project_root / 'Scripts' / 'Utilities'))
 
+    print("Corrected Project root path:", project_root)
+
 try:
-    from Scripts.Utilities.config_handling import ConfigManager
-    from Scripts.Utilities.data_fetch_utils import DataFetchUtils
+    if __package__ is None:
+        # If running as a script directly, use absolute imports
+        from config_handling import ConfigManager
+        from data_fetch_utils import DataFetchUtils
+    else:
+        # If running as part of a package, use relative imports
+        from config_handling import ConfigManager
+        from data_fetch_utils import DataFetchUtils
 except ImportError as e:
     print(f"Error importing modules: {e}")
     raise
+
 
 
 class DataStore:

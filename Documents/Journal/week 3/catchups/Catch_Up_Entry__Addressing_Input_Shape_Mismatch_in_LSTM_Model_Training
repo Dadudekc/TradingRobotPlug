@@ -1,0 +1,144 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Addressing_Input_Shape_Mismatch_in_LSTM_Model_Training"**
+
+---
+
+## Work Completed
+
+- **Objectives and Goals:**  
+  The main objective of this session was to identify and resolve an issue related to input shape mismatch encountered during the evaluation phase of training a Bidirectional LSTM model. The goal was to ensure that the model's input shape configuration aligns with the data being used during training and evaluation.
+
+- **Actions Taken:**  
+  - Investigated the error related to input shape mismatch by examining the model configuration and the input data shape.
+  - Reviewed and modified the input layer of the LSTM model to ensure it correctly handles 3D input data, specifically with shapes `(batch_size, time_steps, features)`.
+  - Implemented logging statements to validate the shapes of input data during both training and evaluation phases.
+  - Reconfigured the LSTM model using the correct input shape and rebuilt the model accordingly.
+
+- **Challenges and Breakthroughs:**  
+  - **Challenges:** The primary challenge was deciphering the cause of the input shape mismatch error that was hindering model evaluation. This involved deep diving into both the model configuration and the input data preprocessing steps.
+  - **Breakthroughs:** The breakthrough came when it was identified that the LSTM layer's input shape was incorrectly specified, leading to the mismatch. Correcting the input shape configuration in the model resolved the issue.
+
+- **Results and Impact:**  
+  After reconfiguring the model with the correct input shape, the model successfully trained without encountering input shape errors. This adjustment has significantly improved the robustness of the model and its ability to handle the input data correctly during both training and evaluation.
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Utilized for scripting and model configuration, including the restructuring of the LSTM model input layer.
+- **TensorFlow/Keras:** Employed for building and training the Bidirectional LSTM model, managing the complexities of input shapes in sequential models.
+- **Logging:** Implemented to trace data shapes during model training and evaluation, aiding in debugging and validation.
+- **Error Debugging:** Enhanced skills in identifying and resolving shape mismatch errors in deep learning models.
+
+---
+
+## Lessons Learned
+
+- **Learning Outcomes:**  
+  Gained a deeper understanding of how input shapes must be carefully managed in LSTM and other sequential models, especially when handling time-series data with multiple features. Correctly setting up the input layer is crucial to avoid shape mismatch errors during training and evaluation.
+
+- **Unexpected Challenges:**  
+  The input shape mismatch error was initially challenging to diagnose due to the model expecting a different shape than what was provided. The solution required meticulous checking of both model configuration and the data preprocessing pipeline.
+
+- **Future Application:**  
+  This experience will lead to more rigorous checks of input shapes in future model configurations. Ensuring that the input layer correctly matches the data's shape will be a standard practice in future projects to avoid similar issues.
+
+---
+
+## To-Do
+
+- **Refine Model Evaluation:** Re-evaluate the model after confirming that all input shapes are correctly handled.
+- **Enhance Logging:** Improve logging to provide more detailed insights into data flow through the model during training and evaluation.
+- **Documentation:** Update project documentation to reflect the changes made to the LSTM model configuration and the reasoning behind these changes.
+- **Code Review:** Schedule a code review session to ensure that the recent changes adhere to best practices and project standards.
+
+---
+
+## Code Snippets and Context
+
+### Adjusted LSTM Model Configuration
+
+```python
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout, Bidirectional
+from tensorflow.keras.optimizers import Adam
+
+class LSTMModelConfig:
+    @staticmethod
+    def lstm_model(input_shape, params):
+        model = Sequential()
+        for layer in params['layers']:
+            if layer['type'] == 'bidirectional_lstm':
+                model.add(Bidirectional(LSTM(layer['units'], return_sequences=layer['return_sequences'], input_shape=input_shape if not model.layers else None)))
+            elif layer['type'] == 'batch_norm':
+                model.add(BatchNormalization())
+            elif layer['type'] == 'dropout':
+                model.add(Dropout(layer['rate']))
+            elif layer['type'] == 'dense':
+                model.add(Dense(layer['units'], activation=layer['activation']))
+        model.add(Dense(1))  # Ensure the final layer produces a single output per sequence
+        model.compile(optimizer=params['optimizer'], loss=params['loss'])
+        return model
+```
+
+### Data Shape Logging
+
+```python
+self.logger.info(f"X_train_seq shape: {X_train_seq.shape}")  # Logging the shape during training
+self.logger.info(f"X_val_seq shape: {X_val_seq.shape}")      # Logging the shape during validation
+```
+
+---
+
+## Additional Notes and Reflections
+
+- **Brainstorming:** Consider implementing automated checks for input shapes before model training begins to preemptively catch any potential mismatches.
+- **Improvements:** Introduce more detailed error messages that explicitly state the expected and actual shapes when an input shape error is detected.
+- **Reflection:** This session highlighted the importance of understanding and correctly implementing input shapes in sequential models, particularly when dealing with complex datasets.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Data preprocessing and feature engineering - Completed
+- **Milestone 3:** LSTM model training and evaluation - In Progress (Resolved input shape mismatch issue)
+- **Milestone 4:** Final integration and deployment - Pending
+
+---
+
+## Resource Links
+
+- [TensorFlow Keras Documentation](https://www.tensorflow.org/api_docs/python/tf/keras)
+- [Python Logging Documentation](https://docs.python.org/3/library/logging.html)
+- [Keras Sequential Model Guide](https://keras.io/guides/sequential_model/)
+
+---
+
+## Collaboration and Communication
+
+- **Meetings and Discussions:** None specific to this session.
+- **Decisions Made:** Decided to reconfigure the model input layer after identifying the shape mismatch issue.
+- **Action Items:** 
+  - Continue monitoring the model's performance after shape adjustments.
+  - Document the changes and update the project repository accordingly.
+
+---
+
+## Risk Management
+
+- **Risk:** The model may encounter similar shape issues with different datasets.
+  - **Mitigation Strategy:** Implement thorough shape checks and validations in the preprocessing pipeline before training begins.
+
+---
+
+## Retrospective
+
+- **What Went Well:** Successfully identified and resolved the input shape mismatch issue, allowing the model training process to proceed without errors.
+- **What Could Be Improved:** There could be better initial planning around input shape management to avoid such issues in the first place.
+- **Actionable Insights:** Incorporate shape validation checks as part of the preprocessing pipeline to ensure that all data passed to the model conforms to the expected input shape.
+
+---

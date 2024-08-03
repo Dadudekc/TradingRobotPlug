@@ -304,7 +304,8 @@ class DataFetchTab(ttk.Frame):
                                     mode='lines',
                                     name=col_name
                                 ), row=2 if indicator in ["SMA", "EMA", "MACD", "ADX", "Ichimoku", "PSAR"] else 3, col=1)
-              fig.update_layout(title=f'Candlestick Chart and Indicators for {symbol}', xaxis_title='Date', yaxis_title='Price')
+
+                fig.update_layout(title=f'Candlestick Chart and Indicators for {symbol}', xaxis_title='Date', yaxis_title='Price')
                 fig.show()
             else:
                 self.status_label.config(text=f"No data found for symbol: {symbol}")

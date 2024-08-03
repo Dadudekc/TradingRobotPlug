@@ -11,14 +11,31 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, BatchNormalization, Dropout
 import optuna
+import sys
+from pathlib import Path
 
-# Adjust the Python path dynamically for independent execution
-if __name__ == "__main__" and __package__ is None:
-    script_dir = Path(__file__).resolve().parent
-    project_root = script_dir.parents[3]
-    sys.path.append(str(project_root))
+# Adjust import path based on your project structure
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parents[3]  # Assuming project root is three levels up
 
-from Scripts.Utilities.model_training_utils import LoggerHandler, DataLoader, DataPreprocessor
+# Add the directory containing 'config_handling' to sys.path
+utilities_dir = project_root / 'Scripts' / 'Utilities'
+sys.path.append(str(utilities_dir))
+
+# Debug print to confirm the path
+print("Corrected Project root path:", project_root)
+print("Adding Utilities directory to sys.path:", utilities_dir)
+
+# Now import config_handling or other needed modules
+try:
+    from config_handling import ConfigManager  # Adjust based on actual module
+except ModuleNotFoundError as e:
+    print(f"Error importing modules: {e}")
+    print(f"sys.path: {sys.path}")
+    sys.exit(1)
+
+
+from model_training_utils import LoggerHandler, DataLoader, DataPreprocessor
 
 # Set up logging using LoggerHandler
 log_dir = Path("C:/TheTradingRobotPlug/logs")
@@ -39,8 +56,8 @@ class AdvancedLSTMModelTrainer:
         self.scaler_save_path = Path(scaler_save_path)
 
     def preprocess_data(self, X_train, X_val):
-        self.logger.log("Preprocessing data...")
-        self.logger.log(f"Initial X_train shape: {X_train.shape}, X_val shape: {X_val.shape}", "DEBUG")
+        self.logger.log("Preprocessing data...", level="INFO")
+        self.logger.log(f"Initial X_train shape: {X_train.shape}, X_val shape: {X_val.shape}", level="DEBUG")
 
         scaler = RobustScaler()
         X_train_scaled = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
@@ -48,7 +65,7 @@ class AdvancedLSTMModelTrainer:
 
         joblib.dump(scaler, self.scaler_save_path)
 
-        self.logger.log(f"Scaled X_train shape: {X_train_scaled.shape}, X_val shape: {X_val_scaled.shape}", "DEBUG")
+        self.logger.log(f"Scaled X_train shape: {X_train_scaled.shape}, X_val shape: {X_val_scaled.shape}", level="DEBUG")
         return X_train_scaled, X_val_scaled
 
     def build_lstm_model(self, input_shape):
@@ -61,7 +78,7 @@ class AdvancedLSTMModelTrainer:
         return model
 
     def train_lstm(self, X_train, y_train, X_val, y_val, epochs=50, callbacks=None):
-        self.logger.log("Starting LSTM model training...")
+        self.logger.log("Starting LSTM model training...", level="INFO")
         try:
             X_train_scaled, X_val_scaled = self.preprocess_data(X_train, X_val)
 
@@ -71,34 +88,29 @@ class AdvancedLSTMModelTrainer:
             input_shape = (X_train_scaled.shape[1], X_train_scaled.shape[2])
             model = self.build_lstm_model(input_shape)
 
-            self.logger.log(f"X_train_scaled shape: {X_train_scaled.shape}")
-            self.logger.log(f"y_train shape: {y_train.shape}")
-            self.logger.log(f"X_val_scaled shape: {X_val_scaled.shape}")
-            self.logger.log(f"y_val shape: {y_val.shape}")
+            self.logger.log(f"X_train_scaled shape: {X_train_scaled.shape}", level="INFO")
+            self.logger.log(f"y_train shape: {y_train.shape}", level="INFO")
+            self.logger.log(f"X_val_scaled shape: {X_val_scaled.shape}", level="INFO")
+            self.logger.log(f"y_val shape: {y_val.shape}", level="INFO")
 
             model.fit(X_train_scaled, y_train, validation_data=(X_val_scaled, y_val), epochs=epochs, batch_size=32,
                       callbacks=callbacks)
 
             y_pred_val = model.predict(X_val_scaled).flatten()
 
-            self.logger.log(f"Predicted y_val shape: {y_pred_val.shape}")
+            self.logger.log(f"Predicted y_val shape: {y_pred_val.shape}", level="INFO")
             mse = mean_squared_error(y_val, y_pred_val)
             rmse = np.sqrt(mse)
             r2 = r2_score(y_val, y_pred_val)
 
-            self.logger.log(f"Validation MSE: {mse:.2f}, RMSE: {rmse:.2f}, R²: {r2:.2f}")
+            self.logger.log(f"Validation MSE: {mse:.2f}, RMSE: {rmse:.2f}, R²: {r2:.2f}", level="INFO")
 
             model.save(self.model_save_path)
             return model
         except Exception as e:
-            self.logger.log(f"Error occurred during LSTM model training: {e}", "ERROR")
+            self.logger.log(f"Error occurred during LSTM model training: {e}", level="ERROR")
             raise
 
-    def evaluate_model(self, X_test, y_test):
-        self.logger.log("Evaluating model on test data...")
-        try:
-            if X_test.size == 0 or y_test.size == 0:
-                raise ValueError("Test data is empty. Cannot evaluate model.")
 
             model = tf.keras.models.load_model(self.model_save_path)
             scaler = joblib.load(self.scaler_save_path)
@@ -118,12 +130,21 @@ class AdvancedLSTMModelTrainer:
     @staticmethod
     def create_sequences(data, target, time_steps=10):
         xs, ys = [], []
+        if len(data) <= time_steps:
+            raise ValueError(f"Not enough data to create sequences with time_steps={time_steps}. Data length: {len(data)}")
+        
         for i in range(len(data) - time_steps):
-            x = data[i:(i + time_steps)]
-            y = target.iloc[i + time_steps]
-            xs.append(x)
-            ys.append(y)
+            try:
+                x = data[i:(i + time_steps)]
+                y = target[i + time_steps]  # Use numpy indexing instead of .iloc
+                xs.append(x)
+                ys.append(y)
+            except KeyError as e:
+                logger.error(f"KeyError encountered at index {i + time_steps}: {e}")
+                raise
         return np.array(xs), np.array(ys)
+
+
 
     def objective(self, trial, X_train, y_train, X_val, y_val):
         self.logger.log(f"X_train shape: {X_train.shape}")

@@ -17,14 +17,28 @@ from sklearn.metrics import confusion_matrix
 from pathlib import Path
 import sys
 
-# Adjust the Python path dynamically for independent execution
-if __name__ == "__main__" and __package__ is None:
-    script_dir = Path(__file__).resolve().parent
-    project_root = script_dir.parent.parent
-    sys.path.append(str(project_root))
+# Setup paths
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parent.parent.parent.parent  # Adjusted to reach the project root
+utilities_dir = project_root / 'Scripts' / 'Utilities'
 
-from Scripts.Utilities.config_handling import ConfigManager
-from Scripts.Utilities.data_store import DataStore
+# Add the Utilities directory to sys.path
+if utilities_dir.exists() and str(utilities_dir) not in sys.path:
+    sys.path.append(str(utilities_dir))
+
+# Print sys.path for debugging
+print("Updated sys.path:")
+for p in sys.path:
+    print(p)
+
+# Now attempt to import modules
+try:
+    from config_handling import ConfigManager
+    from data_store import DataStore
+except ImportError as e:
+    print(f"Error importing modules: {e}")
+    sys.exit(1)
+
 
 class LoggerHandler:
     def __init__(self, log_text_widget=None, logger=None):
@@ -148,7 +162,6 @@ class DataPreprocessor:
             self.logger.log(error_message, "ERROR")
             return None, None, None, None
 
-
     def _handle_dates(self, data, date_column):
         if date_column in data.columns:
             data[date_column] = pd.to_datetime(data[date_column])
@@ -194,7 +207,6 @@ class DataPreprocessor:
         scaler = self.scalers.get(scaler_type, StandardScaler())
         X_scaled = scaler.fit_transform(X_imputed)
         return X_scaled
-
 
 class VisualizationHandler:
     def __init__(self, logger_handler):

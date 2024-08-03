@@ -1,23 +1,54 @@
-# models/arima_model_trainer.py
-
-import threading
+import pandas as pd  # Ensure pandas is imported
+import numpy as np
 import logging
-import pandas as pd
-import pmdarima as pm
-from sklearn.metrics import mean_squared_error
+import threading
 from datetime import datetime
 import traceback
+import pmdarima as pm
+from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
-import numpy as np
+from statsmodels.tsa.stattools import adfuller
+from pathlib import Path
+import yaml
+import sys
+
+# Adjust import path based on your project structure
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parents[3]  # Assuming project root is three levels up
+
+# Add the 'Utilities' directory to sys.path
+utilities_dir = project_root / 'Scripts' / 'Utilities'
+sys.path.append(str(utilities_dir))
+
+# Debug print to confirm the path
+print("Corrected Project root path:", project_root)
+print("Adding Utilities directory to sys.path:", utilities_dir)
+
+# Now import the DataStore class
+try:
+    from data_store import DataStore
+except ModuleNotFoundError as e:
+    print(f"Error importing modules: {e}")
+    print(f"sys.path: {sys.path}")
+    sys.exit(1)
+
+config_file_path = project_root / 'config.yaml'
+
+def load_config(config_file):
+    with open(config_file, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
 
 class ARIMAModelTrainer:
-    def __init__(self, close_prices, threshold=100):
-        self.close_prices = close_prices
+    def __init__(self, symbol, threshold=100):
+        self.symbol = symbol
         self.threshold = threshold
+        self.store = DataStore()
         self.logger = self.setup_logger()
+        self.close_prices = self.load_data()
 
     def setup_logger(self):
-        logger = logging.getLogger('ARIMA_Test')
+        logger = logging.getLogger(f'ARIMA_{self.symbol}')
         logger.setLevel(logging.DEBUG)
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
@@ -25,6 +56,14 @@ class ARIMAModelTrainer:
         ch.setFormatter(formatter)
         logger.addHandler(ch)
         return logger
+
+    def load_data(self):
+        """Load data for the symbol using DataStore."""
+        df = self.store.load_data(self.symbol)
+        if df is None or df.empty:
+            self.logger.error(f"Failed to load data for {self.symbol}")
+            raise ValueError(f"No data available for {self.symbol}")
+        return df['close']
 
     def display_message(self, message, level="INFO"):
         """Log messages with timestamps."""
@@ -36,6 +75,16 @@ class ARIMAModelTrainer:
             self.logger.error(message)
         else:
             self.logger.debug(message)
+
+    def make_stationary(self, data):
+        """Make the series stationary by differencing and performing ADF test."""
+        result = adfuller(data)
+        if result[1] <= 0.05:
+            self.display_message("Data is already stationary.", "INFO")
+            return data
+        else:
+            self.display_message("Data is not stationary, differencing will be applied.", "INFO")
+            return data.diff().dropna()
 
     def background_training(self):
         self.display_message("Starting ARIMA training background process...", "INFO")
@@ -53,35 +102,45 @@ class ARIMAModelTrainer:
         scaled_train = scaler.fit_transform(train.values.reshape(-1, 1)).flatten()
         scaled_test = scaler.transform(test.values.reshape(-1, 1)).flatten()
 
+        # Make the data stationary
+        scaled_train = self.make_stationary(pd.Series(scaled_train)).values
+        scaled_test = pd.Series(scaled_test).reset_index(drop=True)  # Reset index of test Series
+
         history = list(scaled_train)
 
-        # Automatically find the best ARIMA parameters
-        self.display_message("Finding the best ARIMA parameters...", "INFO")
+        # Manually set ARIMA parameters with increased maxiter
+        self.display_message("Testing manually set ARIMA parameters with increased maxiter...", "INFO")
         try:
-            model = pm.auto_arima(history, start_p=1, start_q=1, test='adf', max_p=3, max_q=3, seasonal=False,
-                                trace=True, error_action='ignore', suppress_warnings=True, maxiter=1000)
+            model = pm.ARIMA(order=(1, 1, 1), solver='lbfgs', maxiter=1000)  # Increased maxiter
+            model.fit(history)
             results['parameters']['order'] = model.order
             self.display_message(f"Selected ARIMA parameters: {model.order}", "INFO")
+            
+            # Check if the model attributes exist before accessing
+            if hasattr(model, 'arparams_'):
+                self.display_message(f"AR Coefficients: {model.arparams_}")
+            else:
+                self.display_message("AR Coefficients are not available.", "WARNING")
+
+            if hasattr(model, 'maparams_'):
+                self.display_message(f"MA Coefficients: {model.maparams_}")
+            else:
+                self.display_message("MA Coefficients are not available.", "WARNING")
+
         except Exception as e:
-            self.display_message(f"Error finding ARIMA parameters: {e}", "ERROR")
+            self.display_message(f"Error fitting ARIMA model: {e}", "ERROR")
             return
-
-        # Fit the model on the initial history
-        model_fit = pm.ARIMA(order=model.order, maxiter=1000)
-        model_fit.fit(history)
-
-        scaled_test = pd.Series(scaled_test).reset_index(drop=True)  # Reset index of test Series
 
         for t in range(len(scaled_test)):
             try:
                 self.display_message(f"Training step {t}/{len(scaled_test)}", "DEBUG")
-                forecast = model_fit.predict(n_periods=1)[0]  # Predict the next period
+                forecast = model.predict(n_periods=1)[0]  # Predict the next period
                 self.display_message(f"Forecast at step {t}: {forecast}", "DEBUG")
                 results['predictions'].append(forecast)
                 obs = scaled_test[t]
                 history.append(obs)
                 # Update the model with the new observation
-                model_fit.update([obs])
+                model.update([obs])
             except ValueError as ve:
                 self.display_message(f"ValueError at step {t}: {ve}", "ERROR")
                 results['errors'].append(str(ve))
@@ -91,12 +150,10 @@ class ARIMAModelTrainer:
             except Exception as e:
                 self.display_message(f"Unexpected error at step {t}: {e}", "ERROR")
                 results['errors'].append(str(e))
-                # Log the traceback for the unexpected error
                 self.display_message(f"Traceback: {traceback.format_exc()}", "DEBUG")
-                break  # Exit the loop if an unexpected error occurs
+                break
 
         if len(results['predictions']) > 0:
-            # Inverse scale predictions and test data
             predictions = scaler.inverse_transform(np.array(results['predictions']).reshape(-1, 1)).flatten()
             test_actual = scaler.inverse_transform(scaled_test[:len(results['predictions'])].values.reshape(-1, 1)).flatten()
 
@@ -104,21 +161,17 @@ class ARIMAModelTrainer:
             self.display_message(f"Test MSE: {mse:.2f}", "INFO")
 
             if mse < self.threshold:
-                self.display_message("Your ARIMA model seems promising for forecasting stock prices.", "INFO")
+                self.display_message(f"Your ARIMA model for {self.symbol} seems promising for forecasting stock prices.", "INFO")
             else:
-                self.display_message("Consider different ARIMA parameters or models for better forecasting accuracy.", "WARNING")
+                self.display_message(f"Consider different ARIMA parameters or models for {self.symbol} for better forecasting accuracy.", "WARNING")
         else:
-            self.display_message("No valid predictions were made by the ARIMA model. Please check the model configuration and data.", "ERROR")
+            self.display_message(f"No valid predictions were made by the ARIMA model for {self.symbol}. Please check the model configuration and data.", "ERROR")
 
-        # Log final performance metrics
         results['performance_metrics']['mse'] = mse
         self.display_message(f"Final performance metrics: MSE = {mse:.2f}", "INFO")
 
-        # Save the results
-        pd.DataFrame({'Actual': test_actual, 'Predicted': predictions}).to_csv('arima_predictions.csv', index=False)
-        self.display_message("Results saved to arima_predictions.csv", "INFO")
-
-
+        pd.DataFrame({'Actual': test_actual, 'Predicted': predictions}).to_csv(f'arima_predictions_{self.symbol}.csv', index=False)
+        self.display_message(f"Results for {self.symbol} saved to arima_predictions_{self.symbol}.csv", "INFO")
 
     def train(self):
         if self.close_prices is None or self.close_prices.empty:
@@ -134,47 +187,20 @@ class ARIMAModelTrainer:
         training_thread.join()
         self.display_message("ARIMA model training background process completed.", "INFO")
 
-# models/arima_model_trainer.py
 
-# (The code you already have above remains unchanged)
+# scripts/train_multiple_stocks.py
 
-import unittest
-import os
+def load_config(config_file):
+    with open(config_file, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
 
-class TestARIMAModelTrainer(unittest.TestCase):
-    def setUp(self):
-        # Define the path to your data file
-        self.data_path = "C:/TheTradingRobotPlug/data/alpha_vantage/tsla_data.csv"
-        
-        # Check if the file exists
-        if not os.path.exists(self.data_path):
-            self.fail(f"Data file {self.data_path} not found.")
-
-        # Load the data
-        self.data = pd.read_csv(self.data_path)
-
-        # Ensure 'close' column exists
-        if 'close' not in self.data.columns:
-            self.fail(f"'close' column not found in data file {self.data_path}.")
-
-        # Extract the close prices
-        self.close_prices = self.data['close']
-
-    def test_arima_training(self):
-        """Test the ARIMA model training."""
-        try:
-            trainer = ARIMAModelTrainer(self.close_prices, threshold=100)
-            trainer.train()
-
-            # Check if the ARIMA model training was completed and results were saved
-            self.assertTrue(os.path.exists('arima_predictions.csv'), "arima_predictions.csv not found.")
-            results_df = pd.read_csv('arima_predictions.csv')
-            self.assertFalse(results_df.empty, "Results file is empty.")
-            self.assertIn('Actual', results_df.columns, "Results file missing 'Actual' column.")
-            self.assertIn('Predicted', results_df.columns, "Results file missing 'Predicted' column.")
-        except Exception as e:
-            self.fail(f"ARIMA model training failed with exception: {e}")
+def main():
+    config = load_config('config.yaml')
+    for stock in config['stocks']:
+        symbol = stock['symbol']
+        trainer = ARIMAModelTrainer(symbol=symbol, threshold=stock.get('threshold', 100))
+        trainer.train()
 
 if __name__ == '__main__':
-    unittest.main()
-
+    main()
