@@ -21,7 +21,7 @@ if __name__ == "__main__" and __package__ is None:
     print("Corrected Project root path:", project_root)
 
 from advanced_lstm_trainer import AdvancedLSTMModelTrainer
-from basiclstm import basicLSTMModelTrainer, basicLSTMModelConfig, prepare_data
+from Scripts.ModelTraining.model_training.models.basic_lstm_trainer import basicLSTMModelTrainer, basicLSTMModelConfig, prepare_data
 from Scripts.Utilities.model_training_utils import LoggerHandler, DataLoader, DataPreprocessor
 from Scripts.Utilities.config_handling import ConfigManager  # Import ConfigManager
 

@@ -11,7 +11,7 @@ I have several Python scripts in a project, and I need to standardize the way pa
 4. **Conditional Imports**: Implement conditional imports based on whether the script is in a testing or production environment.
 
 **Required Script Template:**
-```python
+
 # File: <File Name>
 # Location: <Relative Path from Project Root>
 # Description: <Brief Description of Script Functionality>

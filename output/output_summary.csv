@@ -1,0 +1,2 @@
+model_type,model_path,input_data_path,prediction_path,timestamp
+LSTM,N/A,data\alpha_vantage\tsla_data.csv,output\LSTM\20240804_030032\LSTM_predictions.parquet,2024-08-04 03:00:33

@@ -11,8 +11,8 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
-from model_training import ModelTraining
-from logging_module import ModelTrainingLogger
+from model_training_main import train_arima, train_advanced_lstm, train_linear_regression, train_neural_network, train_random_forest
+from Scripts.Utilities.model_training_utils import LoggerHandler, DataLoader, DataPreprocessor
 
 class ModelTrainingTab(tk.Frame):
     def __init__(self, parent, config_file, scaler_options):
@@ -20,12 +20,11 @@ class ModelTrainingTab(tk.Frame):
         self.config_file = config_file
         self.scaler_options = scaler_options
         self.queue = queue.Queue()
-        self.utils = MLRobotUtils()
+        self.logger_handler = LoggerHandler(self.log_text)
+        self.data_loader = DataLoader(self.logger_handler)
+        self.data_preprocessor = DataPreprocessor(self.logger_handler)
         self.is_debug_mode = False
         self.log_text = tk.Text(self, height=10, state='disabled')
-        self.logger = ModelTrainingLogger(self.log_text)
-        self.model_training = ModelTraining(self.logger)
-        self.data_handler = DataHandler(config_file=self.config_file, log_text_widget=self.log_text)
 
         self.scaler_type_var = tk.StringVar(self)
         
@@ -33,10 +32,7 @@ class ModelTrainingTab(tk.Frame):
 
     def toggle_debug_mode(self):
         self.is_debug_mode = not self.is_debug_mode
-        if self.is_debug_mode:
-            self.utils.log_message("Debug mode enabled", self.log_text, False)
-        else:
-            self.utils.log_message("Debug mode disabled", self.log_text, False)
+        self.display_message(f"Debug mode {'enabled' if self.is_debug_mode else 'disabled'}", level="DEBUG")
 
     def setup_gui(self):
         self.setup_title_label()
@@ -70,7 +66,6 @@ class ModelTrainingTab(tk.Frame):
         model_type_dropdown = ttk.Combobox(self, textvariable=self.model_type_var, 
                                            values=["linear_regression", "random_forest", "neural_network", "LSTM", "ARIMA"])
         model_type_dropdown.pack()
-        model_type_dropdown.bind("<<ComboboxSelected>>", self.show_dynamic_options)
         self.dynamic_options_frame = tk.Frame(self)
         self.dynamic_options_frame.pack(pady=5)
 
@@ -92,12 +87,6 @@ class ModelTrainingTab(tk.Frame):
         self.debug_button = tk.Button(self, text="Enable Debug Mode", command=self.toggle_debug_mode)
         self.debug_button.pack(pady=5)
 
-    def toggle_debug_mode(self):
-        self.is_debug_mode = not self.is_debug_mode
-        btn_text = "Disable Debug Mode" if self.is_debug_mode else "Enable Debug Mode"
-        self.debug_button.config(text=btn_text)
-        self.display_message(f"Debug mode {'enabled' if self.is_debug_mode else 'disabled'}", level="DEBUG")
-
     def browse_data_file(self):
         file_path = filedialog.askopenfilename(
             filetypes=[("CSV Files", "*.csv"), ("Excel Files", "*.xlsx"), ("All Files", "*.*")])
@@ -105,30 +94,6 @@ class ModelTrainingTab(tk.Frame):
             self.data_file_entry.delete(0, tk.END)
             self.data_file_entry.insert(0, file_path)
             self.preview_selected_data(file_path)
-
-    def show_dynamic_options(self, *_):
-        for widget in self.dynamic_options_frame.winfo_children():
-            widget.destroy()
-
-        selected_model_type = self.model_type_var.get()
-        if selected_model_type in self.model_training.model_configs:
-            for layer in self.model_training.model_configs[selected_model_type]['layers']:
-                tk.Label(self.dynamic_options_frame, text=layer['type']).pack()
-                if 'units' in layer:
-                    entry = tk.Entry(self.dynamic_options_frame)
-                    entry.insert(0, str(layer['units']))
-                    entry.pack()
-                    setattr(self, f"{layer['type']}_units_entry", entry)
-                if 'rate' in layer:
-                    entry = tk.Entry(self.dynamic_options_frame)
-                    entry.insert(0, str(layer['rate']))
-                    entry.pack()
-                    setattr(self, f"{layer['type']}_rate_entry", entry)
-                if 'activation' in layer:
-                    entry = tk.Entry(self.dynamic_options_frame)
-                    entry.insert(0, layer['activation'] if layer['activation'] else "")
-                    entry.pack()
-                    setattr(self, f"{layer['type']}_activation_entry", entry)
 
     def initiate_training(self):
         data_file = self.data_file_entry.get()
@@ -143,25 +108,30 @@ class ModelTrainingTab(tk.Frame):
             messagebox.showerror("Error", "Model type not selected")
             return
 
-        epochs = int(self.epochs_entry.get()) if hasattr(self, 'epochs_entry') else 50
-        
-        # Use the DataHandler to preprocess data
-        data = pd.read_csv(data_file)
-        X_train, X_val, y_train, y_val = self.data_handler.preprocess_data(data, target_column='close', scaler_type=scaler_type)
-        
-        if X_train is not None and y_train is not None:
-            threading.Thread(target=self.start_training, args=(X_train, y_train, X_val, y_val, model_type, epochs)).start()
-        else:
-            self.display_message("Data preprocessing failed. Training aborted.", level="ERROR")
+        threading.Thread(target=self.start_training, args=(data_file, model_type, scaler_type)).start()
 
-    def start_training(self, X_train, y_train, X_val, y_val, model_type, epochs):
-        self.model_training.start_training(X_train, y_train, X_val, y_val, model_type, epochs)
+    def start_training(self, data_file, model_type, scaler_type):
+        try:
+            if model_type == "ARIMA":
+                train_arima(symbol="AAPL", threshold=100)
+            elif model_type == "LSTM":
+                train_advanced_lstm(data_file_path=data_file)
+            elif model_type == "linear_regression":
+                train_linear_regression(data_file_path=data_file)
+            elif model_type == "neural_network":
+                train_neural_network(data_file_path=data_file, model_config_name="dense_model")
+            elif model_type == "random_forest":
+                train_random_forest(data_file_path=data_file)
+            else:
+                self.display_message(f"Unknown model type: {model_type}", level="ERROR")
+        except Exception as e:
+            self.display_message(f"Error during training: {str(e)}", level="ERROR")
 
     def process_queue(self):
         try:
             while not self.queue.empty():
                 message = self.queue.get_nowait()
-                self.logger.log(message)
+                self.logger_handler.log(message)
         except queue.Empty:
             pass
         finally:
@@ -169,11 +139,11 @@ class ModelTrainingTab(tk.Frame):
 
     def display_message(self, message, level="INFO"):
         if level == "DEBUG":
-            self.logger.debug(message)
+            self.logger_handler.debug(message)
         elif level == "ERROR":
-            self.logger.error(message)
+            self.logger_handler.error(message)
         else:
-            self.logger.info(message)
+            self.logger_handler.info(message)
 
     def preview_selected_data(self, file_path):
         try:

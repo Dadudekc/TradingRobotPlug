@@ -1,3 +1,5 @@
+#C:\TheTradingRobotPlug\Scripts\ModelTraining\model_training\models\advanced_lstm_trainer.py
+
 import sys
 from pathlib import Path
 import logging

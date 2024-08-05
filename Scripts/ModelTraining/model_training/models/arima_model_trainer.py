@@ -1,16 +1,18 @@
-import pandas as pd  # Ensure pandas is imported
+from Scripts.Utilities.test2 import setup_logger, load_config, get_project_root
+import pandas as pd
 import numpy as np
 import logging
 import threading
 from datetime import datetime
-import traceback
 import pmdarima as pm
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
 from statsmodels.tsa.stattools import adfuller
 from pathlib import Path
 import yaml
+import os
 import sys
+
 
 # Adjust import path based on your project structure
 script_dir = Path(__file__).resolve().parent
@@ -32,30 +34,15 @@ except ModuleNotFoundError as e:
     print(f"sys.path: {sys.path}")
     sys.exit(1)
 
-config_file_path = project_root / 'config.yaml'
-
-def load_config(config_file):
-    with open(config_file, 'r') as file:
-        config = yaml.safe_load(file)
-    return config
-
 class ARIMAModelTrainer:
     def __init__(self, symbol, threshold=100):
         self.symbol = symbol
         self.threshold = threshold
         self.store = DataStore()
-        self.logger = self.setup_logger()
+        project_root = get_project_root()
+        log_file = project_root / f'logs/arima_{symbol}.log'
+        self.logger = setup_logger(f'ARIMA_{self.symbol}', log_file)
         self.close_prices = self.load_data()
-
-    def setup_logger(self):
-        logger = logging.getLogger(f'ARIMA_{self.symbol}')
-        logger.setLevel(logging.DEBUG)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
-        return logger
 
     def load_data(self):
         """Load data for the symbol using DataStore."""
@@ -188,19 +175,3 @@ class ARIMAModelTrainer:
         self.display_message("ARIMA model training background process completed.", "INFO")
 
 
-# scripts/train_multiple_stocks.py
-
-def load_config(config_file):
-    with open(config_file, 'r') as file:
-        config = yaml.safe_load(file)
-    return config
-
-def main():
-    config = load_config('config.yaml')
-    for stock in config['stocks']:
-        symbol = stock['symbol']
-        trainer = ARIMAModelTrainer(symbol=symbol, threshold=stock.get('threshold', 100))
-        trainer.train()
-
-if __name__ == '__main__':
-    main()

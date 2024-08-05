@@ -8,11 +8,11 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
-from Scripts.ModelTraining.model_training.models.neural_network import train_neural_network
+from Scripts.ModelTraining.model_training.models.neural_network_trainer import train_neural_network
 from Scripts.ModelTraining.model_training.models.lstm_trainer import train_lstm
-from Scripts.ModelTraining.model_training.models.linear_regression import train_linear_regression
-from Scripts.ModelTraining.model_training.models.random_forest import RandomForestModel  # Updated import
-from Scripts.ModelTraining.model_training.models.arima_model import ARIMAModelTrainer
+from Scripts.ModelTraining.model_training.models.linear_regression_trainer import train_linear_regression
+from Scripts.ModelTraining.model_training.models.random_forest_trainer import RandomForestModel  # Updated import
+from Scripts.ModelTraining.model_training.models.arima_model_trainer import ARIMAModelTrainer
 
 import threading
 from datetime import datetime
