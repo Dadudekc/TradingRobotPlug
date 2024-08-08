@@ -1,3 +1,5 @@
+# C:\TheTradingRobotPlug\Scripts\Utilities\model_training_utils.py
+
 import os
 import sys
 import logging
@@ -39,7 +41,10 @@ except ImportError as e:
     print(f"Error importing modules: {e}")
     sys.exit(1)
 
-
+def check_for_nan_inf(data):
+    if np.isnan(data).any() or np.isinf(data).any():
+        raise ValueError("Data contains NaN or infinite values.")
+        
 class LoggerHandler:
     def __init__(self, log_text_widget=None, logger=None):
         self.log_text_widget = log_text_widget
@@ -54,22 +59,31 @@ class LoggerHandler:
             self.log_text_widget.config(state='disabled')
             self.log_text_widget.see('end')
         else:
-            log_method = getattr(self.logger, level.lower(), self.logger.info)
-            log_method(message)
+            # Ensure logging method is correctly selected
+            if level == "INFO":
+                self.logger.info(message)
+            elif level == "DEBUG":
+                self.logger.debug(message)
+            elif level == "WARNING":
+                self.logger.warning(message)
+            elif level == "ERROR":
+                self.logger.error(message)
+            else:
+                self.logger.log(logging.INFO, message)
 
 
 class DataLoader:
     def __init__(self, logger_handler):
         self.logger = logger_handler
 
+    # File loading function in model_training_utils.py
     def load_data(self, file_path):
         try:
             data = pd.read_csv(file_path)
-            self.logger.log(f"Data loaded from {file_path}.")
             return data
-        except Exception as e:
-            error_message = f"Failed to load data from {file_path}: {str(e)}"
-            self.logger.log(error_message, "ERROR")
+        except FileNotFoundError:
+            error_message = f"No such file or directory: '{file_path}'"
+            self.logger.error(error_message)  # Corrected logging usage
             return None
 
     def save_scaler(self, scaler, file_path):
@@ -113,56 +127,49 @@ class DataPreprocessor:
             'MaxAbsScaler': MaxAbsScaler()
         }
 
-    def preprocess_data(self, data, target_column='close', date_column='date', lag_sizes=[1, 2, 3, 5, 10], window_sizes=[5, 10, 20], scaler_type=None):
+    def preprocess_data(self, data, target_column='close', feature_columns=None, test_size=0.2, random_state=42):
+        """
+        Preprocess the data using specified feature columns, handle date columns, create lag features,
+        rolling window features, and scale the data.
+        """
         try:
-            if isinstance(data, str):
-                raise ValueError("Expected data to be a DataFrame, got string instead.")
-            
-            # Handle date columns
-            data = self._handle_dates(data, date_column)
-            
-            # Create lag features
-            data = self._create_lag_features(data, target_column, lag_sizes)
-            
-            # Create rolling window features
-            data = self._create_rolling_window_features(data, target_column, window_sizes)
+            # Validate input data and feature_columns
+            if not isinstance(data, pd.DataFrame):
+                raise ValueError("Data must be a pandas DataFrame.")
 
-            if target_column in data.columns:
-                y = data[target_column]
-                X = data.drop(columns=[target_column], errors='ignore')
+            if feature_columns is None:
+                feature_columns = data.columns.tolist()  # Use all columns if none specified
             else:
-                self.logger.log(f"The '{target_column}' column is missing from the dataset. Please check the dataset.", "ERROR")
-                return None, None, None, None
+                # Ensure all specified feature_columns exist in the DataFrame
+                missing_cols = [col for col in feature_columns if col not in data.columns]
+                if missing_cols:
+                    raise ValueError(f"Missing columns in DataFrame: {missing_cols}")
 
-            # Remove non-numeric columns
-            numeric_columns = X.select_dtypes(include=[np.number]).columns
-            non_numeric_columns = X.select_dtypes(exclude=[np.number]).columns
-
-            # Log and drop any non-numeric columns
-            if not non_numeric_columns.empty:
-                self.logger.log(f"Non-numeric columns detected and will be dropped: {list(non_numeric_columns)}", "WARNING")
-                X = X[numeric_columns]
-
-            if not numeric_columns.empty:
-                X_numeric = X[numeric_columns]
-                X_numeric = self._impute_and_scale(X_numeric, scaler_type)
-                # Convert the numpy array back to DataFrame
-                X_numeric = pd.DataFrame(X_numeric, columns=numeric_columns, index=X.index)
+            X = data[feature_columns]
+            if target_column in X:
+                y = X.pop(target_column)
             else:
-                self.logger.log(f"No numeric columns found in the dataset for preprocessing.", "ERROR")
-                return None, None, None, None
+                raise ValueError(f"Target column '{target_column}' not found in the DataFrame.")
 
-            X_processed = X_numeric
+            # Optionally handle date columns, create lags, rolling features, etc. as necessary
+            # Example: Handle date if it's one of the features
+            if 'date' in X.columns:
+                X = self._handle_dates(X, 'date')
 
-            # Split the data
-            X_train, X_val, y_train, y_val = train_test_split(X_processed, y, test_size=0.2, random_state=42)
+            # Scale features
+            if 'scaler_type' in self.config_manager.config:
+                scaler_type = self.config_manager.config['scaler_type']
+                scaler = self.scalers.get(scaler_type, StandardScaler())
+                X = pd.DataFrame(scaler.fit_transform(X), columns=X.columns, index=X.index)
 
-            self.logger.log("Data preprocessing completed.")
+            # Split the data into train and validation sets
+            X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=test_size, random_state=random_state)
+
             return X_train, X_val, y_train, y_val
         except Exception as e:
-            error_message = f"Error during data preprocessing: {str(e)}\n{traceback.format_exc()}"
-            self.logger.log(error_message, "ERROR")
+            self.logger.error(f"Failed to preprocess data: {str(e)}", exc_info=True)
             return None, None, None, None
+
 
     def _handle_dates(self, data, date_column):
         if date_column in data.columns:
@@ -286,9 +293,34 @@ def load_model_from_file(model_type, model_path, logger):
 
 
 def preprocess_data(data, model_type):
+    """
+    Preprocesses the data to ensure it matches the expected input shape for the model type.
+
+    Parameters:
+    - data: numpy array or pandas DataFrame, the input data to preprocess.
+    - model_type: str, the type of model ('lstm', 'neural_network', etc.).
+
+    Returns:
+    - data: Preprocessed data reshaped for the specific model type.
+    """
     if model_type in ['lstm', 'neural_network']:
-        data = data.reshape((data.shape[0], data.shape[1], 1))
+        # Determine the expected number of features for the model
+        expected_num_features = 16  # Adjust this value to match your model's training setup
+
+        # Ensure data has the correct number of features
+        if data.shape[1] != expected_num_features:
+            raise ValueError(f"Input data has {data.shape[1]} features, but the model expects {expected_num_features} features.")
+
+        # Reshape data accordingly
+        if model_type == 'lstm':
+            # LSTM expects 3D input: [samples, time steps, features]
+            data = data.reshape((data.shape[0], -1, expected_num_features))
+        elif model_type == 'neural_network':
+            # Neural network expects 2D input: [samples, features]
+            data = data.reshape(-1, expected_num_features)
+
     return data
+
 
 
 def save_predictions(predictions, model_type, output_dir, format='parquet', compress=True):

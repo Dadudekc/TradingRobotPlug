@@ -1,13 +1,21 @@
-# C:\TheTradingRobotPlug\Scripts\Utilities\config_handling.py
+# File: config_manager_and_rmse.py
+# Location: Scripts/Utilities/
+# Description: Utility script for managing configuration via environment variables and calculating RMSE.
 
 import os
 import logging
 import numpy as np
 from sklearn.metrics import mean_squared_error
 
-# Function to safely get an environment variable with a default
+# Function to safely get an environment variable with a default value
 def get_env_value(key, default=None):
-    return os.getenv(key, default)
+    value = os.getenv(key, default)
+    logger.debug(f"Environment variable {key} retrieved with value: {value}")
+    return value
+
+# Initialize logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # Safely get the environment variables
 loading_path = get_env_value('LOADING_PATH', 'default/loading/path')
@@ -20,20 +28,8 @@ db_user = get_env_value('DB_USER', 'default_user')
 # Set environment variable to disable oneDNN custom operations
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-# Print statements for debugging
-print(f"Loading Path: {loading_path}")
-print(f"API Key: {api_key}")
-print(f"Base URL: {base_url}")
-print(f"Timeout: {timeout}")
-print(f"Database Name: {db_name}")
-print(f"Database User: {db_user}")
-
-# Initialize logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Example usage of the logger
-logger.info(f"Configuration loaded successfully: API Key={api_key}, Base URL={base_url}, Timeout={timeout}, DB Name={db_name}, DB User={db_user}")
+# Logging the configuration
+logger.info(f"Configuration loaded successfully: Loading Path={loading_path}, API Key={api_key}, Base URL={base_url}, Timeout={timeout}, DB Name={db_name}, DB User={db_user}")
 
 class ConfigManager:
     def __init__(self):
@@ -47,8 +43,8 @@ class ConfigManager:
             'db_user': db_user,
         }
 
-    def get(self, key):
-        value = self.config.get(key)
+    def get(self, key, default=None):  # Allow default value
+        value = self.config.get(key, default)
         self.logger.debug(f"Retrieving {key}: {value}")
         return value
 
@@ -59,16 +55,18 @@ def root_mean_squared_error(y_true, y_pred):
 # Example usage of ConfigManager and RMSE function
 if __name__ == "__main__":
     config_manager = ConfigManager()
+    
     loading_path = config_manager.get('loading_path')
     api_key = config_manager.get('api_key')
     base_url = config_manager.get('base_url')
     timeout = config_manager.get('timeout')
     db_name = config_manager.get('db_name')
     db_user = config_manager.get('db_user')
-    print(f"ConfigManager loaded values: Loading Path={loading_path}, API Key={api_key}, Base URL={base_url}, Timeout={timeout}, DB Name={db_name}, DB User={db_user}")
 
-    # Example RMSE calculation (replace y_true and y_pred with actual data)
+    logger.info(f"ConfigManager loaded values: Loading Path={loading_path}, API Key={api_key}, Base URL={base_url}, Timeout={timeout}, DB Name={db_name}, DB User={db_user}")
+
+    # Example RMSE calculation
     y_true = np.array([3, -0.5, 2, 7])
     y_pred = np.array([2.5, 0.0, 2, 8])
     rmse = root_mean_squared_error(y_true, y_pred)
-    print(f"Calculated RMSE: {rmse}")
+    logger.info(f"Calculated RMSE: {rmse}")

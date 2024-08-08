@@ -1,7 +1,11 @@
-from Scripts.Utilities.test2 import setup_logger, load_config, get_project_root
+# File: arima_model_trainer.py
+# Location: Scripts/Training/
+# Description: Script for training ARIMA models on stock data with background processing and logging.
+
+import os
+import sys
 import pandas as pd
 import numpy as np
-import logging
 import threading
 from datetime import datetime
 import pmdarima as pm
@@ -9,29 +13,37 @@ from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
 from statsmodels.tsa.stattools import adfuller
 from pathlib import Path
-import yaml
-import os
-import sys
+import traceback
 
-
-# Adjust import path based on your project structure
+# Set up project root dynamically
 script_dir = Path(__file__).resolve().parent
-project_root = script_dir.parents[3]  # Assuming project root is three levels up
+project_root = script_dir.parents[3]  # Adjust based on your project structure
+sys.path.append(str(project_root / 'Scripts' / 'Utilities'))
 
-# Add the 'Utilities' directory to sys.path
-utilities_dir = project_root / 'Scripts' / 'Utilities'
-sys.path.append(str(utilities_dir))
+# Set up relative paths for resources and logs
+resources_path = project_root / 'resources'
+log_path = project_root / 'logs'
 
-# Debug print to confirm the path
-print("Corrected Project root path:", project_root)
-print("Adding Utilities directory to sys.path:", utilities_dir)
+# Ensure the directories exist
+resources_path.mkdir(parents=True, exist_ok=True)
+log_path.mkdir(parents=True, exist_ok=True)
 
-# Now import the DataStore class
+# Logging configuration
+import logging
+log_file = log_path / 'application.log'
+logging.basicConfig(
+    filename=log_file,
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
+from model_training_utils import setup_logger, get_project_root, DataLoader, DataPreprocessor, ConfigManager, LoggerHandler
+
 try:
     from data_store import DataStore
 except ModuleNotFoundError as e:
-    print(f"Error importing modules: {e}")
-    print(f"sys.path: {sys.path}")
+    logging.error(f"Error importing modules: {e}")
+    logging.error(f"sys.path: {sys.path}")
     sys.exit(1)
 
 class ARIMAModelTrainer:
@@ -42,7 +54,7 @@ class ARIMAModelTrainer:
         project_root = get_project_root()
         log_file = project_root / f'logs/arima_{symbol}.log'
         self.logger = setup_logger(f'ARIMA_{self.symbol}', log_file)
-        self.close_prices = self.load_data()
+        self.close_prices = None
 
     def load_data(self):
         """Load data for the symbol using DataStore."""
@@ -54,8 +66,6 @@ class ARIMAModelTrainer:
 
     def display_message(self, message, level="INFO"):
         """Log messages with timestamps."""
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        message = f"[{timestamp}] {message}"
         if level == "INFO":
             self.logger.info(message)
         elif level == "ERROR":
@@ -84,6 +94,11 @@ class ARIMAModelTrainer:
         self.display_message(f"Train data: {train.head()}", "DEBUG")
         self.display_message(f"Test data: {test.head()}", "DEBUG")
 
+        # Check if all columns are of the correct numeric type
+        if not all(test.dtypes.isin([np.float64, np.float32])):
+            for col in test.columns:
+                test[col] = pd.to_numeric(test[col], errors='coerce')
+
         # Scale the data
         scaler = StandardScaler()
         scaled_train = scaler.fit_transform(train.values.reshape(-1, 1)).flatten()
@@ -91,7 +106,7 @@ class ARIMAModelTrainer:
 
         # Make the data stationary
         scaled_train = self.make_stationary(pd.Series(scaled_train)).values
-        scaled_test = pd.Series(scaled_test).reset_index(drop=True)  # Reset index of test Series
+        scaled_test = np.array(pd.Series(scaled_test).reset_index(drop=True))
 
         history = list(scaled_train)
 
@@ -102,8 +117,7 @@ class ARIMAModelTrainer:
             model.fit(history)
             results['parameters']['order'] = model.order
             self.display_message(f"Selected ARIMA parameters: {model.order}", "INFO")
-            
-            # Check if the model attributes exist before accessing
+
             if hasattr(model, 'arparams_'):
                 self.display_message(f"AR Coefficients: {model.arparams_}")
             else:
@@ -126,7 +140,6 @@ class ARIMAModelTrainer:
                 results['predictions'].append(forecast)
                 obs = scaled_test[t]
                 history.append(obs)
-                # Update the model with the new observation
                 model.update([obs])
             except ValueError as ve:
                 self.display_message(f"ValueError at step {t}: {ve}", "ERROR")
@@ -142,7 +155,7 @@ class ARIMAModelTrainer:
 
         if len(results['predictions']) > 0:
             predictions = scaler.inverse_transform(np.array(results['predictions']).reshape(-1, 1)).flatten()
-            test_actual = scaler.inverse_transform(scaled_test[:len(results['predictions'])].values.reshape(-1, 1)).flatten()
+            test_actual = scaler.inverse_transform(scaled_test[:len(results['predictions'])].reshape(-1, 1)).flatten()
 
             mse = mean_squared_error(test_actual, predictions)
             self.display_message(f"Test MSE: {mse:.2f}", "INFO")
@@ -157,10 +170,17 @@ class ARIMAModelTrainer:
         results['performance_metrics']['mse'] = mse
         self.display_message(f"Final performance metrics: MSE = {mse:.2f}", "INFO")
 
-        pd.DataFrame({'Actual': test_actual, 'Predicted': predictions}).to_csv(f'arima_predictions_{self.symbol}.csv', index=False)
-        self.display_message(f"Results for {self.symbol} saved to arima_predictions_{self.symbol}.csv", "INFO")
+        output_file = project_root / f'arima_predictions_{self.symbol}.csv'
+        pd.DataFrame({'Actual': test_actual, 'Predicted': predictions}).to_csv(output_file, index=False)
+        self.display_message(f"Results for {self.symbol} saved to {output_file}", "INFO")
 
-    def train(self):
+    def train(self, data=None):
+        """Main method to start ARIMA training."""
+        if data is not None:
+            self.close_prices = data
+        else:
+            self.close_prices = self.load_data()
+
         if self.close_prices is None or self.close_prices.empty:
             self.display_message("The provided close_prices data is empty or None.", "ERROR")
             return
@@ -175,3 +195,7 @@ class ARIMAModelTrainer:
         self.display_message("ARIMA model training background process completed.", "INFO")
 
 
+# Example of how to use these classes:
+if __name__ == "__main__":
+    trainer = ARIMAModelTrainer(symbol="AAPL")
+    trainer.train()

@@ -1,160 +1,341 @@
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
-import queue
-import threading
-import pandas as pd
-import os
+import numpy as np
+import logging
+from multiprocessing import Pool
+from time import time
 import sys
+import os
+import tkinter as tk
+from tkinter import ttk, messagebox
+from datetime import datetime
+import pandas as pd
+from pathlib import Path
 
-# Add project root to the Python path
-script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
-sys.path.append(project_root)
+# Adjust import path based on your project structure
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parents[2]  # Assuming project root is two levels up
 
-from model_training_main import train_arima, train_advanced_lstm, train_linear_regression, train_neural_network, train_random_forest
-from Scripts.Utilities.model_training_utils import LoggerHandler, DataLoader, DataPreprocessor
+# Add the correct directories to sys.path
+model_training_dir = project_root / 'ModelTraining' / 'model_training'
+utilities_dir = project_root / 'Utilities'
 
-class ModelTrainingTab(tk.Frame):
-    def __init__(self, parent, config_file, scaler_options):
-        super().__init__(parent)
-        self.config_file = config_file
-        self.scaler_options = scaler_options
-        self.queue = queue.Queue()
-        self.logger_handler = LoggerHandler(self.log_text)
-        self.data_loader = DataLoader(self.logger_handler)
-        self.data_preprocessor = DataPreprocessor(self.logger_handler)
-        self.is_debug_mode = False
-        self.log_text = tk.Text(self, height=10, state='disabled')
+sys.path.append(str(model_training_dir))
+sys.path.append(str(utilities_dir))
 
-        self.scaler_type_var = tk.StringVar(self)
+# Debug print to confirm the paths
+print("Corrected Project root path:", project_root)
+print("Adding ModelTraining directory to sys.path:", model_training_dir)
+print("Adding Utilities directory to sys.path:", utilities_dir)
+
+from model_training_utils import (
+    setup_logger, load_model_from_file, save_predictions, save_metadata, 
+    validate_predictions, preprocess_data, detect_models, LoggerHandler
+)
+
+try:
+    from config_handling import ConfigManager
+    from data_store import DataStore
+    from Scripts.Utilities.DataHandler import DataHandler
+    from Scripts.ModelTraining.model_training.models.basic_lstm_trainer import (
+        basicLSTMModelConfig, basicLSTMModelTrainer, prepare_data
+    )
+    from advanced_lstm_trainer import AdvancedLSTMModelTrainer
+    from arima_model_trainer import ARIMAModelTrainer
+    from linear_regression_trainer import LinearRegressionModel
+    from neural_network_trainer import NeuralNetworkTrainer, NNModelConfig
+    from random_forest_trainer import RandomForestModel
+
+except ModuleNotFoundError as e:
+    print(f"Error importing modules: {e}")
+    print(f"sys.path: {sys.path}")
+    sys.exit(1)
+
+# Helper function to create tooltips
+def create_tooltip(widget, text):
+    tooltip = tk.Label(widget, text=text, background="yellow", wraplength=200)
+    def on_enter(event):
+        tooltip.place(x=event.x + 20, y=event.y)
+    def on_leave(event):
+        tooltip.place_forget()
+    widget.bind("<Enter>", on_enter)
+    widget.bind("<Leave>", on_leave)
+
+# Class for the main application
+class Application(tk.Tk):
+    def __init__(self, config):
+        super().__init__()
+        self.title("Automated Model Trainer")
+        self.geometry("800x600")
+        self.config = config
+
+        self.create_widgets()
+
+    def create_widgets(self):
+        # Logging text widget
+        log_frame = ttk.LabelFrame(self, text="Log")
+        log_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
         
-        self.setup_gui()
+        self.log_text = tk.Text(log_frame, state='disabled', height=10, width=80)
+        self.log_text.pack(fill="both", expand=True)
+        
+        # Schedule dropdown
+        schedule_label = ttk.Label(self, text="Schedule:")
+        schedule_label.grid(row=1, column=0, padx=10, pady=10, sticky='e')
 
-    def toggle_debug_mode(self):
-        self.is_debug_mode = not self.is_debug_mode
-        self.display_message(f"Debug mode {'enabled' if self.is_debug_mode else 'disabled'}", level="DEBUG")
+        self.schedule_dropdown = ttk.Combobox(self, values=["Daily", "Weekly", "Monthly"])
+        self.schedule_dropdown.grid(row=1, column=1, padx=10, pady=10, sticky='w')
+        self.schedule_dropdown.current(0)
+        create_tooltip(self.schedule_dropdown, "Select the schedule for automated training")
 
-    def setup_gui(self):
-        self.setup_title_label()
-        self.setup_data_file_path_section()
-        self.setup_scaler_type_selection()
-        self.setup_model_type_selection()
-        self.setup_training_configurations()
-        self.setup_start_training_button()
-        self.setup_progress_and_logging()
-        self.setup_debug_mode_toggle()
-        self.after(100, self.process_queue)
+        # Start button
+        start_button = ttk.Button(self, text="Start Automated Training", command=self.start_automated_training)
+        start_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
 
-    def setup_title_label(self):
-        tk.Label(self, text="Model Training", font=("Helvetica", 16)).pack(pady=10)
+        # Progress bar
+        self.progress_var = tk.DoubleVar()
+        self.progress_bar = ttk.Progressbar(self, variable=self.progress_var, maximum=100)
+        self.progress_bar.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
 
-    def setup_data_file_path_section(self):
-        tk.Label(self, text="Data File Path:").pack()
-        self.data_file_entry = tk.Entry(self)
-        self.data_file_entry.pack()
-        ttk.Button(self, text="Browse", command=self.browse_data_file).pack(pady=5)
+    def log_message(self, message, level="INFO"):
+        log_colors = {"INFO": "black", "WARNING": "orange", "ERROR": "red", "DEBUG": "blue"}
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        formatted_message = f"[{timestamp} - {level}] {message}\n"
+        self.log_text.config(state='normal')
+        self.log_text.tag_config(level, foreground=log_colors.get(level, "black"))
+        self.log_text.insert(tk.END, formatted_message, level)
+        self.log_text.see(tk.END)
+        self.log_text.config(state='disabled')
 
-    def setup_scaler_type_selection(self):
-        tk.Label(self, text="Select Scaler Type:").pack()
-        scaler_type_dropdown = ttk.Combobox(self, textvariable=self.scaler_type_var, values=self.scaler_options)
-        scaler_type_dropdown.pack()
-        scaler_type_dropdown.current(0)
-
-    def setup_model_type_selection(self):
-        tk.Label(self, text="Select Model Type:").pack()
-        self.model_type_var = tk.StringVar(self)
-        model_type_dropdown = ttk.Combobox(self, textvariable=self.model_type_var, 
-                                           values=["linear_regression", "random_forest", "neural_network", "LSTM", "ARIMA"])
-        model_type_dropdown.pack()
-        self.dynamic_options_frame = tk.Frame(self)
-        self.dynamic_options_frame.pack(pady=5)
-
-    def setup_training_configurations(self):
-        tk.Label(self, text="Training Configurations", font=("Helvetica", 14)).pack(pady=5)
-        self.settings_frame = tk.Frame(self)
-        self.settings_frame.pack()
-
-    def setup_start_training_button(self):
-        self.start_training_button = ttk.Button(self, text="Start Training", command=self.initiate_training)
-        self.start_training_button.pack(pady=10)
-
-    def setup_progress_and_logging(self):
-        self.progress_var = tk.IntVar(self, value=0)
-        ttk.Progressbar(self, variable=self.progress_var, maximum=100).pack(pady=5)
-        self.log_text.pack()
-
-    def setup_debug_mode_toggle(self):
-        self.debug_button = tk.Button(self, text="Enable Debug Mode", command=self.toggle_debug_mode)
-        self.debug_button.pack(pady=5)
-
-    def browse_data_file(self):
-        file_path = filedialog.askopenfilename(
-            filetypes=[("CSV Files", "*.csv"), ("Excel Files", "*.xlsx"), ("All Files", "*.*")])
-        if file_path:
-            self.data_file_entry.delete(0, tk.END)
-            self.data_file_entry.insert(0, file_path)
-            self.preview_selected_data(file_path)
-
-    def initiate_training(self):
-        data_file = self.data_file_entry.get()
-        model_type = self.model_type_var.get()
-        scaler_type = self.scaler_type_var.get()
-
-        if not data_file:
-            messagebox.showerror("Error", "Data file not selected")
-            return
-
-        if not model_type:
-            messagebox.showerror("Error", "Model type not selected")
-            return
-
-        threading.Thread(target=self.start_training, args=(data_file, model_type, scaler_type)).start()
-
-    def start_training(self, data_file, model_type, scaler_type):
+    def start_automated_training(self):
         try:
-            if model_type == "ARIMA":
-                train_arima(symbol="AAPL", threshold=100)
-            elif model_type == "LSTM":
-                train_advanced_lstm(data_file_path=data_file)
-            elif model_type == "linear_regression":
-                train_linear_regression(data_file_path=data_file)
-            elif model_type == "neural_network":
-                train_neural_network(data_file_path=data_file, model_config_name="dense_model")
-            elif model_type == "random_forest":
-                train_random_forest(data_file_path=data_file)
-            else:
-                self.display_message(f"Unknown model type: {model_type}", level="ERROR")
+            # Example of how to start the automated training
+            self.log_message("Starting automated training...")
+            trainer = AutomatedModelTrainer(self.config, self.schedule_dropdown, self.log_text, data_handler, model_trainer, model_evaluator, hyperparameter_tuner)
+            trainer.start_automated_training()
         except Exception as e:
-            self.display_message(f"Error during training: {str(e)}", level="ERROR")
+            messagebox.showerror("Error", f"Failed to start training: {e}")
 
-    def process_queue(self):
-        try:
-            while not self.queue.empty():
-                message = self.queue.get_nowait()
-                self.logger_handler.log(message)
-        except queue.Empty:
-            pass
-        finally:
-            self.after(100, self.process_queue)
+# Example configuration
+config = {
+    "Data": {"file_path": "path/to/data.csv", "y_test": np.array([1, 2, 3]), "y_pred": np.array([1.1, 1.9, 3.2])},
+    "Model": {"model_type": "neural_network", "epochs": "10", "param_distributions": {"units": [32, 64, 128], "dropout": [0.1, 0.2, 0.3]}}
+}
 
-    def display_message(self, message, level="INFO"):
-        if level == "DEBUG":
-            self.logger_handler.debug(message)
-        elif level == "ERROR":
-            self.logger_handler.error(message)
+# Initialize components with DataHandler integration
+data_store = DataStore()
+data_handler = DataHandler(logger=logging.getLogger("DataHandlerLogger"), data_store=data_store)
+model_trainer = ModelTrainer(config, None)
+model_evaluator = ModelEvaluator(None)
+hyperparameter_tuner = HyperparameterTuner(logger=ModelTrainingLogger(None))
+
+# Start the application
+app = Application(config)
+app.mainloop()
+
+# Model training and prediction functions (merged)
+# ARIMA training function
+def train_arima(symbol, threshold=100):
+    arima_trainer = ARIMAModelTrainer(symbol=symbol, threshold=threshold)
+    arima_trainer.train()
+
+# Prediction generation function
+def generate_predictions(model_dir, data_dir, output_format='parquet', output_dir='output', parallel=False):
+    logger = setup_logger("Prediction_Generator")
+
+    # Automatically detect available models
+    detected_models = detect_models(model_dir)
+    if not detected_models:
+        logger.error("No models detected in the specified directory.")
+        return
+
+    logger.info(f"Detected models: {detected_models}")
+
+    # Automatically detect the data file
+    data_path = detect_data_file(data_dir)
+    if data_path is None or not os.path.exists(data_path):
+        logger.error(f"No valid data file found in directory: {data_dir}")
+        return
+
+    logger.info(f"Using data file: {data_path}")
+    print("Data path selected: ", data_path)  # Debug print
+
+    try:
+        data = data_handler.load_data(data_path)
+        logger.info("Data loaded successfully.")
+        print("Columns in the DataFrame:", data.columns)
+    except Exception as e:
+        logger.error(f"Failed to load data: {e}")
+        return
+
+    # Preprocess data using DataHandler
+    X_train, X_val, y_train, y_val = data_handler.preprocess_data(data, target_column='close')
+
+    if X_train is None or y_train is None:
+        logger.error("Data preprocessing failed.")
+        return
+
+    print(f"Selected features for model training: {X_train.columns.tolist()}")
+
+    # Continue with other models (if any)
+    for model_type, model_path in detected_models.items():
+        logger.info(f"Processing model type: {model_type}")
+        model = load_model_from_file(model_type, model_path, logger)
+        
+        if model is not None:
+            print(f"Features shape: {X_train.shape}")
+
+            preds = model.predict(X_train)
+            predictions[model_type] = preds
+            logger.info(f"Predictions for {model_type}: {preds[:5]}")
         else:
-            self.logger_handler.info(message)
+            logger.error(f"Skipping predictions for {model_type} due to loading error.")
 
-    def preview_selected_data(self, file_path):
-        try:
-            data = pd.read_csv(file_path)
-            self.display_message("Data preview:\n" + str(data.head()), level="INFO")
-        except Exception as e:
-            self.display_message(f"Error loading data: {str(e)}", level="ERROR")
+    validate_predictions(predictions, logger)
 
+    for model_type, preds in predictions.items():
+        prediction_path = save_predictions(preds, model_type, output_dir, format=output_format)
+        save_metadata(output_dir, model_type, detected_models[model_type], data_path, prediction_path, logger)
+
+# Advanced LSTM Model Training function
+def train_advanced_lstm(data_file_path, model_save_path="best_model.keras", scaler_save_path="scaler.pkl"):
+    logger_handler = LoggerHandler(logger=logging.getLogger('AdvancedLSTMModelTrainer'))
+    
+    # Load and preprocess data using DataHandler
+    data = data_handler.load_data(data_file_path)
+    X_train, X_val, y_train, y_val = data_handler.preprocess_data(data, target_column='close')
+
+    if X_train is not None and X_val is not None and y_train is not None and y_val is not None:
+        trainer = AdvancedLSTMModelTrainer(logger_handler, model_save_path, scaler_save_path)
+        trainer.train_lstm(X_train, y_train, X_val, y_val, epochs=50)
+    else:
+        logger_handler.log("Data preprocessing failed.", "ERROR")
+
+# Linear Regression Model Training function
+def train_linear_regression(data_file_path):
+    logger_handler = LoggerHandler(logger=logging.getLogger('LinearRegressionModel'))
+    
+    # Load and preprocess data using DataHandler
+    data = data_handler.load_data(data_file_path)
+    X_train, X_val, y_train, y_val = data_handler.preprocess_data(
+        data, 
+        target_column='close',  # Assuming 'close' is the target column
+    )
+    
+    if X_train is None or y_train is None:
+        logger_handler.log("Data preprocessing failed. Exiting.", "ERROR")
+        return
+    
+    # Instantiate the model
+    model = LinearRegressionModel(logger=logger_handler.logger)
+    
+    # Train the model with explainability
+    best_model = model.train_with_explainability(X_train, y_train, X_val, y_val)
+    
+    if best_model:
+        logger_handler.log("Model training and explainability completed successfully.")
+    else:
+        logger_handler.log("Model training failed.", "ERROR")
+
+# Neural Network Model Training function
+def train_neural_network(data_file_path, model_config_name="dense_model"):
+    logger_handler = LoggerHandler(logger=logging.getLogger('NeuralNetworkModel'))
+    
+    # Load and preprocess data using DataHandler
+    data = data_handler.load_data(data_file_path)
+    X_train, X_val, y_train, y_val = data_handler.preprocess_data(
+        data, 
+        target_column='close',  # Assuming 'close' is the target column
+    )
+    
+    if X_train is None or y_train is None:
+        logger_handler.log("Data preprocessing failed. Exiting.", "ERROR")
+        return
+    
+    # Choose the model configuration
+    if model_config_name == "dense_model":
+        model_config = NNModelConfig.dense_model()
+    elif model_config_name == "lstm_model":
+        model_config = NNModelConfig.lstm_model()
+    else:
+        logger_handler.log(f"Unknown model configuration: {model_config_name}. Exiting.", "ERROR")
+        return
+    
+    # Instantiate the trainer
+    trainer = NeuralNetworkTrainer(model_config=model_config, epochs=50)
+    
+    # Train the model
+    trained_model = trainer.train(X_train, y_train, X_val, y_val)
+    
+    if trained_model:
+        logger_handler.log("Neural network training completed successfully.")
+    else:
+        logger_handler.log("Neural network training failed.", "ERROR")
+
+# Random Forest Model Training function
+def train_random_forest(data_file_path):
+    logger_handler = LoggerHandler(logger=logging.getLogger('RandomForestModel'))
+    
+    # Load and preprocess data using DataHandler
+    data = data_handler.load_data(data_file_path)
+    X_train, X_val, y_train, y_val = data_handler.preprocess_data(
+        data, 
+        target_column='close',  # Assuming 'close' is the target column
+    )
+    
+    if X_train is None or y_train is None:
+        logger_handler.log("Data preprocessing failed. Exiting.", "ERROR")
+        return
+    
+    # Instantiate the model
+    model = RandomForestModel(logger=logger_handler.logger)
+    
+    # Train the model
+    best_model, best_params, mse, rmse, mae, mape, r2 = model.train(X_train, y_train)
+    
+    if best_model:
+        logger_handler.log("Random Forest model training completed successfully.")
+        logger_handler.log(f"Best Parameters: {best_params}")
+        logger_handler.log(f"MSE: {mse}, RMSE: {rmse}, MAE: {mae}, MAPE: {mape}, R²: {r2}")
+    else:
+        logger_handler.log("Random Forest model training failed.", "ERROR")
+
+# Detect the most recent data file function (now part of the main module)
+def detect_data_file(data_dir, file_extension='csv'):
+    data_files = list(Path(data_dir).rglob(f"*.{file_extension}"))
+    if not data_files:
+        return None
+    
+    data_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
+    
+    if len(data_files) > 1:
+        print("Multiple data files found. Please choose one:")
+        for i, file in enumerate(data_files, 1):
+            print(f"{i}: {file.name}")
+        choice = int(input("Enter the number of the file to use: ")) - 1
+        return str(data_files[choice])
+    
+    return str(data_files[0])
+
+# Main execution
 if __name__ == "__main__":
-    root = tk.Tk()
-    root.title("Model Training Application")
-    app = ModelTrainingTab(root, config_file='path_to_your_config_file.ini', scaler_options=["StandardScaler", "MinMaxScaler"])
-    app.pack(expand=True, fill="both")
-    root.mainloop()
+    start_time = time()
+    
+    # Example usage: Train ARIMA model
+    train_arima(symbol="AAPL", threshold=10)
+    
+    # Example usage: Generate predictions
+    generate_predictions(model_dir='models', data_dir='data', output_format='parquet', output_dir='output', parallel=False)
+    
+    # Example usage: Train Advanced LSTM Model
+    train_advanced_lstm(data_file_path='C:/TheTradingRobotPlug/data/alpha_vantage/tsla_data.csv')
+    
+    # Example usage: Train Linear Regression Model
+    train_linear_regression(data_file_path='C:/TheTradingRobotPlug/data/alpha_vantage/tsla_data.csv')
+
+    # Example usage: Train Neural Network Model
+    train_neural_network(data_file_path='C:/TheTradingRobotPlug/data/alpha_vantage/tsla_data.csv', model_config_name="dense_model")
+    
+    # Example usage: Train Random Forest Model
+    train_random_forest(data_file_path='C:/TheTradingRobotPlug/data/alpha_vantage/tsla_data.csv')
+    
+    end_time = time()
+    print(f"Execution time: {end_time - start_time} seconds")

@@ -10,13 +10,8 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
-# Import necessary classes from the Model_Training directory
-from Scripts.Utilities.DataHandler import DataHandler
-from Model_Training.ModelTrainer import ModelTrainer
-from Model_Training.ModelEvaluator import ModelEvaluator
-from Model_Training.HyperparameterTuner import HyperparameterTuner
-from Model_Training.AutomatedModelTrainer import AutomatedModelTrainer
-from Model_Training.ModelTrainer import ModelTrainingLogger
+
+
 
 # Helper function to create tooltips
 def create_tooltip(widget, text):

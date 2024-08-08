@@ -60,9 +60,6 @@ except ImportError as e:
     logger.error(f"Failed to import ConfigManager from config_handling: {e}")
     raise
 
-
-
-
 class LinearRegressionModel:
     def __init__(self, logger=None):
         self.logger = logger
@@ -150,7 +147,6 @@ class LinearRegressionModel:
 
         return self.best_model
 
-
     def explain_with_shap(self, X_train, X_val):
         X_train_selected = self.selector.transform(X_train)
         X_val_selected = self.selector.transform(X_val)
@@ -168,26 +164,112 @@ class LinearRegressionModel:
         shap.dependence_plot(0, shap_values.values, X_val_selected, show=False)
         plt.savefig('shap_dependence_plot.png')
 
-    def explain_with_lime(self, X_train, X_val):
+    def explain_with_lime(self, X_train, y_train, X_val, y_val, strategies=None):
+        if strategies is None:
+            strategies = ["worst", "best", "median", "25th_quantile", "75th_quantile", 
+                        "high_variance", "cluster_center", "outlier", "boundary_case", 
+                        "high_influence", "feature_extreme", "new_data", "cluster_error"]
+
         X_train_selected = self.selector.transform(X_train)
         X_val_selected = self.selector.transform(X_val)
-        
-        explainer = LimeTabularExplainer(X_train_selected, mode='regression')
-        for i in range(len(X_val_selected)):
-            exp = explainer.explain_instance(X_val_selected[i], self.best_model.predict, num_features=5)
-            if self.logger:
-                self.logger.info(f"LIME Explanation for instance {i} saved as lime_explanation_{i}.html")
-            
-            # Save the explanation file in the 'lime_explanations' directory
-            explanation_path = os.path.join(lime_explanation_dir, f'lime_explanation_{i}.html')
-            exp.save_to_file(explanation_path)
 
+        for strategy in strategies:
+                # Generate predictions to compute errors
+                predictions = self.best_model.predict(X_val_selected)
+                errors = np.abs(predictions - y_val)
+
+                # Determine the index of the instance to explain based on the chosen strategy
+                if strategy == "worst":
+                    index = np.argmax(errors)
+                elif strategy == "best":
+                    index = np.argmin(errors)
+                elif strategy == "median":
+                    median_error = np.median(errors)
+                    index = np.argmin(np.abs(errors - median_error))
+                elif strategy == "25th_quantile":
+                    quantile_error = np.percentile(errors, 25)
+                    index = np.argmin(np.abs(errors - quantile_error))
+                elif strategy == "75th_quantile":
+                    quantile_error = np.percentile(errors, 75)
+                    index = np.argmin(np.abs(errors - quantile_error))
+                elif strategy == "high_variance":
+                    variances = np.var([self.best_model.predict(X_val_selected) for _ in range(10)], axis=0)
+                    index = np.argmax(variances)
+                elif strategy == "cluster_center":
+                    from sklearn.cluster import KMeans
+                    kmeans = KMeans(n_clusters=5, random_state=42)
+                    kmeans.fit(X_val_selected)
+                    centers = kmeans.cluster_centers_
+                    index = np.argmin(np.sum((X_val_selected - centers[:, np.newaxis])**2, axis=2).min(axis=1))
+                elif strategy == "outlier":
+                    outlier_threshold = 3 * np.std(errors)
+                    outliers = np.where(errors > outlier_threshold)[0]
+                    if outliers.size > 0:
+                        index = outliers[0]
+                    else:
+                        self.logger.info(f"No significant outliers found for strategy '{strategy}'. Defaulting to 'worst' error.")
+                        index = np.argmax(errors)
+                elif strategy == "boundary_case":
+                    boundary_threshold = 0.05  # Example threshold, adjust as needed
+                    boundary_cases = np.where((predictions < boundary_threshold) | (predictions > (1 - boundary_threshold)))[0]
+                    if boundary_cases.size > 0:
+                        index = boundary_cases[0]
+                    else:
+                        self.logger.info(f"No significant boundary cases found for strategy '{strategy}'. Defaulting to 'worst' error.")
+                        index = np.argmax(errors)
+                elif strategy == "high_influence":
+                    from sklearn.linear_model import LinearRegression
+                    influence_model = LinearRegression()
+                    influence_model.fit(X_train_selected, y_train)
+                    influence_scores = np.abs(influence_model.coef_)
+                    index = np.argmax(influence_scores)
+                elif strategy == "feature_extreme":
+                    extreme_threshold = 0.01  # Example threshold for extremes, adjust as needed
+                    extremes = np.where((X_val_selected < extreme_threshold) | (X_val_selected > (1 - extreme_threshold)))[0]
+                    if extremes.size > 0:
+                        index = extremes[0]
+                    else:
+                        self.logger.info(f"No significant feature extremes found for strategy '{strategy}'. Defaulting to 'worst' error.")
+                        index = np.argmax(errors)
+                elif strategy == "new_data":
+                    # Identify instances that are far from the training data (e.g., using distance metrics or clustering)
+                    from sklearn.neighbors import NearestNeighbors
+                    neigh = NearestNeighbors(n_neighbors=1)
+                    neigh.fit(X_train_selected)
+                    distances, _ = neigh.kneighbors(X_val_selected)
+                    index = np.argmax(distances)
+                elif strategy == "cluster_error":
+                    from sklearn.cluster import KMeans
+                    kmeans = KMeans(n_clusters=5, random_state=42)
+                    kmeans.fit(X_val_selected)
+                    cluster_labels = kmeans.labels_
+                    cluster_errors = [errors[cluster_labels == i].mean() for i in range(5)]
+                    worst_cluster = np.argmax(cluster_errors)
+                    cluster_indices = np.where(cluster_labels == worst_cluster)[0]
+                    index = cluster_indices[np.argmax(errors.iloc[cluster_indices])]  # Use iloc for positional indexing
+
+
+                else:
+                    raise ValueError(f"Unknown strategy: {strategy}")
+
+                # Create a LIME explainer
+                explainer = LimeTabularExplainer(X_train_selected, mode='regression')
+                
+                # Explain the selected instance
+                exp = explainer.explain_instance(X_val_selected[index], self.best_model.predict, num_features=5)
+                
+                if self.logger:
+                    self.logger.info(f"LIME Explanation for instance with {strategy} error (index {index}) saved as lime_explanation_{strategy}.html")
+                
+                # Save the explanation file in the 'lime_explanations' directory
+                explanation_path = os.path.join(lime_explanation_dir, f'lime_explanation_{strategy}.html')
+                exp.save_to_file(explanation_path)
 
     def train_with_explainability(self, X_train, y_train, X_val, y_val):
         self.train(X_train, y_train, X_val, y_val)
         if self.best_model is not None:
             self.explain_with_shap(X_train, X_val)
-            self.explain_with_lime(X_train, X_val)
+            self.explain_with_lime(X_train, y_train, X_val, y_val)  # Corrected to pass y_train and y_val here
         return self.best_model
 
     def consume_streaming_data(self, topic):
@@ -219,7 +301,7 @@ class LinearRegressionModel:
             self.logger.info(f"Predicted y_val shape: {y_pred_val.shape}")
 
         mse = mean_squared_error(y_val, y_pred_val)
-        rmse = root_mean_squared_error(y_val, y_pred_val)  # Updated to use the new function
+        rmse = np.sqrt(mse)  # Updated to use the standard method of calculating RMSE
         r2 = r2_score(y_val, y_pred_val)
 
         if self.logger:

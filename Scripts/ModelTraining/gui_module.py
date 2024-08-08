@@ -11,7 +11,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
-from model_training import ModelTraining
+from model_training_main import ModelTraining
 from logging_module import ModelTrainingLogger
 
 class ModelTrainingTab(tk.Frame):

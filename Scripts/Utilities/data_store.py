@@ -1,33 +1,28 @@
 # C:\TheTradingRobotPlug\Scripts\Utilities\data_store.py
 
 import os
-import pandas as pd
-import pickle
 import sys
 from pathlib import Path
+import pandas as pd
+import pickle
 from typing import Dict, Optional, Union
 import talib  # Ensure TA-Lib is imported
 
-# Adjust the Python path dynamically for independent execution
-if __name__ == "__main__" and __package__ is None:
-    script_dir = Path(__file__).resolve().parent
-    project_root = script_dir.parent.parent
-    sys.path.append(str(project_root / 'Scripts' / 'Utilities'))
+# Dynamically adjust the Python path
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parent.parent
+sys.path.append(str(project_root))
 
-    print("Corrected Project root path:", project_root)
+print("Corrected Project root path:", project_root)
 
+# Correct the import statement
 try:
-    if __package__ is None:
-        # If running as a script directly, use absolute imports
-        from config_handling import ConfigManager
-        from data_fetch_utils import DataFetchUtils
-    else:
-        # If running as part of a package, use relative imports
-        from config_handling import ConfigManager
-        from data_fetch_utils import DataFetchUtils
+    from Scripts.Utilities.config_handling import ConfigManager
+    from Scripts.Utilities.data_fetch_utils import DataFetchUtils
 except ImportError as e:
     print(f"Error importing modules: {e}")
     raise
+
 
 
 

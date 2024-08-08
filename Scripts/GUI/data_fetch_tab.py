@@ -15,6 +15,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
+from Scripts.Utilities.config_handling import ConfigManager
 from Scripts.Data_Fetchers.data_fetch_main import main as fetch_data_main
 from Scripts.Utilities.data_store import DataStore
 from Scripts.Data_Processing.Technical_indicators.custom_indicators import CustomIndicators

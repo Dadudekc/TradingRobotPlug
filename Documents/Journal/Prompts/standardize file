@@ -18,10 +18,15 @@ I have several Python scripts in a project, and I need to standardize the way pa
 
 import os
 import sys
+import logging
+
+# Determine the script's directory
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Determine the project root dynamically
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 
 # Add project root to the Python path
-script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir))
 sys.path.append(project_root)
 
 # Set up relative paths for resources and logs
@@ -29,15 +34,16 @@ resources_path = os.path.join(project_root, 'resources')
 log_path = os.path.join(project_root, 'logs')
 
 # Ensure the directories exist
-if not os.path.exists(resources_path):
-    os.makedirs(resources_path)
-if not os.path.exists(log_path):
-    os.makedirs(log_path)
+os.makedirs(resources_path, exist_ok=True)
+os.makedirs(log_path, exist_ok=True)
 
 # Logging configuration
-import logging
 log_file = os.path.join(log_path, 'application.log')
-logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    filename=log_file,
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 # Conditional imports based on execution context
 try:
@@ -45,4 +51,4 @@ try:
 except ImportError:
     from unittest.mock import Mock as ProductionClass
 
-# Rest of your script...
+next i will post my files for you to standardize  and improve as far as efficiency
