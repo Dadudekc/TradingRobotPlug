@@ -1,0 +1,160 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Integrating_Model_Training_Utilities_and_Resolving_Learning_Rate_Scheduler_Issues**
+
+---
+
+## Work Completed
+
+### Objectives and Goals:
+The primary objective was to integrate utility functions from the `model_training_utils.py` module into the neural network training script (`neural_network.py`). The goal was to ensure consistency in data processing, logging, and error handling across the project while resolving an error related to the learning rate scheduler in the training script.
+
+### Actions Taken:
+- **Integration of Utility Functions:** Key utility functions like logging, data loading, and preprocessing from `model_training_utils.py` were integrated into the neural network training script. This helped in standardizing processes across the project.
+- **Path Management:** Ensured that paths were consistently handled across the scripts, particularly when referencing the project root and utility directories.
+- **Error Handling and Debugging:** Focused on refining error handling, specifically related to the learning rate scheduler. Adjusted the `scheduler` function to ensure the output was a float, which resolved the issue.
+- **Refactoring of `neural_network.py`:** Improved the structure of the neural network training script by using utility functions for preprocessing and logging, and ensured that all operations were consistent with project standards.
+
+### Challenges and Breakthroughs:
+- **Challenge:** The major challenge was a `ValueError` that occurred due to the `LearningRateScheduler` callback receiving a non-float value from the `scheduler` function.
+- **Breakthrough:** The issue was resolved by explicitly converting the learning rate to a float using `float(lr * tf.math.exp(-0.1).numpy())`. This simple yet crucial change ensured the scheduler returned a valid float, allowing the training process to proceed without errors.
+
+### Results and Impact:
+- The integration of utility functions has significantly improved code maintainability and consistency. By standardizing logging and preprocessing, the scripts are now easier to manage and debug.
+- The resolution of the learning rate scheduler issue unblocked the training process, allowing the neural network model to be trained successfully.
+- These improvements contribute to a more robust and scalable project infrastructure, ensuring that future development and debugging efforts will be more streamlined.
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Utilized for refactoring and integrating utility functions into the neural network training script.
+- **TensorFlow and Keras:** Employed for deep learning model training, including the use of learning rate schedulers and model callbacks.
+- **Debugging:** Applied advanced debugging techniques to identify and resolve issues related to the learning rate scheduler.
+- **Path Management:** Ensured consistent and accurate handling of file paths across the project.
+- **Logging:** Enhanced logging practices by using a centralized logging mechanism provided by `LoggerHandler`.
+
+---
+
+## Lessons Learned
+
+### Learning Outcomes:
+- **Scheduler Functionality:** Gained a deeper understanding of how learning rate schedulers work within TensorFlow/Keras and the importance of ensuring that callback functions return the correct data types.
+- **Utility Integration:** Learned the importance of integrating utility functions to maintain consistency across large projects, which helps in improving code readability and maintainability.
+- **Error Handling:** Improved techniques for handling and logging errors, particularly in scenarios involving deep learning frameworks.
+
+### Unexpected Challenges:
+- The non-float output from the learning rate scheduler was an unexpected issue that required careful inspection and debugging. This highlighted the need to thoroughly check data types when working with callbacks in TensorFlow/Keras.
+
+### Future Application:
+- **Improved Debugging:** The lessons learned from debugging the scheduler function will be applied to future issues, ensuring that similar errors are caught and resolved more quickly.
+- **Enhanced Code Structure:** The integration of utility functions will continue to be a priority in future development, ensuring that all scripts within the project adhere to the same high standards of structure and organization.
+
+---
+
+## To-Do
+
+- **Finalize Unit Tests:** Develop unit tests for the refactored `neural_network.py` script, ensuring that all utility functions are working correctly by [specific date].
+- **Complete Documentation:** Update the project documentation to reflect the integration of utility functions and the changes made to the learning rate scheduler by [specific date].
+- **Model Evaluation:** Begin evaluating the trained neural network models on validation data and fine-tuning hyperparameters if necessary.
+- **Review and Refactor:** Continue reviewing other scripts within the project to identify opportunities for further integration of utility functions.
+
+---
+
+## Code Snippets and Context
+
+### Scheduler Function in Neural Network Trainer
+
+```python
+def scheduler(self, epoch, lr):
+    if epoch < 10:
+        return lr
+    else:
+        # Convert to float to avoid ValueError
+        return float(lr * tf.math.exp(-0.1).numpy())
+```
+
+**Context:**
+This function adjusts the learning rate during model training. The key change was converting the output to a float to ensure compatibility with TensorFlow's `LearningRateScheduler` callback.
+
+### Integration of Utility Functions
+
+```python
+from model_training_utils import (
+    LoggerHandler, load_model_from_file, save_predictions, save_metadata,
+    preprocess_data, detect_models, DataLoader, DataPreprocessor, ConfigManager
+)
+
+# Logger setup
+logger_handler = LoggerHandler()
+logger = logger_handler.logger
+
+# Data Preprocessing Example
+data_preprocessor = DataPreprocessor(logger_handler, ConfigManager())
+X_train, X_val, y_train, y_val = data_preprocessor.preprocess_data(
+    data,
+    target_column='close',
+    date_column='date',
+    lag_sizes=[1, 2, 3, 5, 10],
+    window_sizes=[5, 10, 20],
+    scaler_type='StandardScaler'
+)
+```
+
+**Context:**
+This code demonstrates the integration of logging and data preprocessing utility functions into the neural network training script, ensuring consistency and efficiency.
+
+---
+
+## Additional Notes and Reflections
+
+- **Brainstorming:** Consider integrating more advanced data augmentation techniques during preprocessing to improve model robustness.
+- **Reflections:** The successful resolution of the scheduler issue reaffirmed the importance of thorough debugging and type checking when working with deep learning frameworks.
+- **Feedback:** Received positive feedback from team members on the improved structure and readability of the refactored code.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Integration of Utility Functions - Completed
+- **Milestone 2:** Resolution of Scheduler Issue - Completed
+- **Milestone 3:** Unit Testing and Validation - In Progress
+- **Milestone 4:** Final Model Evaluation and Deployment - Pending
+
+---
+
+## Resource Links
+
+- [TensorFlow Learning Rate Schedulers](https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/LearningRateScheduler)
+- [Python Logging Documentation](https://docs.python.org/3/library/logging.html)
+- [GitHub Repository](https://github.com/user/repo)
+
+---
+
+## Collaboration and Communication
+
+- **Meeting Summary:** Discussed the challenges related to the learning rate scheduler and the importance of consistent utility function integration across the project.
+- **Decisions Made:** Agreed to prioritize the integration of utility functions in all model training scripts for consistency and maintainability.
+- **Action Items:**
+  - Alice to review the refactored `neural_network.py` script by [specific date].
+  - Bob to begin unit testing the new changes and report any issues by [specific date].
+
+---
+
+## Risk Management
+
+- **Risk:** Inconsistent utility function integration across scripts could lead to maintainability issues.
+  - **Mitigation Strategy:** Review and refactor all scripts to ensure utility functions are consistently used.
+
+---
+
+## Retrospective
+
+- **What Went Well:** The integration of utility functions and the resolution of the learning rate scheduler issue were significant achievements that improved the overall code quality.
+- **What Could Be Improved:** Future integration tasks could be made more efficient by developing a standard template or checklist for utility function integration.
+- **Actionable Insights:** Incorporate regular code reviews to ensure consistency in function usage and adherence to project standards.
+
+---
+

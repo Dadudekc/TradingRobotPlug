@@ -1,0 +1,191 @@
+# Project Journal Entry
+
+**Catch_Up_Entry__Refactoring_LSTM_Model_Training_and_Resolving_Git_Workflow_Challenges**
+
+---
+
+## Work Completed
+
+### Objectives and Goals
+- Refactor the LSTM model training script to improve modularity and address circular import issues.
+- Ensure successful cloning of the project repository and correct branch checkout for collaboration on the teamwork laptop.
+- Resolve issues related to directory navigation and repository setup.
+
+### Actions Taken
+1. **Refactoring the LSTM Model Training Script**:
+   - Separated the LSTM model configuration and training logic into different modules (`lstm_config.py` and `lstm_trainer.py`) to eliminate circular imports.
+   - Implemented the `Attention` layer directly in the `lstm_config.py` to avoid dependency issues.
+
+    ```python
+    class Attention(Layer):
+        def __init__(self, **kwargs):
+            super(Attention, self).__init__(**kwargs)
+
+        def build(self, input_shape):
+            self.W = self.add_weight(name="att_weight", shape=(input_shape[-1], input_shape[-1]), initializer="glorot_uniform", trainable=True)
+            self.b = self.add_weight(name="att_bias", shape=(input_shape[-1],), initializer="zeros", trainable=True)
+            super(Attention, self).build(input_shape)
+
+        def call(self, x):
+            e = tf.keras.backend.tanh(tf.keras.backend.dot(x, self.W) + self.b)
+            a = tf.keras.backend.softmax(e, axis=1)
+            output = x * a
+            return tf.keras.backend.sum(output, axis=1)
+    ```
+
+2. **Repository Setup and Branch Management**:
+   - Attempted to clone the project repository using the correct URL (`https://github.com/dadudekc/tradingrobotplug.git`).
+   - Created and switched to a new branch (`testing`) on the teamwork laptop to ensure the correct environment for collaboration.
+
+    ```bash
+    cd ~
+    mkdir TheTradingRobotPlug
+    cd TheTradingRobotPlug
+    git clone https://github.com/dadudekc/tradingrobotplug.git .
+    git fetch origin
+    git checkout testing
+    git pull origin testing
+    ```
+
+3. **Challenges and Breakthroughs**:
+   - **Challenges**: Encountered errors due to incorrect repository URLs and directory navigation issues, which were resolved by verifying the correct paths and branch names.
+   - **Breakthroughs**: Successfully set up the project on the teamwork laptop, allowing seamless collaboration on the `testing` branch.
+
+### Results and Impact
+- The refactored LSTM model training script is now more modular, reducing complexity and making future updates easier.
+- Successful setup of the project repository on the teamwork laptop enables smooth collaboration on ongoing tasks, specifically within the `testing` branch.
+
+---
+
+## Skills and Technologies Used
+- **Python Programming**: Utilized for refactoring scripts, implementing custom layers, and managing imports.
+- **Git Version Control**: Employed for branching, committing, and managing repository setups on different machines.
+- **TensorFlow and Keras**: Used for defining and building the LSTM model with custom layers such as `Attention`.
+- **Command Line**: Managed directory navigation, repository setup, and branch management using command-line tools.
+
+---
+
+## Lessons Learned
+
+### Learning Outcomes
+- **Repository Management**: Gained a deeper understanding of Git commands for managing branches and resolving common issues with repository setup.
+- **Modular Design**: Recognized the importance of modular design to prevent circular imports and improve code maintainability.
+
+### Unexpected Challenges
+- Encountered issues with incorrect repository URLs and existing directories on the teamwork laptop, which were resolved by rechecking the correct paths and branch names.
+
+### Future Application
+- Plan to implement better modularization practices in future projects to avoid similar issues with imports and improve collaboration efficiency.
+
+---
+
+## To-Do
+- **Complete Unit Tests**: Finish the unit tests for the refactored LSTM model script by [specific date].
+- **Documentation**: Update the project documentation to reflect recent changes and improvements in the code structure.
+- **Feature Implementation**: Begin working on implementing a caching mechanism for API responses.
+- **Code Review**: Schedule a code review session to ensure the quality and consistency of the recent changes.
+
+---
+
+## Code Snippets and Context
+
+### Refactored LSTM Model Configuration
+
+```python
+# lstm_config.py
+
+class LSTMModelConfig:
+    @staticmethod
+    def lstm_model(input_shape, model_params):
+        model = Sequential()
+        
+        if not model_params['layers']:
+            raise ValueError("Model configuration should include at least one layer.")
+
+        for layer in model_params['layers']:
+            if layer['type'] == 'bidirectional_lstm':
+                model.add(Bidirectional(LSTM(units=layer['units'], return_sequences=layer['return_sequences'], kernel_regularizer=layer['kernel_regularizer']),
+                                        input_shape=input_shape))
+            elif layer['type'] == 'batch_norm':
+                model.add(BatchNormalization())
+            elif layer['type'] == 'dropout':
+                model.add(Dropout(rate=layer['rate']))
+            elif layer['type'] == 'dense':
+                model.add(Dense(units=layer['units'], activation=layer['activation'], kernel_regularizer=layer['kernel_regularizer']))
+            elif layer['type'] == 'attention':
+                model.add(Attention())
+            else:
+                raise ValueError(f"Unsupported layer type: {layer['type']}")
+
+        model.add(Dense(1))
+        model.compile(optimizer=model_params['optimizer'], loss='mean_squared_error')
+        return model
+```
+
+### Branch Setup and Collaboration
+
+```bash
+# Repository setup and branch management on teamwork laptop
+
+cd ~
+mkdir TheTradingRobotPlug
+cd TheTradingRobotPlug
+git clone https://github.com/dadudekc/tradingrobotplug.git .
+git fetch origin
+git checkout testing
+git pull origin testing
+```
+
+---
+
+## Additional Notes and Reflections
+- **Feature Idea**: Consider adding a feature to cache API responses to reduce redundant data fetches and improve efficiency.
+- **Improvement**: Improve error handling in the data fetch script to better manage API rate limits and provide more informative error messages.
+- **Reflection**: The project is progressing well with the refactoring tasks, but regular team check-ins could further enhance collaboration and alignment on goals.
+- **Feedback**: Received positive feedback on the repository setup and branch management process from the team.
+
+---
+
+## Project Milestones
+- **Milestone 1**: Initial setup and configuration - Completed
+- **Milestone 2**: Refactor LSTM model training script - Completed
+- **Milestone 3**: Unit testing and validation - Pending
+- **Milestone 4**: Feature implementation (caching) - Pending
+
+---
+
+## Resource Links
+- [TensorFlow and Keras Documentation](https://www.tensorflow.org/api_docs/python/tf/keras)
+- [Python unittest Documentation](https://docs.python.org/3/library/unittest.html)
+- [GitHub Repository](https://github.com/dadudekc/tradingrobotplug)
+
+---
+
+## Collaboration and Communication
+- **Meeting Summary**: Discussed the repository setup on the teamwork laptop and agreed on the next steps for unit testing and feature implementation.
+- **Decision**: Decided to focus on refactoring and unit testing before moving on to feature implementation.
+- **Action Items**:
+  - Complete unit tests for the refactored script by [specific date].
+  - Update the project documentation by [specific date].
+
+---
+
+## Risk Management
+- **Risk**: Issues with repository setup on different machines could delay collaboration.
+  - **Mitigation Strategy**: Ensure clear documentation and use of correct repository URLs and branch names.
+- **Risk**: Delays in completing unit tests could impact project timelines.
+  - **Mitigation Strategy**: Allocate additional resources to ensure timely completion of unit tests.
+
+---
+
+## Retrospective
+
+### What Went Well
+- The refactoring of the LSTM model training script was completed successfully, improving modularity and maintainability.
+- Successfully set up the project repository on the teamwork laptop, enabling collaboration on the `testing` branch.
+
+### What Could Be Improved
+- Need to improve the efficiency of directory navigation and repository setup, especially when working on different machines.
+
+### Actionable Insights
+- Implement a checklist for repository setup and branch management to streamline collaboration and avoid common pitfalls in the future.

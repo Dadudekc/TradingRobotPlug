@@ -1,0 +1,147 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Resolving_Import_Issues_and_Project_Root_Calculation**
+
+---
+
+## Work Completed
+
+- **Objectives and Goals:**  
+  The primary goal for this session was to resolve a `ModuleNotFoundError` that was occurring during the import of a custom module (`Scripts.Utilities.model_training_utils`) in the neural network training script. The objective was to ensure that the project root was correctly identified and added to the Python path to allow for proper module importing.
+
+- **Actions Taken:**  
+  1. **Initial Diagnosis:** The error was traced back to the incorrect calculation of the `project_root` path, which was not pointing to the expected project root directory. The path was instead resolving to a subdirectory within the project (`c:\TheTradingRobotPlug\Scripts\ModelTraining`).
+  2. **Path Calculation Adjustment:** Adjusted the calculation of `project_root` to move three levels up from the script's location, ensuring it correctly pointed to `c:\TheTradingRobotPlug`.
+  3. **Verification:** Added debug statements to verify that the correct path was being added to `sys.path`.
+  4. **Execution and Testing:** Ran the script again to confirm that the module import issue was resolved, but further refinement was necessary as the path was still incorrect.
+  5. **Final Fix:** The path calculation was refined to ensure it correctly identified the project root. The script was executed once more, confirming that the import issue was resolved.
+
+- **Challenges and Breakthroughs:**  
+  The main challenge was ensuring that the project root path was accurately identified regardless of where the script was executed. The breakthrough came after realizing the need to move three directory levels up, correcting the path calculation to point directly to the project root.
+
+- **Results and Impact:**  
+  The correct identification of the project root path allowed for successful imports of custom modules, ensuring that the neural network training script could execute without errors. This fix will have a lasting impact on the project's maintainability and ease of use, especially as the project scales and additional modules are added.
+
+```python
+import os
+import sys
+
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Move three levels up to the project root
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir, os.pardir))
+
+# Add the project root to the Python path
+sys.path.append(project_root)
+
+print("Corrected Project root path:", project_root)
+```
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Used for scripting and debugging the path-related issues.
+- **File System Navigation:** Leveraged to correctly calculate and navigate to the project root.
+- **Debugging:** Implemented to identify and fix issues related to module importing.
+- **TensorFlow:** Utilized within the neural network training script for model definition and training.
+- **Logging:** Employed to trace the path calculation and module import processes.
+
+---
+
+## Lessons Learned
+
+- **Learning Outcomes:**  
+  Gained a deeper understanding of how Python's `sys.path` works and how to effectively manipulate it to ensure that custom modules can be imported regardless of the script's location. This was particularly useful in complex project structures.
+
+- **Unexpected Challenges:**  
+  The path calculation was more challenging than initially anticipated due to the complexity of the directory structure. The need to move up multiple directory levels to reach the project root was an unexpected requirement.
+
+- **Future Application:**  
+  In future projects, more attention will be paid to the initial setup of directory structures and path calculations to prevent similar issues. Additionally, setting up more robust and scalable path management solutions will be a priority.
+
+---
+
+## To-Do
+
+- **Finalize Neural Network Training Script:** Now that the import issues are resolved, focus on refining and testing the model training process.
+- **Implement Unit Tests:** Ensure all modules are covered by unit tests to prevent similar issues from arising in the future.
+- **Document Path Calculation:** Update project documentation to include details about the directory structure and path calculation logic.
+- **Code Review:** Schedule a code review session to ensure that all recent changes adhere to project standards.
+
+---
+
+## Code Snippets and Context
+
+### Path Calculation and Import Resolution
+
+```python
+import os
+import sys
+
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Move three levels up to the project root
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir, os.pardir))
+
+# Add the project root to the Python path
+sys.path.append(project_root)
+
+print("Corrected Project root path:", project_root)
+```
+
+This snippet resolves the module import issue by correctly identifying the project root directory and adding it to `sys.path`, allowing the neural network training script to import necessary modules.
+
+---
+
+## Additional Notes and Reflections
+
+- **Improvement Idea:** Consider setting up a virtual environment with specific environment variables that manage Python paths dynamically based on the project’s root.
+- **Reflection:** The session highlighted the importance of a well-organized project structure and how it can greatly affect the efficiency of development. Future projects will benefit from a more thought-out initial setup.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Neural network model training script implementation - In Progress
+- **Milestone 3:** Unit testing and validation - Pending
+- **Milestone 4:** Final integration and deployment - Pending
+
+---
+
+## Resource Links
+
+- [Python sys.path Documentation](https://docs.python.org/3/library/sys.html#sys.path)
+- [TensorFlow Documentation](https://www.tensorflow.org/api_docs/python/tf)
+- [Python os.path Documentation](https://docs.python.org/3/library/os.path.html)
+
+---
+
+## Collaboration and Communication
+
+- **Meeting Summary:** Discussed the path calculation issue and potential solutions during a brief team sync. The decision was made to adjust the calculation to ensure robust module importing.
+- **Action Items:**
+  - Continue refining the neural network training script by [specific date].
+  - Complete unit tests for the entire project by [specific date].
+
+---
+
+## Risk Management
+
+- **Risk:** Improper path management could lead to further import issues as the project scales.
+  - **Mitigation Strategy:** Implement a more dynamic and environment-agnostic approach to path management, possibly through environment variables or configuration files.
+
+---
+
+## Retrospective
+
+- **What Went Well:** Successfully identified and fixed the path-related import issue, allowing the script to run correctly.
+- **What Could Be Improved:** Need to establish a more comprehensive approach to managing paths and imports in complex projects.
+- **Actionable Insights:** Consider automating the setup of `sys.path` to avoid similar issues in future projects.
+
+---

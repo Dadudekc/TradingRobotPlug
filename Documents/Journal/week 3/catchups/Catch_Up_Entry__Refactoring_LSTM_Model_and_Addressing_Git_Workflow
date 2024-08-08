@@ -1,0 +1,230 @@
+# Project Journal Entry
+
+**Catch_Up_Entry__Refactoring_LSTM_Model_and_Addressing_Git_Workflow**
+
+---
+
+## Work Completed
+### Objectives and Goals
+- Refactor the LSTM model training script to improve maintainability and functionality.
+- Resolve issues related to importing custom layers and addressing circular imports.
+- Clone the project repository to a new branch for collaboration with a team member.
+- Ensure the repository is correctly set up on the teamwork laptop and the appropriate branch is checked out.
+
+### Actions Taken
+1. **Refactoring the LSTM Model Training Script**:
+   - Separated the configuration and trainer classes into different modules to avoid circular imports.
+   - Defined the `Attention` class directly in the `lstm_config.py` file.
+
+    ```python
+    class Attention(Layer):
+        def __init__(self, **kwargs):
+            super(Attention, self).__init__(**kwargs)
+
+        def build(self, input_shape):
+            self.W = self.add_weight(name="att_weight", shape=(input_shape[-1], input_shape[-1]), initializer="glorot_uniform", trainable=True)
+            self.b = self.add_weight(name="att_bias", shape=(input_shape[-1],), initializer="zeros", trainable=True)
+            super(Attention, self).build(input_shape)
+
+        def call(self, x):
+            e = tf.keras.backend.tanh(tf.keras.backend.dot(x, self.W) + self.b)
+            a = tf.keras.backend.softmax(e, axis=1)
+            output = x * a
+            return tf.keras.backend.sum(output, axis=1)
+    ```
+
+2. **Branch Creation and Collaboration**:
+   - Created a new branch named `lstm-attention-refactor` to work on the refactoring task.
+   - Committed and pushed the changes to the remote repository for collaboration.
+
+    ```bash
+    git checkout -b lstm-attention-refactor
+    git add .
+    git commit -m "Refactor LSTM model training script and add Attention layer"
+    git push origin lstm-attention-refactor
+    ```
+
+3. **Repository Setup on Teamwork Laptop**:
+   - Ensured the project directory was correctly set up.
+   - Cloned the repository using the correct URL and checked out the new branch.
+
+    ```bash
+    cd ~
+    mkdir TheTradingRobotPlug
+    cd TheTradingRobotPlug
+    git clone https://github.com/dadudekc/tradingrobotplug.git .
+    git fetch origin
+    git checkout testing
+    git pull origin testing
+    ```
+
+### Challenges and Breakthroughs
+- **Challenges**:
+  - Encountered circular import issues due to the original script structure.
+  - Faced difficulties in navigating and setting up the correct project directory on the teamwork laptop.
+
+- **Breakthroughs**:
+  - Successfully refactored the LSTM model training script by separating concerns into different modules.
+  - Resolved import issues by defining the `Attention` layer within the configuration module.
+
+### Results and Impact
+- The refactored script improves maintainability and functionality, allowing for easier updates and collaboration.
+- Setting up the project repository on the teamwork laptop ensures seamless collaboration with team members on the refactored branch.
+
+---
+
+## Skills and Technologies Used
+- **Python Programming**: Utilized for refactoring scripts, defining custom layers, and handling imports.
+- **Git Version Control**: Employed for branching, committing, and pushing changes to facilitate collaboration.
+- **TensorFlow and Keras**: Used for defining and building the LSTM model with custom layers.
+- **Command Line**: Used for navigating directories, cloning repositories, and managing Git workflows.
+
+---
+
+## Lessons Learned
+### Learning Outcomes
+- **Debugging Techniques**: Improved strategies for resolving circular import issues and managing complex project structures.
+- **Git Workflow**: Enhanced understanding of branch management and collaboration using Git.
+
+### Unexpected Challenges
+- Encountered issues with directory navigation and repository setup on a new machine, which were resolved by verifying paths and repository URLs.
+
+### Future Application
+- Apply better modularization practices in future projects to avoid circular imports.
+- Ensure clear documentation and communication of repository URLs and branch names for seamless collaboration.
+
+---
+
+## To-Do
+- **Complete Unit Tests**: Finalize the remaining unit tests for the refactored LSTM model script by [specific date].
+- **Documentation**: Update project documentation to reflect recent changes and improvements.
+- **Feature Implementation**: Start working on the caching mechanism for API responses.
+- **Code Review**: Schedule a code review session to ensure code quality and consistency.
+
+---
+
+## Code Snippets and Context
+
+### Refactored LSTM Model Configuration
+
+```python
+# lstm_config.py
+
+class LSTMModelConfig:
+    @staticmethod
+    def lstm_model(input_shape, model_params):
+        model = Sequential()
+        
+        if not model_params['layers']:
+            raise ValueError("Model configuration should include at least one layer.")
+
+        for layer in model_params['layers']:
+            if layer['type'] == 'bidirectional_lstm':
+                model.add(Bidirectional(LSTM(units=layer['units'], return_sequences=layer['return_sequences'], kernel_regularizer=layer['kernel_regularizer']),
+                                        input_shape=input_shape))
+            elif layer['type'] == 'batch_norm':
+                model.add(BatchNormalization())
+            elif layer['type'] == 'dropout':
+                model.add(Dropout(rate=layer['rate']))
+            elif layer['type'] == 'dense':
+                model.add(Dense(units=layer['units'], activation=layer['activation'], kernel_regularizer=layer['kernel_regularizer']))
+            elif layer['type'] == 'attention':
+                model.add(Attention())
+            else:
+                raise ValueError(f"Unsupported layer type: {layer['type']}")
+
+        model.add(Dense(1))
+        model.compile(optimizer=model_params['optimizer'], loss='mean_squared_error')
+        return model
+```
+
+### Example Usage Script
+
+```python
+# lstm.py
+
+def main():
+    from lstm_config import LSTMModelConfig
+    from lstm_trainer import LSTMModelTrainer
+
+    data_file_path = 'C:/TheTradingRobotPlug/data/alpha_vantage/tsla_data.csv'
+    model_save_path = 'best_model.keras'
+    scaler_save_path = 'scaler.pkl'
+
+    data_handler = DataHandler(logger=logger)
+    data = data_handler.load_data(data_file_path)
+
+    if data is not None:
+        X_train, X_val, y_train, y_val = data_handler.preprocess_data(data)
+
+        if X_train is not None and X_val is not None and y_train is not None and y_val is not None:
+            time_steps = 10
+            trainer = LSTMModelTrainer(logger, model_save_path, scaler_save_path)
+            X_train_seq, y_train_seq = trainer.create_sequences(X_train, y_train, time_steps)
+            X_val_seq, y_val_seq = trainer.create_sequences(X_val, y_val, time_steps)
+
+            model_params = {
+                'layers': [
+                    {'type': 'bidirectional_lstm', 'units': 100, 'return_sequences': True, 'kernel_regularizer': None},
+                    {'type': 'attention'},
+                    {'type': 'batch_norm'},
+                    {'type': 'dropout', 'rate': 0.3},
+                    {'type': 'dense', 'units': 50, 'activation': 'relu', 'kernel_regularizer': None}
+                ],
+                'optimizer': 'adam',
+                'loss': 'mean_squared_error'
+            }
+
+            model_config = LSTMModelConfig.lstm_model((X_train_seq.shape[1], X_train_seq.shape[2]), model_params)
+            trained_model = trainer.train_lstm(X_train_seq, y_train_seq, X_val_seq, y_val_seq, model_config, epochs=50)
+
+            if trained_model:
+                trainer.evaluate_model(X_val_seq, y_val_seq)
+        else:
+            logger.error("Data preprocessing failed.")
+    else:
+        logger.error("Data loading failed.")
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+## Additional Notes and Reflections
+- **Feature Idea**: Consider adding a feature to cache API responses to reduce redundant data fetches and improve efficiency.
+- **Improvement**: Enhance error handling in the data fetch script to better manage API rate limits and provide more informative error messages.
+- **Reflection**: The project is progressing well, but regular team check-ins could further enhance collaboration and ensure alignment on goals.
+- **Feedback**: Positive feedback on the recent improvements to the data fetch script from team members.
+
+---
+
+## Project Milestones
+- **Milestone 1**: Initial setup and configuration - Completed
+- **Milestone 2**: Data fetch module implementation - In Progress
+- **Milestone 3**: Unit testing and validation - Pending
+- **Milestone 4**: Final integration and deployment - Pending
+
+---
+
+## Resource Links
+- [Alpha Vantage API Documentation](https://www.alphavantage.co/documentation/)
+- [Python unittest Documentation](https://docs.python.org/3/library/unittest.html)
+- [GitHub Repository](https://github.com/dadudekc/tradingrobotplug)
+
+---
+
+## Collaboration and Communication
+- **Meeting Summary**: Discussed the implementation of the caching mechanism. Decided to prioritize this feature in the next sprint.
+- **Decision**: Agreed to refactor the data fetch script for better maintainability and scalability.
+- **Action Items**:
+  - Alice to draft the initial caching mechanism implementation by [specific date].
+  - Bob to review and update the project documentation by [specific date].
+
+---
+
+## Risk Management
+- **Risk**: API rate limits could affect data retrieval.
+  - **Mitigation Strategy**: Implement caching to reduce the number of API calls.
+- **Risk**: Potential delays in completing unit tests.
+  - **Mitigation Strategy

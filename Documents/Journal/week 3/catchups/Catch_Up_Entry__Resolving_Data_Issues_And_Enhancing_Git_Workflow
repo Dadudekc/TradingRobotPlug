@@ -1,0 +1,154 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Resolving_Data_Issues_And_Enhancing_Git_Workflow**
+
+---
+
+## Work Completed
+
+### Objectives and Goals
+- The main objectives were to debug and resolve issues related to the LSTM model training script (`lstm_trainer.py`) and address challenges encountered during Git operations.
+
+### Actions Taken
+- **LSTM Model Training Script:**
+  - Worked on the `lstm_trainer.py` script, focusing on resolving errors encountered during the sequence creation process.
+  - Addressed a `KeyError` related to sequence creation by debugging the code and investigating the issue thoroughly. This involved checking how sequences were created from the input data and adjusting the logic accordingly.
+  - Attempted to fix logging issues where updates were not being recorded in the log file (`lstm_model_trainer.log`). Adjusted the logging configuration and ensured that the logging directory and file paths were correctly set up.
+
+- **Git Workflow:**
+  - Faced challenges with Git operations, particularly with pushing and pulling changes to the remote repository.
+  - Encountered a situation where the remote repository had updates that were not present locally, leading to a rejected push. Followed up by attempting a `git pull` but encountered network-related errors preventing successful data retrieval from the remote repository.
+  - Attempted to troubleshoot by checking the network connection and verifying the availability of GitHub. Further steps were taken to resolve the issues, including retrying the Git commands and considering alternative methods for accessing the repository.
+
+### Challenges and Breakthroughs
+- **Challenges:**
+  - The `KeyError` encountered during the LSTM model sequence creation was a significant roadblock. It required detailed debugging to identify the root cause and make necessary adjustments to the code.
+  - Network issues during Git operations were another challenge, preventing smooth collaboration and version control. The inability to access the GitHub repository posed a risk to the workflow.
+
+- **Breakthroughs:**
+  - Successfully identified and began addressing the root cause of the `KeyError` in the sequence creation logic. This was a crucial step toward ensuring the model training script functions as intended.
+  - Made progress in understanding and resolving the issues with the logging mechanism, ensuring that future logs will be correctly recorded.
+
+### Results and Impact
+- The debugging efforts on the `lstm_trainer.py` script improved the understanding of the underlying issues, setting the stage for a more robust and error-free model training process.
+- Although the Git issues were not fully resolved, the actions taken provided valuable insights into the problems, allowing for better preparation and strategies for future attempts.
+
+---
+
+## Skills and Technologies Used
+- **Python Programming:** Extensively used for debugging and refining the LSTM model training script.
+- **TensorFlow:** Utilized for building and training the LSTM model, requiring a deep understanding of sequence data and model configurations.
+- **Git Version Control:** Engaged in troubleshooting and managing source code with Git, facing challenges that necessitated a thorough understanding of Git operations.
+- **Logging in Python:** Worked on enhancing the logging mechanism to ensure better tracking and debugging of the script.
+
+---
+
+## Lessons Learned
+- **Learning Outcomes:**
+  - Gained deeper insights into handling sequence data for LSTM models, particularly the importance of correctly indexing and managing data in time series tasks.
+  - Learned about potential pitfalls in logging configurations and the importance of verifying log output paths and permissions.
+  - Encountered and began addressing common network and repository access issues that can occur during Git operations, highlighting the importance of having backup strategies for version control.
+
+- **Unexpected Challenges:**
+  - The persistence of the `KeyError` in the sequence creation process was unexpected, requiring more time and effort than initially anticipated.
+  - Network issues during Git operations were also unforeseen, adding complexity to what should have been straightforward version control tasks.
+
+- **Future Application:**
+  - The lessons learned will influence future debugging strategies, with a focus on thoroughly understanding data structures before applying operations like sequence creation.
+  - Improved logging practices will be implemented to ensure that all actions and errors are properly recorded, aiding future troubleshooting efforts.
+  - The challenges with Git will lead to more cautious and prepared approaches when dealing with network-dependent operations.
+
+---
+
+## To-Do
+- **Fix Sequence Creation Issue:** Continue working on the `lstm_trainer.py` script to fully resolve the `KeyError` and ensure that the LSTM model training process is error-free.
+- **Resolve Git Access Issues:** Reattempt the Git push and pull operations after resolving network issues. Consider switching to SSH if HTTPS issues persist.
+- **Verify Logging Mechanism:** Ensure that the logging mechanism is fully operational and accurately records all actions taken during the script's execution.
+- **Refactor Code:** Once the immediate issues are resolved, refactor the `lstm_trainer.py` script to improve readability and maintainability.
+- **Test the Model:** Run comprehensive tests on the LSTM model once the sequence creation issue is resolved to ensure it performs as expected.
+
+---
+
+## Code Snippets and Context
+
+### Sequence Creation in LSTM Trainer
+
+```python
+# Function to create sequences for LSTM training
+def create_sequences(self, X, y, time_steps):
+    Xs, ys = [], []
+    try:
+        for i in range(len(X) - time_steps):
+            Xs.append(X[i:(i + time_steps)])  # Adjusted to handle numpy arrays correctly
+            ys.append(y[i + time_steps])
+        return np.array(Xs), np.array(ys)
+    except Exception as e:
+        self.logger.error(f"Error in create_sequences: {e}")
+        return None, None
+```
+
+### Logging Configuration
+
+```python
+# Logging setup in lstm_trainer.py
+log_dir = Path("C:/TheTradingRobotPlug/logs")
+log_dir.mkdir(parents=True, exist_ok=True)
+log_file = log_dir / "lstm_model_trainer.log"
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', handlers=[
+    logging.FileHandler(log_file),
+    logging.StreamHandler()
+])
+logger = logging.getLogger('LSTMModelTrainer')
+```
+
+---
+
+## Additional Notes and Reflections
+- **Improvement Needed:** Consider implementing a more robust error-handling mechanism to provide better diagnostic information during unexpected failures.
+- **Feature Idea:** Add detailed logging for each step of the sequence creation process to better trace the flow of data and catch potential issues early.
+- **Reflection:** The session highlighted the importance of a meticulous approach to debugging and the value of thorough testing before assuming a fix is complete.
+
+---
+
+## Project Milestones
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Data fetch module implementation - Completed
+- **Milestone 3:** LSTM model training script debugging - In Progress
+- **Milestone 4:** Unit testing and validation - Pending
+- **Milestone 5:** Final integration and deployment - Pending
+
+---
+
+## Resource Links
+- [TensorFlow Documentation](https://www.tensorflow.org/api_docs)
+- [GitHub SSH Setup Guide](https://docs.github.com/en/authentication/connecting-to-github-with-ssh)
+- [Python Logging Documentation](https://docs.python.org/3/library/logging.html)
+
+---
+
+## Collaboration and Communication
+- **Discussion with Team:** Discussed the `KeyError` in the sequence creation process with team members, leading to a better understanding of the problem.
+- **Action Items:**
+  - Continue investigating the sequence creation issue with the team.
+  - Prepare a plan for refactoring the LSTM model training script once the bug is resolved.
+
+---
+
+## Risk Management
+- **Risk:** Persisting `KeyError` in sequence creation may delay model training.
+  - **Mitigation Strategy:** Prioritize debugging and allocate additional time to ensure the issue is fully resolved before proceeding.
+
+- **Risk:** Git network issues could hinder collaboration and code integration.
+  - **Mitigation Strategy:** Investigate alternative methods (e.g., SSH) and ensure local backups are maintained.
+
+---
+
+## Retrospective
+- **What Went Well:** Progress was made in identifying the root causes of the issues in the LSTM model training script.
+- **What Could Be Improved:** Need to ensure better preparation for network-dependent tasks, especially during critical project phases.
+- **Actionable Insights:** Incorporate more detailed logging and testing into the workflow to catch and resolve issues earlier in the development process.
+
+---

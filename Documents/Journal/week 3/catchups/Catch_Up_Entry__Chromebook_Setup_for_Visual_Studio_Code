@@ -1,0 +1,87 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Chromebook_Setup_for_Visual_Studio_Code**
+
+---
+
+## Work Completed
+- **Objectives and Goals:** The goal for this session was to determine the best way to set up and use Visual Studio Code (VS Code) on a Chromebook to enable efficient project development and management.
+- **Actions Taken:** 
+   - Explored and evaluated various options for using VS Code on a Chromebook, including the web version, installing the desktop version via Linux (Crostini), using Chrome extensions, and considering online IDE alternatives.
+   - Detailed the steps for enabling Linux on a Chromebook, downloading and installing VS Code, and starting the application.
+   - Investigated simpler alternatives for quick access to code editors without complex setups, such as using online IDEs and Chrome extensions.
+- **Challenges and Breakthroughs:** One challenge was the need to balance between ease of setup and full functionality. The breakthrough was identifying that the Linux installation method provides a full-featured VS Code experience, while the web version offers a quick and accessible alternative for basic coding tasks.
+- **Results and Impact:** The exploration provided a clear path forward for setting up VS Code on a Chromebook, allowing for flexibility depending on the project's needs. This ensures that the development environment is readily accessible and can be tailored to different use cases, enhancing overall productivity.
+
+---
+
+## Skills and Technologies Used
+- **Linux Environment:** Utilized for enabling and configuring the Linux (Crostini) environment on a Chromebook, which allowed for the installation of the full desktop version of VS Code.
+- **Web-Based Tools:** Evaluated the use of web-based tools like vscode.dev for quick access to VS Code features without full installation.
+- **Chrome Extensions:** Explored Chrome extensions as lightweight alternatives for quick coding tasks.
+- **Online IDEs:** Considered platforms like Repl.it and Gitpod for easy access to coding environments without local installations.
+
+---
+
+## Lessons Learned
+- **Learning Outcomes:** Gained a better understanding of how to configure and optimize a Chromebook for software development, particularly with VS Code. Learned about the trade-offs between different setups and how to choose the best one based on project requirements.
+- **Unexpected Challenges:** Realized that the Linux setup might be too complex for quick tasks, making the web version or Chrome extensions more suitable for certain scenarios.
+- **Future Application:** These insights will inform future decisions when setting up development environments on different devices, particularly when balancing between functionality and ease of setup. The knowledge will also help in advising team members or collaborators on the best setup options for their specific needs.
+
+---
+
+## To-Do
+- **Finalize Linux Setup:** Ensure that the Linux environment on the Chromebook is fully configured with all necessary dependencies for future project work.
+- **Test Web Version:** Conduct further testing on the web version of VS Code to assess its suitability for more complex coding tasks.
+- **Evaluate Chrome Extensions:** Try out additional Chrome extensions to determine if any provide sufficient features for lightweight coding sessions.
+- **Documentation:** Update project documentation with a guide on setting up VS Code on a Chromebook, including both Linux and web-based options.
+
+---
+
+## Code Snippets and Context
+No specific code snippets were generated during this session, as the focus was on setting up the development environment rather than coding. Future sessions will include code snippets relevant to the tasks completed in the newly configured environment.
+
+---
+
+## Additional Notes and Reflections
+- **Brainstorming:** Consider adding a section in the project documentation dedicated to alternative development setups for various devices (e.g., Chromebook, tablet, etc.).
+- **Improvements:** Explore additional Linux packages or extensions that could enhance the coding experience on a Chromebook, such as tools for better terminal integration or file management.
+- **Reflection:** The session was productive in establishing a reliable method for coding on a Chromebook, which is crucial for maintaining flexibility in where and how the project is developed.
+
+---
+
+## Project Milestones
+- **Milestone 1:** Initial Chromebook environment setup - Completed
+- **Milestone 2:** Documentation of setup options - In Progress
+- **Milestone 3:** Evaluation of coding environments - Pending
+- **Milestone 4:** Integration and deployment of the coding environment for project tasks - Pending
+
+---
+
+## Resource Links
+- [VS Code Web Version](https://vscode.dev/)
+- [VS Code Download for Linux](https://code.visualstudio.com/download)
+- [Gitpod](https://www.gitpod.io/)
+- [Repl.it](https://repl.it/)
+
+---
+
+## Collaboration and Communication
+No significant collaboration or communication with team members was required during this session, as the work was focused on individual setup. Future sessions may involve sharing the setup guide and gathering feedback from team members who also use Chromebooks for development.
+
+---
+
+## Risk Management
+- **Risk:** Limited functionality in the web version of VS Code might hinder some development tasks.
+  - **Mitigation Strategy:** Use the Linux version for more complex tasks and reserve the web version for quick edits or lightweight coding.
+
+---
+
+## Retrospective
+- **What Went Well:** The Linux setup for VS Code on a Chromebook was successfully completed, providing a powerful development environment.
+- **What Could Be Improved:** Future sessions could focus on streamlining the setup process to make it more accessible for less technically inclined team members.
+- **Actionable Insights:** Document the setup process thoroughly and consider creating a video tutorial to assist others in the team who might benefit from similar setups.
+
+---
