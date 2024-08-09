@@ -1,0 +1,147 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Handling_Date_Columns_and_Training_Neural_Network_with_Real_Data**
+
+---
+
+## Work Completed
+
+- **Objectives and Goals:** 
+  The primary goal of this session was to address the issue of handling non-numeric date columns in a dataset when training a neural network model. Additionally, the objective was to ensure that the real data from `C:\TheTradingRobotPlug\data\alpha_vantage\tsla_data.csv` could be successfully loaded, processed, and used to train a neural network model.
+
+- **Actions Taken:** 
+  1. **Issue Identification:** Identified an error in the model training script where date strings from the dataset caused a failure when the `StandardScaler` attempted to convert them to float values.
+  2. **Data Handling Update:** Modified the data loading function to recognize and appropriately handle the 'Date' column by converting it to datetime format and extracting useful numerical features such as 'Year', 'Month', and 'Day'.
+  3. **Model Training Execution:** Updated the training script to correctly preprocess the data, including dropping unnecessary columns and scaling the numerical features before feeding them into the neural network.
+  4. **Error Resolution:** Tested the updated script to confirm that it correctly handles the date columns and successfully proceeds with model training using the real data.
+
+- **Challenges and Breakthroughs:**
+  - **Challenge:** The initial error was caused by attempting to scale non-numeric data, specifically date strings, which the `StandardScaler` could not process.
+  - **Breakthrough:** By converting the 'Date' column into separate numerical features and dropping the original string-based 'Date' column, the data could be effectively used in the neural network training process.
+
+- **Results and Impact:** 
+  The script was successfully updated to handle the date column issue, allowing for seamless data preprocessing and model training. This enhancement enables the neural network to be trained using real historical stock data, thus contributing significantly to the project's progress by ensuring that the model can now be trained and tested on actual data.
+
+**Example:**
+
+```python
+# Updated data handling for Date column
+df['Date'] = pd.to_datetime(df['Date'])
+df['Year'] = df['Date'].dt.year
+df['Month'] = df['Date'].dt.month
+df['Day'] = df['Date'].dt.day
+df.drop('Date', axis=1, inplace=True)
+```
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Utilized for scripting the data handling and model training process.
+- **Pandas:** Employed for efficient data manipulation, particularly for handling date columns.
+- **TensorFlow:** Used to build and train the neural network model.
+- **Scikit-learn:** Applied for data preprocessing, including scaling and splitting datasets.
+- **Error Debugging:** Efficiently identified and resolved errors related to data preprocessing, enhancing code robustness.
+
+---
+
+## Lessons Learned
+
+- **Learning Outcomes:** 
+  The importance of proper data preprocessing was reinforced, particularly in converting non-numeric features such as dates into a format suitable for machine learning models. Understanding how to extract useful features from date columns can significantly improve the quality of the input data.
+  
+- **Unexpected Challenges:** 
+  The primary unexpected challenge was the handling of the date strings, which initially caused the model training process to fail. This was addressed by converting the date column into separate numerical features.
+
+- **Future Application:** 
+  This experience will influence future workflows by ensuring that any potential non-numeric columns are identified and appropriately processed early in the data preprocessing stage. Additionally, the practice of handling date features as part of feature engineering will be consistently applied in future projects.
+
+---
+
+## To-Do
+
+- **Finalize Model Training:** Complete the remaining training sessions using different configurations to validate the model's performance on real data.
+- **Enhance Feature Engineering:** Explore additional feature engineering techniques to derive more predictive features from the existing data.
+- **Document Changes:** Update the project documentation to reflect the recent changes in the data handling and model training process.
+- **Refactor Code:** Refactor the data loading and preprocessing scripts to improve code readability and maintainability.
+
+---
+
+## Code Snippets and Context
+
+### Data Handling and Model Training Script
+
+```python
+import pandas as pd
+
+# Load the data
+df = pd.read_csv('C:/TheTradingRobotPlug/data/alpha_vantage/tsla_data.csv')
+
+# Convert 'Date' to datetime and extract features
+df['Date'] = pd.to_datetime(df['Date'])
+df['Year'] = df['Date'].dt.year
+df['Month'] = df['Date'].dt.month
+df['Day'] = df['Date'].dt.day
+
+# Drop the original 'Date' column
+df.drop('Date', axis=1, inplace=True)
+
+# Prepare features and target
+X = df.iloc[:, :-1].values
+y = df.iloc[:, -1].values
+
+# Split data into training and validation sets
+split_index = int(len(df) * 0.8)
+X_train, X_val = X[:split_index], X[split_index:]
+y_train, y_val = y[:split_index], y[split_index:]
+```
+
+---
+
+## Additional Notes and Reflections
+
+- **Improvement:** Implement additional feature extraction techniques, such as creating time-based features that capture trends over time (e.g., moving averages, day of the week).
+- **Reflection:** The resolution of the date column issue is a significant milestone in the project, as it ensures that the real data can be processed and used effectively in the model training pipeline.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Data Preprocessing Enhancements - Completed
+- **Milestone 2:** Model Training with Real Data - In Progress
+- **Milestone 3:** Model Validation and Tuning - Pending
+- **Milestone 4:** Final Integration and Testing - Pending
+
+---
+
+## Resource Links
+
+- [Pandas Documentation](https://pandas.pydata.org/pandas-docs/stable/)
+- [TensorFlow Documentation](https://www.tensorflow.org/guide)
+- [Scikit-learn Documentation](https://scikit-learn.org/stable/user_guide.html)
+
+---
+
+## Collaboration and Communication
+
+- **Discussion:** Regular communication with stakeholders to update them on progress and ensure alignment on goals, particularly concerning the successful handling of real data for model training.
+- **Decision:** Agreed to prioritize the finalization of the model training process using the updated data preprocessing methods before moving on to further enhancements.
+
+---
+
+## Risk Management
+
+- **Risk:** Potential delays in finalizing model training due to unexpected data preprocessing issues.
+  - **Mitigation Strategy:** Allocate additional time for thorough testing and validation of the data preprocessing pipeline to ensure that all potential issues are resolved before final training.
+
+---
+
+## Retrospective
+
+- **What Went Well:** The identification and resolution of the date column issue allowed for smooth progress in training the neural network with real data.
+- **What Could Be Improved:** Additional automated checks could be implemented to detect and handle non-numeric columns more efficiently in the future.
+- **Actionable Insights:** Consider implementing a more robust data validation step in the preprocessing pipeline to catch and resolve issues early.
+
+---

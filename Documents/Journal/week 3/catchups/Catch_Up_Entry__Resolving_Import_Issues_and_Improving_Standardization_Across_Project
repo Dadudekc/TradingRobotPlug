@@ -1,0 +1,168 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Resolving_Import_Issues_and_Improving_Standardization_Across_Project**
+
+---
+
+## Work Completed
+
+- **Objectives and Goals:**
+  The main objective was to resolve import issues that were causing the Python scripts in the project to fail due to module path problems. Additionally, I aimed to standardize the way paths, logging, and other configurations were handled across various scripts within the project to ensure consistency and maintainability.
+
+- **Actions Taken:**
+  - Updated the `linear_regression.py` and `neural_network.py` scripts to dynamically determine the project root and adjust the Python path accordingly. This ensures that the scripts can correctly locate and import modules from the `Scripts.Utilities` package.
+  - Implemented a consistent logging setup across the scripts to ensure all logs are saved to a designated `logs` directory. This included setting up loggers using the `LoggerHandler` class from `model_training_utils.py`.
+  - Modified the data preprocessing and model training processes in `neural_network.py` to handle non-numeric columns correctly, addressing issues where string values (like 'tsla') were causing failures during scaling.
+  - Utilized the `DataLoader` and `DataPreprocessor` classes from `model_training_utils.py` for consistent data loading and preprocessing across different scripts.
+  - Ran tests and debugging sessions to verify that the changes were effective in resolving the import issues and ensuring consistent behavior across the project.
+
+- **Challenges and Breakthroughs:**
+  - **Challenges:** 
+    - Initially, the scripts failed to locate the `Scripts.Utilities` module, resulting in `ModuleNotFoundError` exceptions. This required careful restructuring of the Python path configuration.
+    - Handling non-numeric columns during data preprocessing was another challenge, as it caused crashes during the scaling process. This required adjusting the preprocessing logic to remove or transform non-numeric columns.
+  - **Breakthroughs:**
+    - Successfully resolved the import issues by dynamically adjusting the Python path based on the script's location relative to the project root. This approach proved effective across different scripts.
+    - Implemented a uniform logging configuration across scripts, improving traceability and consistency in logging outputs.
+
+- **Results and Impact:**
+  - The import issues have been fully resolved, allowing all scripts to run without errors. This has improved the stability and reliability of the project.
+  - The standardization of logging and path handling has enhanced maintainability and reduced the likelihood of similar issues occurring in the future.
+  - The preprocessing improvements have ensured that the neural network model can handle various data types without encountering errors, leading to smoother model training sessions.
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Used extensively for scripting, module handling, and debugging.
+- **Logging:** Implemented consistent logging across the project to enhance debugging and traceability.
+- **Data Preprocessing:** Applied data preprocessing techniques using `pandas` and `scikit-learn`, including handling non-numeric data and scaling features.
+- **TensorFlow:** Utilized for building and training neural network models with distributed strategies.
+- **SHAP:** Used for model explainability, particularly for generating SHAP values to understand model predictions.
+- **Version Control (Git):** Used for tracking changes and ensuring that all modifications were appropriately versioned.
+
+---
+
+## Lessons Learned
+
+- **Learning Outcomes:**
+  - Gained a deeper understanding of Python’s module import system and how to dynamically adjust the Python path to avoid import errors.
+  - Learned the importance of standardizing logging and configuration across a project to ensure consistency and ease of maintenance.
+  - Improved my ability to handle and preprocess data, particularly in managing non-numeric columns that can disrupt scaling operations.
+
+- **Unexpected Challenges:**
+  - Encountered unexpected issues with non-numeric data in the dataset, which required additional preprocessing steps that were not initially anticipated.
+  - The process of ensuring uniformity across different scripts revealed inconsistencies that needed to be addressed, such as different logging setups and path configurations.
+
+- **Future Application:**
+  - These lessons will influence future projects by emphasizing the need for standardized configurations and logging from the outset. This will streamline development and reduce the potential for errors.
+  - The experience with handling non-numeric data will guide future data preprocessing efforts, ensuring that all potential data types are considered and appropriately managed.
+
+---
+
+## To-Do
+
+- **Complete Unit Tests:** Finalize unit tests for all scripts that were modified to ensure they function as expected.
+- **Refactor Code:** Review and refactor other scripts in the project to apply the same standardization for logging and path handling.
+- **Documentation:** Update project documentation to reflect the changes made to the Python path configuration and logging setup.
+- **Model Training:** Continue testing the neural network model with different datasets to ensure robustness and accuracy.
+
+---
+
+## Code Snippets and Context
+
+### Dynamic Path Setup and Logging Configuration
+
+```python
+import os
+import sys
+import logging
+
+# Dynamically set the project root and adjust the Python path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir, os.pardir, os.pardir))
+sys.path.append(project_root)
+
+# Setup logging
+logger_handler = LoggerHandler()
+logger = logger_handler.logger
+
+# Example log message
+logger.info("Script started successfully.")
+```
+
+### Preprocessing Non-Numeric Data
+
+```python
+class DataPreprocessor:
+    def __init__(self, logger_handler, config_manager):
+        self.logger = logger_handler
+        self.config_manager = config_manager
+
+    def preprocess_data(self, data, target_column='close', date_column='date', scaler_type='StandardScaler'):
+        # Handle date columns and create lag features
+        data = self._handle_dates(data, date_column)
+        data = self._create_lag_features(data, target_column)
+
+        # Remove non-numeric columns
+        X = data.drop(columns=[target_column])
+        X = X.select_dtypes(include=[np.number])
+
+        y = data[target_column]
+        return train_test_split(X, y, test_size=0.2, random_state=42)
+```
+
+---
+
+## Additional Notes and Reflections
+
+- **Brainstorming:** Consider implementing a more advanced configuration management system that can handle different environments (development, testing, production) with specific settings for each.
+- **Improvements:** Improve the error handling in data preprocessing to provide more informative error messages when unexpected data types are encountered.
+- **Reflection:** The project is moving in the right direction with the resolution of critical issues. Ensuring uniformity across all scripts has made the codebase more cohesive and maintainable.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Data fetch module implementation - Completed
+- **Milestone 3:** Standardizing logging and path handling - Completed
+- **Milestone 4:** Final integration and deployment - In Progress
+
+---
+
+## Resource Links
+
+- [TensorFlow Documentation](https://www.tensorflow.org/api_docs/python/tf)
+- [SHAP Documentation](https://shap.readthedocs.io/en/latest/)
+- [Python Logging Documentation](https://docs.python.org/3/library/logging.html)
+
+---
+
+## Collaboration and Communication
+
+- **Meetings and Discussions:** Discussed the standardization approach with the team to ensure alignment on the new logging and path handling conventions.
+- **Decisions Made:** Decided to apply the same path and logging standardization to all scripts in the project for consistency.
+- **Action Items:**
+  - Continue refactoring other scripts to apply the new standards.
+  - Schedule a team code review session to ensure all changes are correctly implemented.
+
+---
+
+## Risk Management
+
+- **Risk:** Inconsistent application of the new logging and path handling standards across the project.
+  - **Mitigation Strategy:** Implement a checklist to ensure all scripts are reviewed and updated according to the new standards.
+- **Risk:** Potential for missed errors during the transition to standardized configurations.
+  - **Mitigation Strategy:** Implement thorough testing and review processes for all modified scripts.
+
+---
+
+## Retrospective
+
+- **What Went Well:** The import issues were resolved effectively, and the project now has a more cohesive structure.
+- **What Could Be Improved:** Time management during the debugging process could be enhanced to allow for more efficient issue resolution.
+- **Actionable Insights:** Regularly reviewing and standardizing configurations across the project can prevent technical debt and reduce the likelihood of issues arising later.
+
+---

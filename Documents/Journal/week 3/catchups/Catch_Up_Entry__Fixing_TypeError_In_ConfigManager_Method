@@ -1,0 +1,133 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Fixing_TypeError_In_ConfigManager_Method**
+
+---
+
+## Work Completed
+
+### Objectives and Goals
+The primary objective was to resolve a `TypeError` encountered during the execution of the `model_training_main.py` script, specifically related to the `ConfigManager.get()` method being called with the wrong number of arguments.
+
+### Actions Taken
+- **Issue Identification:** The traceback was analyzed, revealing that the `ConfigManager.get()` method was being called with three arguments instead of the expected two.
+- **Code Review:** Reviewed the `ConfigManager.get()` method in the `config_handling.py` file to confirm that it only accepts two arguments: the key and an optional default value.
+- **Bug Fix:** Modified the method call in the `advanced_lstm_trainer.py` script to ensure only two arguments were passed: the configuration key and the default value.
+- **Validation:** Re-ran the script to confirm that the `TypeError` was resolved and that the script executed successfully.
+
+### Challenges and Breakthroughs
+- **Challenge:** The initial challenge was understanding the method signature and ensuring that the correct number of arguments was passed. 
+- **Breakthrough:** A quick review of the method’s definition clarified the expected parameters, leading to a straightforward fix.
+
+### Results and Impact
+The `TypeError` was successfully resolved, allowing the script to run without errors. This fix ensures the `ConfigManager` correctly retrieves configuration settings, contributing to the overall stability of the model training module.
+
+**Code Snippet:**
+
+```python
+# Corrected method call in advanced_lstm_trainer.py
+log_dir = Path(config_manager.get('log_dir', log_path))
+```
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Utilized for debugging and resolving the error in the script.
+- **Error Handling:** Applied techniques to identify and correct argument mismatch issues in method calls.
+- **Configuration Management:** Ensured proper use of configuration management within the script.
+
+---
+
+## Lessons Learned
+
+### Learning Outcomes
+- **Debugging and Troubleshooting:** Improved understanding of method signatures and argument handling in Python, which is crucial for avoiding and resolving similar issues in the future.
+
+### Unexpected Challenges
+- The issue was straightforward, with no unexpected challenges during the resolution process.
+
+### Future Application
+- **Enhanced Error Prevention:** Moving forward, double-checking method signatures when passing arguments will be a standard practice to avoid similar errors.
+
+---
+
+## To-Do
+
+- **Further Testing:** Conduct additional tests to ensure all configurations are correctly retrieved and applied.
+- **Documentation Update:** Update the documentation to reflect the changes made in handling configuration settings.
+- **Code Review:** Schedule a code review session to ensure similar issues are identified and resolved earlier in the development process.
+
+---
+
+## Code Snippets and Context
+
+### Configuration Manager Method
+
+```python
+# Example of get method in config_handling.py
+def get(self, key, default_value=None):
+    return self.config.get(key, default_value)
+```
+
+### Corrected Method Call
+
+```python
+# C:\TheTradingRobotPlug\Scripts\ModelTraining\model_training\models\advanced_lstm_trainer.py
+log_dir = Path(config_manager.get('log_dir', log_path))
+```
+
+---
+
+## Additional Notes and Reflections
+
+- **Improvement:** Consider adding more detailed type hints and method signatures within the `ConfigManager` class to help avoid similar issues in the future.
+- **Reflection:** The quick resolution of this issue reinforces the importance of careful review and understanding of method signatures, particularly in complex scripts with multiple dependencies.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Data fetch module implementation - In Progress
+- **Milestone 3:** Model training scripts setup and testing - In Progress
+- **Milestone 4:** Unit testing and validation - Pending
+
+---
+
+## Resource Links
+
+- [Python Documentation on Functions](https://docs.python.org/3/tutorial/controlflow.html#defining-functions)
+- [Python Pathlib Documentation](https://docs.python.org/3/library/pathlib.html)
+
+---
+
+## Collaboration and Communication
+
+- **Meeting Summary:** No meetings were required for this specific task.
+- **Decision:** Decided to refactor method calls across similar scripts to ensure consistency in argument handling.
+- **Action Items:** Review all instances where the `ConfigManager.get()` method is called to ensure consistency.
+
+---
+
+## Risk Management
+
+- **Risk:** Potential similar issues with other configuration methods.
+  - **Mitigation Strategy:** Implement a review process to ensure all method calls are correctly handled and conform to expected signatures.
+
+---
+
+## Retrospective
+
+### What Went Well
+- The issue was identified and resolved quickly, minimizing downtime and keeping the project on track.
+
+### What Could Be Improved
+- Need for better documentation of method signatures to prevent similar issues in the future.
+
+### Actionable Insights
+- Implement regular code reviews focusing on method calls and configurations to catch errors early in the development process.
+
+---

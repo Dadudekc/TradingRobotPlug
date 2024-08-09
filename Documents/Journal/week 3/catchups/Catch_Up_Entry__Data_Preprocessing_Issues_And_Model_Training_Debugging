@@ -1,0 +1,154 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Data_Preprocessing_Issues_And_Model_Training_Debugging**
+
+---
+
+## Work Completed
+- **Objectives and Goals:** 
+  - The primary objective was to train an LSTM model on TSLA stock data and address errors encountered during the ARIMA model training process. 
+  - Identify and resolve issues related to data preprocessing, particularly handling `NaN` values and ensuring correct input shapes for the LSTM model.
+
+- **Actions Taken:** 
+  - Investigated and resolved multiple errors encountered during the ARIMA and LSTM model training processes.
+  - Implemented checks and handling mechanisms for `NaN` values in the input data to prevent training interruptions.
+  - Addressed issues related to incorrect input shapes for the LSTM model by ensuring proper data reshaping.
+  - Refactored logging statements to avoid syntax errors and improved error handling during model training.
+
+- **Challenges and Breakthroughs:** 
+  - **Challenges:** 
+    - Encountered `NaN` values in the training data, leading to errors during the LSTM model training.
+    - Faced issues with incorrect input shapes for the LSTM model, causing the model to throw errors during the training process.
+    - Debugging the `Logger.log()` method, which was incorrectly used, leading to errors during logging.
+  - **Breakthroughs:** 
+    - Successfully implemented data preprocessing steps to handle `NaN` values, allowing the model to train without interruptions.
+    - Corrected input shape errors for the LSTM model, ensuring compatibility with the expected model architecture.
+    - Refactored logging calls to use the correct syntax, improving error handling and debugging capabilities.
+
+- **Results and Impact:** 
+  - The code was refactored to better handle edge cases, particularly related to `NaN` values and input shape mismatches. 
+  - The improvements made will significantly enhance the reliability and robustness of the model training process, enabling smoother and more accurate training sessions.
+
+```python
+# Handling NaN values in LSTM model training
+if np.isnan(X_train_reshaped).any() or np.isnan(X_val_reshaped).any() or np.isnan(y_train).any() or np.isnan(y_val).any():
+    self.logger.log(level=logging.WARNING, msg="NaN values detected in the input data. Filling NaNs with column means.")
+    X_train_reshaped = np.nan_to_num(X_train_reshaped, nan=np.nanmean(X_train_reshaped))
+    X_val_reshaped = np.nan_to_num(X_val_reshaped, nan=np.nanmean(X_val_reshaped))
+    y_train = np.nan_to_num(y_train, nan=np.nanmean(y_train))
+    y_val = np.nan_to_num(y_val, nan=np.nanmean(y_val))
+```
+
+---
+
+## Skills and Technologies Used
+- **Python Programming:** Utilized for debugging, data preprocessing, and model training script adjustments.
+- **TensorFlow and Keras:** Used for training the LSTM model, requiring in-depth understanding of input shapes and data formatting.
+- **Sklearn Preprocessing:** Employed to handle data scaling and managing `NaN` values in the dataset.
+- **Logging and Debugging:** Refined logging practices to better trace errors and monitor model training progress.
+
+---
+
+## Lessons Learned
+- **Learning Outcomes:** 
+  - The importance of thorough data preprocessing, especially when dealing with time series data that may contain missing or malformed entries.
+  - Recognized the need for correctly handling input shapes in deep learning models to avoid compatibility issues.
+  - Learned the value of clear and concise logging practices to aid in debugging complex training pipelines.
+
+- **Unexpected Challenges:** 
+  - Encountered persistent `NaN` values that were not immediately obvious, requiring additional preprocessing steps.
+  - Debugging input shape errors took more time than anticipated due to the complex nature of the model's architecture.
+
+- **Future Application:** 
+  - Moving forward, data validation steps will be incorporated earlier in the pipeline to catch issues before they impact model training.
+  - Will apply similar logging and error handling strategies across other models and processes to maintain consistency.
+
+---
+
+## To-Do
+- **Complete LSTM Model Training:** Finalize the LSTM model training with the corrected data preprocessing steps and ensure no `NaN` values are present.
+- **ARIMA Model Debugging:** Continue debugging the ARIMA model, particularly focusing on handling time series data correctly.
+- **Enhance Error Logging:** Improve error logging in other parts of the project to ensure comprehensive monitoring during training sessions.
+- **Unit Tests:** Develop unit tests for data preprocessing functions to catch issues like `NaN` values before they propagate into model training.
+
+---
+
+## Code Snippets and Context
+
+### Data Preprocessing for LSTM
+
+```python
+# Handling NaN values and reshaping input for LSTM model
+if np.isnan(X_train_reshaped).any() or np.isnan(X_val_reshaped).any() or np.isnan(y_train).any() or np.isnan(y_val).any():
+    self.logger.log(level=logging.WARNING, msg="NaN values detected in the input data. Filling NaNs with column means.")
+    X_train_reshaped = np.nan_to_num(X_train_reshaped, nan=np.nanmean(X_train_reshaped))
+    X_val_reshaped = np.nan_to_num(X_val_reshaped, nan=np.nanmean(X_val_reshaped))
+    y_train = np.nan_to_num(y_train, nan=np.nanmean(y_train))
+    y_val = np.nan_to_num(y_val, nan=np.nanmean(y_val))
+
+# Reshaping data to match LSTM input requirements
+X_train_reshaped = X_train.reshape((X_train.shape[0], X_train.shape[1], -1))
+X_val_reshaped = X_val.reshape((X_val.shape[0], X_val.shape[1], -1))
+```
+
+### Logging Adjustments
+
+```python
+# Corrected logging syntax
+self.logger.log(level=logging.INFO, msg="Starting LSTM model training...")
+```
+
+---
+
+## Additional Notes and Reflections
+- **Brainstorming:** Consider implementing automated data validation scripts that check for `NaN` values, incorrect data types, and other anomalies before data is passed to the model training phase.
+- **Improvements:** Enhance the preprocessing pipeline to include more robust handling of edge cases like missing data or unexpected input shapes.
+- **Reflections:** The iterative debugging process highlighted the importance of data integrity and proper preprocessing. Future projects will benefit from a more rigorous initial validation phase.
+- **Feedback:** Received positive feedback from peers on the improved logging practices, which greatly aided in identifying and resolving issues during model training.
+
+---
+
+## Project Milestones
+- **Milestone 1:** Data Preprocessing Improvements - Completed
+- **Milestone 2:** LSTM Model Training - In Progress
+- **Milestone 3:** ARIMA Model Debugging - In Progress
+- **Milestone 4:** Unit Testing and Validation - Pending
+- **Milestone 5:** Final Integration and Model Deployment - Pending
+
+---
+
+## Resource Links
+- [TensorFlow Documentation](https://www.tensorflow.org/api_docs)
+- [Sklearn Preprocessing Documentation](https://scikit-learn.org/stable/modules/preprocessing.html)
+- [Python Logging Documentation](https://docs.python.org/3/library/logging.html)
+- [Pandas Documentation on Handling Missing Data](https://pandas.pydata.org/pandas-docs/stable/user_guide/missing_data.html)
+
+---
+
+## Collaboration and Communication
+- **Meetings and Discussions:** Discussed with the team the recurring issues with `NaN` values and input shapes, leading to a consensus on improving preprocessing steps.
+- **Decisions Made:** Agreed to implement stricter data validation steps before the training phase to reduce errors related to data integrity.
+- **Action Items:** 
+  - [Your Name] to finalize LSTM model training with the updated preprocessing steps by [specific date].
+  - [Team Member] to focus on resolving ARIMA model issues and report progress by [specific date].
+
+---
+
+## Risk Management
+- **Risk:** Data integrity issues leading to failed model training.
+  - **Mitigation Strategy:** Implementing comprehensive data validation and preprocessing steps before training begins.
+
+- **Risk:** Delays in model training due to recurring errors.
+  - **Mitigation Strategy:** Allocate more time for debugging and testing preprocessing functions to ensure smooth training runs.
+
+---
+
+## Retrospective
+- **What Went Well:** Successfully identified and addressed key issues related to data preprocessing, leading to more stable model training.
+- **What Could Be Improved:** Initial data validation steps could have been more thorough, which would have prevented some of the issues encountered during training.
+- **Actionable Insights:** Integrate data validation and preprocessing checks earlier in the pipeline to prevent similar issues in the future. Allocate dedicated time blocks for debugging and testing to maintain consistent progress.
+
+---
+

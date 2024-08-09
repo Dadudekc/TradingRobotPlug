@@ -1,0 +1,78 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Troubleshooting_Hostinger_Admin_Access_and_WordPress_Issues**
+
+---
+
+## Work Completed
+- **Objectives and Goals:** Resolve issues related to accessing the WordPress admin panel through Hostinger.
+- **Actions Taken:** Attempted to troubleshoot and access the admin panel using various approaches, including clearing cache, checking for plugin conflicts, and analyzing potential .htaccess file issues. Additionally, outlined steps to access the WordPress admin through Hostinger’s dashboard.
+- **Challenges and Breakthroughs:** The primary challenge was an error page when trying to access the admin panel via Hostinger. While the exact issue couldn't be replicated, several common solutions were explored, such as disabling plugins and increasing the PHP memory limit.
+- **Results and Impact:** Provided a series of troubleshooting steps to address potential issues with accessing the WordPress admin panel, ensuring smoother management of the website.
+
+---
+
+## Skills and Technologies Used
+- **WordPress Management:** Accessing and troubleshooting WordPress admin issues.
+- **Web Hosting (Hostinger):** Navigated Hostinger’s hosting environment to manage and resolve site access problems.
+- **Problem Solving:** Identified multiple potential causes and solutions for the WordPress admin access issue.
+
+---
+
+## Lessons Learned
+- **Learning Outcomes:** Gained deeper insights into common issues that can occur when accessing the WordPress admin panel and the steps required to resolve them.
+- **Unexpected Challenges:** The inability to directly access the admin panel highlighted the need for understanding various troubleshooting methods.
+- **Future Application:** These lessons will improve future troubleshooting and management of WordPress sites hosted on platforms like Hostinger.
+
+---
+
+## To-Do
+- **Contact Support:** If the issue persists, contact Hostinger support for further assistance.
+- **Backup and Restore:** Consider setting up regular backups to quickly restore the site in case of future issues.
+- **Documentation Update:** Document the troubleshooting process and solutions for future reference.
+
+---
+
+## Code Snippets and Context
+No specific code snippets were involved in this session as the focus was on web hosting and WordPress management tasks.
+
+---
+
+## Additional Notes and Reflections
+- **Improvement:** Consider setting up automated health checks for the site to detect and resolve issues faster.
+- **Reflection:** The troubleshooting process underscored the importance of having a reliable support system when managing a WordPress site on a third-party hosting platform.
+
+---
+
+## Project Milestones
+- **Milestone 1:** Initial WordPress site setup - Completed
+- **Milestone 2:** Resolving admin access issues - In Progress
+- **Milestone 3:** Ongoing site management and optimization - Pending
+
+---
+
+## Resource Links
+- [Hostinger Support](https://www.hostinger.com/support)
+- [WordPress Troubleshooting Guide](https://wordpress.org/support/article/common-wordpress-errors/)
+
+---
+
+## Collaboration and Communication
+No team collaboration was necessary during this session.
+
+---
+
+## Risk Management
+- **Risk:** Potential recurring issues with WordPress admin access.
+  - **Mitigation Strategy:** Regularly monitor the site and maintain updated backups.
+
+---
+
+## Retrospective
+- **What Went Well:** Quickly identified potential solutions for common WordPress access issues.
+- **What Could Be Improved:** Faster access to direct support could have resolved the issue more efficiently.
+- **Actionable Insights:** Maintain a list of common troubleshooting steps for quick reference.
+
+---

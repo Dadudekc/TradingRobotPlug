@@ -1,0 +1,153 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Enhancing_LSTM_Model_Training_and_Data_Preprocessing**
+
+---
+
+## Work Completed
+
+### Objectives and Goals
+The primary objective of this session was to resolve issues related to inconsistent sample sizes encountered during LSTM model training. Additionally, improvements were needed in the data preprocessing pipeline to ensure reliable and accurate data handling before feeding it into the model.
+
+### Actions Taken
+- **LSTM Model Trainer Enhancements:**
+  - Updated the `LSTMModelTrainer` class to include robust error handling during model training and evaluation.
+  - Improved the method for creating sequences of data to ensure consistent sample sizes across training and validation datasets.
+  - Integrated additional logging to provide better insights into the training process, including data shape and performance metrics.
+
+- **Data Preprocessing Improvements:**
+  - Updated the `DataHandler` class to include comprehensive logging for each step in the data preprocessing pipeline.
+  - Improved the management of non-numeric data by converting it to NaN values and applying imputation techniques.
+  - Enhanced the creation of lag and rolling window features to avoid data loss due to NaN removal.
+
+- **Model Configuration and Training:**
+  - Implemented a more flexible model configuration for LSTM models, allowing for different types of layers, such as Bidirectional LSTM and Attention layers.
+  - Updated the training loop to include callbacks for early stopping, learning rate reduction, and model checkpointing, ensuring that the best model is saved.
+
+### Challenges and Breakthroughs
+- **Challenge:** Inconsistent sample sizes during LSTM model training led to errors in the training process.
+  - **Breakthrough:** The issue was resolved by refining the sequence creation method in the `LSTMModelTrainer` class, ensuring that the data fed into the model had consistent dimensions across training and validation sets.
+
+- **Challenge:** Managing non-numeric data during preprocessing posed challenges in maintaining data integrity.
+  - **Breakthrough:** The solution involved converting non-numeric data to NaN values and applying imputation, which improved the quality of the data before it was scaled and split.
+
+### Results and Impact
+The improvements made in this session significantly enhanced the robustness of the LSTM model training process. The logging and error-handling mechanisms provide better insights into the training pipeline, making it easier to diagnose issues and ensure consistent model performance. These changes contribute to the overall progress of the project by ensuring that the models are trained on well-prepared and consistent data, leading to more reliable predictions.
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Used extensively for scripting the data preprocessing and model training processes.
+- **TensorFlow and Keras:** Employed for building and training LSTM models, incorporating advanced techniques such as Bidirectional LSTM and Attention layers.
+- **Data Handling and Preprocessing:** Applied techniques for managing and transforming data, including imputation, scaling, and feature engineering.
+- **Error Handling and Logging:** Implemented detailed logging and error-handling strategies to improve code reliability and debuggability.
+
+---
+
+## Lessons Learned
+
+### Learning Outcomes
+- Gained a deeper understanding of sequence creation for time series data, ensuring consistent data shapes for LSTM models.
+- Improved skills in managing and preprocessing data, particularly in handling non-numeric data and applying imputation techniques.
+
+### Unexpected Challenges
+- The issue with inconsistent sample sizes during training was unexpected but provided valuable insights into the importance of careful sequence management.
+
+### Future Application
+- The lessons learned will inform future data preprocessing and model training efforts, particularly in projects involving time series data. The improvements in logging and error handling will be applied to other areas of the project to ensure robust and maintainable code.
+
+---
+
+## To-Do
+
+- **Finalize LSTM Model Training:** Continue refining the LSTM model based on the updated training pipeline, ensuring optimal performance.
+- **Expand Data Preprocessing:** Incorporate additional feature engineering techniques to further enhance data quality before model training.
+- **Unit Testing:** Develop and execute unit tests for the `DataHandler` and `LSTMModelTrainer` classes to ensure code reliability.
+- **Documentation:** Update project documentation to reflect the recent changes and improvements in data preprocessing and model training.
+
+---
+
+## Code Snippets and Context
+
+### DataHandler Class
+
+```python
+# Example of lag feature creation in the DataHandler class
+def create_lag_features(self, df, column_name, lag_sizes):
+    for lag_days in lag_sizes:
+        df[f'{column_name}_lag_{lag_days}'] = df[column_name].shift(lag_days)
+    df.fillna(method='ffill', inplace=True)
+    df.fillna(method='bfill', inplace=True)
+    return df
+```
+
+### LSTMModelTrainer Class
+
+```python
+# Example of sequence creation in the LSTMModelTrainer class
+def create_sequences(data, target, time_steps=10):
+    xs, ys = [], []
+    for i in range(len(data) - time_steps):
+        x = data[i:(i + time_steps)]
+        y = target.iloc[i + time_steps]
+        xs.append(x)
+        ys.append(y)
+    return np.array(xs), np.array(ys)
+```
+
+---
+
+## Additional Notes and Reflections
+
+- **Feature Idea:** Consider adding support for more advanced feature engineering techniques, such as Fourier transformations or wavelet transforms, to enhance the predictive power of the LSTM models.
+- **Improvement:** Explore the use of automated hyperparameter tuning tools, such as Optuna, to optimize LSTM model configurations.
+- **Reflection:** The project is moving forward steadily with the improvements made in this session. The next focus will be on ensuring the robustness of the models through thorough testing and validation.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Data fetch module implementation - Completed
+- **Milestone 3:** Data preprocessing and feature engineering - In Progress
+- **Milestone 4:** LSTM model training and validation - In Progress
+
+---
+
+## Resource Links
+
+- [TensorFlow Keras Documentation](https://www.tensorflow.org/guide/keras)
+- [Scikit-learn Imputation Techniques](https://scikit-learn.org/stable/modules/impute.html)
+- [Optuna for Hyperparameter Tuning](https://optuna.org/)
+
+---
+
+## Collaboration and Communication
+
+- **Meeting Summary:** Discussed the implementation of the enhanced LSTM model training pipeline. Agreed to prioritize testing and validation in the next sprint.
+- **Decision:** Decided to refactor the `DataHandler` class to make it more modular and easier to test.
+- **Action Items:** 
+  - Alice to work on unit tests for the `DataHandler` class by [specific date].
+  - Bob to refactor the `DataHandler` class and update documentation by [specific date].
+
+---
+
+## Risk Management
+
+- **Risk:** Potential for overfitting during LSTM model training due to complex model architecture.
+  - **Mitigation Strategy:** Implement early stopping and reduce learning rate on plateau to prevent overfitting.
+- **Risk:** Data inconsistencies leading to model training errors.
+  - **Mitigation Strategy:** Enhance data validation steps during preprocessing to catch and correct inconsistencies early.
+
+---
+
+## Retrospective
+
+- **What Went Well:** The implementation of detailed logging and error handling significantly improved the debugging process.
+- **What Could Be Improved:** More time should be allocated for unit testing to ensure all components work as expected before integrating them.
+- **Actionable Insights:** Regularly review and refactor code to maintain quality and prevent technical debt from accumulating.
+
+---

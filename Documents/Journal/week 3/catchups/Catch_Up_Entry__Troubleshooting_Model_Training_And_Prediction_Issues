@@ -1,0 +1,156 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Troubleshooting_Model_Training_And_Prediction_Issues**
+
+---
+
+## Work Completed
+
+- **Objectives and Goals:**
+  - The main objective of this session was to run and validate the training and prediction process of different machine learning models, including ARIMA, LSTM, and neural networks, using existing data and model configurations.
+  
+- **Actions Taken:**
+  - Initiated the ARIMA model training on the AAPL dataset. Encountered and documented issues with model convergence.
+  - Loaded and attempted predictions with the LSTM and neural network models on MSFT data, recording detailed logs of input and output discrepancies.
+  - Addressed the challenges of loading serialized models and the shape mismatches during model prediction by carefully inspecting error messages and runtime logs.
+
+- **Challenges and Breakthroughs:**
+  - **ARIMA Model:** Encountered multiple convergence issues during ARIMA model training, which necessitates reevaluating model parameters or preprocessing steps.
+  - **LSTM Model:** Faced two critical issues: 
+    - The first was related to the model loading process due to serialization errors.
+    - The second issue was an input shape mismatch that caused the LSTM model to fail during prediction. 
+  - **Neural Network Model:** Successfully loaded the neural network model but ran into an input shape compatibility issue during prediction. This highlighted the need to better align data preprocessing with model expectations.
+  
+- **Results and Impact:**
+  - The ARIMA model training highlighted the need for parameter tuning or an alternative modeling approach due to non-convergence.
+  - The LSTM model’s challenges emphasized the importance of consistent data preprocessing and serialization methods across different environments.
+  - Although predictions for the neural network model were not fully successful, the process provided crucial insights into the necessary adjustments for input data handling, which will improve future model training and prediction accuracy.
+
+```python
+# Example of ARIMA training initiation
+arima_model = ARIMA(train_data, order=(1, 1, 1))
+arima_model_fit = arima_model.fit(maxiter=100, disp=False)
+
+# Example of LSTM input data preprocessing
+features = preprocess_data(features.values, model_type='lstm')
+predictions = lstm_model.predict(features)
+```
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Employed for executing scripts, managing model training, and handling data preprocessing tasks.
+- **TensorFlow/Keras:** Used for loading and running the LSTM and neural network models, dealing with input data shape handling.
+- **ARIMA Modeling:** Utilized for time series forecasting with the ARIMA model, though faced challenges with parameter settings.
+- **Debugging:** Applied extensive debugging techniques to identify and resolve issues with model convergence and input data mismatches.
+
+---
+
+## Lessons Learned
+
+- **Learning Outcomes:**
+  - Gained a deeper understanding of the importance of ensuring that the input data's shape matches the expected format for different model types, particularly in LSTM and neural networks.
+  - Learned that ARIMA models require careful parameter tuning, especially when dealing with non-stationary data.
+
+- **Unexpected Challenges:**
+  - Encountered serialization errors when loading models, which underscored the need for consistency in model saving and loading processes.
+  - The shape mismatch error in LSTM highlighted that more rigorous checks are necessary during data preprocessing to ensure compatibility with the model architecture.
+
+- **Future Application:**
+  - Plan to implement more robust data validation checks before model training and prediction processes to avoid input shape issues.
+  - Will explore alternative time series models or better preprocessing techniques to address ARIMA convergence challenges.
+
+---
+
+## To-Do
+
+- **Adjust ARIMA Parameters:** Revisit and adjust the parameters for the ARIMA model to improve convergence during training.
+- **Fix LSTM Loading Issues:** Investigate and resolve the serialization problem when loading the LSTM model, possibly by re-saving the model with a different protocol.
+- **Address Input Shape Mismatches:** Refactor the data preprocessing steps to ensure that input data is correctly shaped for each model type, particularly for LSTM and neural networks.
+- **Run Additional Tests:** Conduct further tests on the neural network model with adjusted input data to ensure that predictions can be generated successfully.
+
+---
+
+## Code Snippets and Context
+
+### ARIMA Model Training Initialization
+
+```python
+# ARIMA Model initialization and training with sample data
+arima_model = ARIMA(train_data, order=(1, 1, 1))
+arima_model_fit = arima_model.fit(maxiter=100, disp=False)
+```
+
+### LSTM Model Data Preprocessing
+
+```python
+# Preprocessing input features for LSTM model
+features = preprocess_data(features.values, model_type='lstm')
+
+# LSTM model prediction
+predictions = lstm_model.predict(features)
+```
+
+### Neural Network Model Loading and Prediction
+
+```python
+# Load Neural Network model
+neural_net_model = load_model('models/neural_network_model.pkl')
+
+# Generate predictions with Neural Network
+predictions = neural_net_model.predict(preprocess_data(features.values, 'neural_network'))
+```
+
+---
+
+## Additional Notes and Reflections
+
+- **Improvement:** Consider developing a more comprehensive preprocessing pipeline that dynamically adjusts input data shapes based on the model type, reducing the chances of mismatch errors.
+- **Reflection:** The session provided valuable insights into the intricate dependencies between data preprocessing and model expectations, reinforcing the need for thorough validation at each stage of the workflow.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Initial setup and model configuration - Completed
+- **Milestone 2:** Model training and debugging - In Progress
+- **Milestone 3:** Prediction generation and validation - Pending
+- **Milestone 4:** Final testing and deployment - Pending
+
+---
+
+## Resource Links
+
+- [TensorFlow Keras Documentation](https://www.tensorflow.org/api_docs/python/tf/keras)
+- [ARIMA Model Guide](https://www.statsmodels.org/stable/generated/statsmodels.tsa.arima.model.ARIMA.html)
+
+---
+
+## Collaboration and Communication
+
+- **Meeting Summary:** Discussed the current issues with model loading and data preprocessing, and agreed to prioritize resolving the LSTM and ARIMA challenges.
+- **Decision:** Decided to reconfigure the data preprocessing steps to ensure that all input data conforms to the expected model architecture.
+- **Action Items:** 
+  - Revisit ARIMA parameters and test different configurations by [specific date].
+  - Investigate and resolve LSTM serialization issue by [specific date].
+
+---
+
+## Risk Management
+
+- **Risk:** Model loading issues could delay prediction generation.
+  - **Mitigation Strategy:** Re-save models using a different serialization protocol and ensure compatibility across different environments.
+
+---
+
+## Retrospective
+
+- **What Went Well:** Successfully identified key issues with model training and prediction, providing clear directions for further troubleshooting.
+- **What Could Be Improved:** The input data preprocessing pipeline needs to be more robust to avoid shape mismatches.
+- **Actionable Insights:** Implement rigorous data validation checks before feeding data into models to ensure compatibility and prevent errors during predictions.
+
+---
+

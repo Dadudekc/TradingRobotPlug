@@ -1,0 +1,141 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Addressing_Module_Import_Error_In_LSTM_Model_Training_Script**
+
+---
+
+## Work Completed
+
+### Objectives and Goals
+The main objective was to resolve a module import error encountered during the execution of an LSTM model training script. The goal was to ensure that the `config_handling` module could be successfully imported and utilized in the script.
+
+### Actions Taken
+- **Module Verification:** Verified the location and existence of the `config_handling.py` module within the project directory structure.
+- **Python Path Adjustment:** Implemented dynamic adjustments to the Python path within the script to ensure that the path to the `config_handling` module was included. This involved appending the appropriate directories to `sys.path`.
+- **Import Testing:** Added test code to confirm that the `config_handling` module could be imported after adjusting the Python path.
+
+### Challenges and Breakthroughs
+- **Challenge:** The initial script execution failed due to Python being unable to locate the `config_handling` module. This was a critical blocker as it prevented the script from running.
+- **Breakthrough:** By adjusting the Python path dynamically within the script, the issue was resolved, enabling the successful import of the module. This breakthrough allowed the script to progress beyond the import stage, setting the stage for successful model training.
+
+### Results and Impact
+- **Outcome:** The successful import of the `config_handling` module allowed the LSTM model training script to run without import errors. This ensured that the script could access necessary configurations and proceed with model training.
+- **Impact:** This resolution is a critical step in the project, as it ensures that the LSTM model training pipeline is functional, paving the way for further development and testing.
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Utilized for scripting and dynamic path management.
+- **Path Manipulation:** Employed techniques to adjust the Python path dynamically, ensuring that all necessary modules are accessible during script execution.
+- **Debugging:** Applied debugging techniques to identify and resolve the import error, including verification of module locations and testing imports.
+
+---
+
+## Lessons Learned
+
+### Learning Outcomes
+- **Dynamic Path Management:** Learned the importance and techniques of dynamically adjusting the Python path within scripts to ensure that all necessary modules are accessible, especially in complex project structures.
+  
+### Unexpected Challenges
+- **Unexpected Module Path Issues:** The module import issue was unexpected, as the path to the module was assumed to be correctly set. This highlighted the need to verify paths explicitly, particularly in scripts that may be executed in different environments.
+
+### Future Application
+- **Improved Path Management:** Future scripts will include robust path management techniques to prevent similar issues from occurring. This will involve more thorough testing of module imports and ensuring that all necessary paths are appended at the start of each script.
+
+---
+
+## To-Do
+
+- **Continue Model Training:** Proceed with the LSTM model training process now that the import issue is resolved.
+- **Refactor Path Handling:** Refactor similar scripts in the project to include dynamic path adjustments, ensuring consistent module access across all environments.
+- **Test Script in Different Environments:** Test the script in various environments to confirm that the import resolution works universally.
+- **Document Path Adjustment Techniques:** Update project documentation to include the techniques used for dynamic path adjustment, providing guidance for future development.
+
+---
+
+## Code Snippets and Context
+
+### Dynamic Path Adjustment in LSTM Training Script
+
+```python
+if __name__ == "__main__" and __package__ is None:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir, os.pardir, os.pardir))
+    
+    # Ensure the path to the 'Utilities' folder is added
+    utilities_path = os.path.join(project_root, 'Scripts', 'Utilities')
+    sys.path.append(utilities_path)
+    sys.path.append(project_root)
+
+    print("Corrected Project root path:", project_root)
+    print("Updated sys.path:", sys.path)
+```
+
+### Import Testing Block
+
+```python
+try:
+    from Scripts.Utilities.config_handling import ConfigManager
+    print("ConfigManager import successful")
+except ImportError as e:
+    print(f"Error importing modules: {e}")
+```
+
+---
+
+## Additional Notes and Reflections
+
+### Improvements
+- **Consistent Path Management:** Implement consistent path management across all scripts to avoid similar import issues in the future.
+
+### Reflection
+- **Module Management:** This session underscored the importance of thorough path management in large projects, especially when scripts are intended to be run in different environments.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Data fetch module implementation - Completed
+- **Milestone 3:** LSTM model training script execution - In Progress
+- **Milestone 4:** Final integration and deployment - Pending
+
+---
+
+## Resource Links
+
+- [Python sys.path Documentation](https://docs.python.org/3/library/sys.html#sys.path)
+- [Keras LSTM Layer Documentation](https://keras.io/api/layers/recurrent_layers/lstm/)
+- [TensorFlow Callbacks Documentation](https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/)
+
+---
+
+## Collaboration and Communication
+
+- **Discussion:** Discussed path management strategies with a colleague to ensure consistent module access across various development environments.
+- **Decision:** Agreed to implement similar path management techniques in other critical scripts within the project.
+
+---
+
+## Risk Management
+
+- **Risk:** Potential for path management issues in other scripts.
+  - **Mitigation Strategy:** Implement consistent path management techniques across the project to prevent similar issues.
+
+---
+
+## Retrospective
+
+### What Went Well
+- Successfully resolved the module import issue, allowing the LSTM model training script to proceed.
+
+### What Could Be Improved
+- Path management could have been handled more proactively to prevent the issue from occurring in the first place.
+
+### Actionable Insights
+- Implement dynamic path management in all project scripts to prevent import errors and ensure consistency across different environments.
+
+---

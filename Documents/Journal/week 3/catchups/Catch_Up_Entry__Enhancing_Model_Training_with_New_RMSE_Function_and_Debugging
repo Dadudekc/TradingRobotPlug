@@ -1,0 +1,293 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Enhancing_Model_Training_with_New_RMSE_Function_and_Debugging**
+
+---
+
+## Work Completed
+
+- **Objectives and Goals:** 
+  - Update the Linear Regression model script to use the new `root_mean_squared_error` function for calculating RMSE.
+  - Ensure compatibility with the latest versions of scikit-learn.
+  - Address and fix any encountered issues to ensure the script runs smoothly.
+
+- **Actions Taken:** 
+  - Reviewed the existing `linear_regression.py` script to identify areas that required updates due to deprecated functions.
+  - Updated the RMSE calculation to use `root_mean_squared_error`.
+  - Tested the script to ensure all functionalities are working as expected and addressed any runtime errors.
+  - Ensured logging is correctly configured for better debugging and monitoring.
+  - Verified the integration with the data loading and preprocessing utilities.
+
+- **Challenges and Breakthroughs:** 
+  - Encountered a deprecation warning related to RMSE calculation using `mean_squared_error` with `squared=False`.
+  - Resolved the issue by updating the script to use the new `root_mean_squared_error` function from scikit-learn.
+  - Ensured that all instances of RMSE calculation were correctly updated and validated through comprehensive testing.
+
+- **Results and Impact:** 
+  - Successfully updated the script to use the new RMSE calculation method, ensuring compatibility with the latest library versions.
+  - Improved the robustness and reliability of the model training process.
+  - Enhanced logging for better monitoring and debugging, leading to quicker identification and resolution of issues.
+
+**Code Snippet:**
+```python
+# Predict and calculate metrics on transformed validation data
+y_pred_val = self.best_model.predict(X_val_selected)
+if self.logger:
+    self.logger.info(f"Predicted y_val shape: {y_pred_val.shape}")
+
+mse = mean_squared_error(y_val, y_pred_val)
+rmse = root_mean_squared_error(y_val, y_pred_val)  # Updated to use the new function
+mae = mean_absolute_error(y_val, y_pred_val)
+r2 = r2_score(y_val, y_pred_val)
+
+if self.logger:
+    self.logger.info(f"Validation Metrics - MSE: {mse:.2f}, RMSE: {rmse:.2f}, MAE: {mae:.2f}, R²: {r2:.2f}")
+    best_alpha = randomized_search.best_params_['ridge__alpha']
+    self.logger.info(f"Best regularization strength (alpha): {best_alpha:.4f}. Consider using this as a starting point for your next training session.")
+```
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Used for scripting, data manipulation, and machine learning model development.
+- **Scikit-learn:** Employed for model training, hyperparameter tuning, and feature selection.
+- **Logging:** Configured detailed logging for debugging and monitoring the training process.
+- **Data Analysis:** Utilized data preprocessing and transformation techniques for effective model training.
+- **Git:** Managed version control to track changes and maintain codebase integrity.
+
+---
+
+## Lessons Learned
+
+- **Learning Outcomes:** 
+  - Gained a deeper understanding of handling deprecations in third-party libraries and updating code accordingly.
+  - Improved skills in debugging and enhancing logging for better issue resolution.
+
+- **Unexpected Challenges:** 
+  - Encountered deprecation warnings that required immediate attention to ensure future compatibility.
+  - Addressed issues with real-time predictions and model training efficiently through improved logging and debugging techniques.
+
+- **Future Application:** 
+  - The lessons learned will help in maintaining compatibility with evolving libraries and ensuring robust code.
+  - Enhanced logging practices will be applied to other parts of the project to improve debugging and monitoring.
+
+---
+
+## To-Do
+
+- **Complete Unit Tests:** Finalize the remaining unit tests for the `linear_regression.py` script by [specific date].
+- **Refactor Code:** Improve the structure and readability of the data fetching module to enhance maintainability.
+- **Documentation:** Update project documentation to reflect recent changes and improvements.
+- **Code Review:** Schedule a code review session to ensure code quality and consistency.
+- **Feature Implementation:** Start working on the caching mechanism for API responses.
+
+---
+
+## Code Snippets and Context
+
+### Updated Linear Regression Model Script
+
+```python
+# File: linear_regression.py
+# Location: Scripts/ModelTraining/model_training/models
+# Description: Contains a Linear Regression model class with training, explainability, and streaming capabilities.
+
+import os
+import sys
+import logging
+import matplotlib.pyplot as plt
+
+# Dynamic Root Path Setup
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir, os.pardir, os.pardir))
+sys.path.append(project_root)
+
+# Resource and Log Directory Setup
+resources_path = os.path.join(project_root, 'resources')
+log_path = os.path.join(project_root, 'logs')
+
+# Ensure the directories exist
+os.makedirs(resources_path, exist_ok=True)
+os.makedirs(log_path, exist_ok=True)
+
+# Logging Configuration
+log_file = os.path.join(log_path, 'application.log')
+logging.basicConfig(
+    filename=log_file,
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Conditional Imports Based on Execution Context
+try:
+    from some_production_module import ProductionClass
+except ImportError:
+    logger.warning("Production module not found; using mock for testing.")
+    from unittest.mock import Mock as ProductionClass
+
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import Ridge
+from sklearn.model_selection import RandomizedSearchCV, cross_val_score
+from sklearn.feature_selection import SelectFromModel
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, root_mean_squared_error
+import shap
+import lime
+from lime.lime_tabular import LimeTabularExplainer
+from tpot import TPOTRegressor
+from kafka import KafkaConsumer
+import json
+
+from Scripts.Utilities.model_training_utils import DataLoader, DataPreprocessor, LoggerHandler, ConfigManager
+
+
+class LinearRegressionModel:
+    def __init__(self, logger=None):
+        self.logger = logger
+        self.best_model = None
+        self.selector = None
+
+    def train(self, X_train, y_train, X_val, y_val):
+        """Train a linear regression model with hyperparameter tuning and feature selection."""
+        if self.logger:
+            self.logger.info(f"Initial X_train shape: {X_train.shape}, y_train shape: {y_train.shape}")
+            self.logger.info(f"Initial X_val shape: {X_val.shape}, y_val shape: {y_val.shape}")
+
+        ridge_for_selection = Ridge(alpha=1.0)
+        self.selector = SelectFromModel(estimator=ridge_for_selection, threshold='mean')
+
+        # Fit the selector on the training data
+        self.selector.fit(X_train, y_train)
+
+        # Transform the training and validation data
+        X_train_selected = self.selector.transform(X_train)
+        X_val_selected = self.selector.transform(X_val)
+
+        if self.logger:
+            self.logger.info(f"X_train shape after feature selection: {X_train_selected.shape}")
+            self.logger.info(f"X_val shape after feature selection: {X_val_selected.shape}")
+
+        # Create a pipeline for scaling and regression
+        pipeline = Pipeline([
+            ('scaler', StandardScaler()),
+            ('ridge', Ridge())
+        ])
+
+        param_grid = {'ridge__alpha': np.logspace(-4, 0, 100)}
+
+        if self.logger:
+            self.logger.info("Starting randomized search...")
+
+        randomized_search = RandomizedSearchCV(
+            pipeline,
+            param_distributions=param_grid,
+            n_iter=50,
+            cv=5,
+            scoring='neg_mean_squared_error',
+            verbose=2,
+            n_jobs=-1
+        )
+
+        try:
+            randomized_search.fit(X_train_selected, y_train)
+        except Exception as e:
+            if self.logger:
+                self.logger.error(f"Error during model training: {str(e)}")
+            return None
+
+        if self.logger:
+            self.logger.info("Randomized Search Results:")
+            results_df = pd.DataFrame(randomized_search.cv_results_)
+            results_str = results_df[['param_ridge__alpha', 'mean_test_score', 'std_test_score']].to_string()
+            self.logger.info(results_str)
+
+        cv_scores = cross_val_score(randomized_search.best_estimator_, X_train_selected, y_train, cv=5, scoring='neg_mean_squared_error')
+        if self.logger:
+            cv_scores_str = ", ".join([f"{score:.2f}" for score in cv_scores])
+            self.logger.info(f"CV Scores: {cv_scores_str}")
+
+        self.best_model = randomized_search.best_estimator_
+
+        if self.logger:
+            self.logger.info(f"Best model's training pipeline steps: {self.best_model.named_steps}")
+
+        # Predict and calculate metrics on transformed validation data
+        y_pred_val = self.best_model.predict(X_val_selected)
+        if self.logger:
+            self.logger.info(f"Predicted y_val shape: {y_pred_val.shape}")
+
+        mse = mean_squared_error(y_val, y_pred_val)
+        rmse = root_mean_squared_error(y_val, y_pred_val)  # Updated to use the new function
+        mae = mean_absolute_error(y_val, y_pred_val)
+        r2 = r2_score(y_val, y_pred_val)
+
+        if self.logger:
+            self.logger.info(f"Validation Metrics - MSE: {mse:.2f}, RMSE: {rmse:.2f}, MAE: {mae:.2f}, R²: {r2:.2f}")
+            best_alpha = randomized_search.best_params_['ridge__alpha']
+
+
+            self.logger.info(f"Best regularization strength (alpha): {best_alpha:.4f}. Consider using this as a starting point for your next training session.")
+        return self.best_model
+```
+
+---
+
+## Additional Notes and Reflections
+
+- **Improvement:** The project's codebase will benefit from regular updates and refactoring to maintain compatibility with the latest library versions and best practices.
+- **Reflection:** This session reinforced the importance of keeping up with library updates and ensuring that the project code remains compatible and efficient.
+- **Feedback:** Positive feedback received on the improved logging and debugging capabilities, which will streamline future troubleshooting and development efforts.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Data fetch module implementation - In Progress
+- **Milestone 3:** Model training and validation - Completed
+- **Milestone 4:** Integration of explainability and streaming capabilities - Pending
+- **Milestone 5:** Final integration and deployment - Pending
+
+---
+
+## Resource Links
+
+- [Scikit-learn Documentation](https://scikit-learn.org/stable/)
+- [Python Logging Documentation](https://docs.python.org/3/library/logging.html)
+- [SHAP Documentation](https://shap.readthedocs.io/en/latest/)
+- [LIME Documentation](https://lime-ml.readthedocs.io/en/latest/)
+
+---
+
+## Collaboration and Communication
+
+- **Meetings and Discussions:** Discussed the necessity of updating the model training script to avoid potential issues with deprecated functions.
+- **Decisions Made:** Agreed to prioritize updating and refactoring the codebase to maintain compatibility with the latest libraries.
+- **Action Items:** 
+  - Update all scripts to ensure compatibility with the latest versions of scikit-learn and other dependencies by [specific date].
+  - Review and enhance logging across the project for better monitoring and debugging.
+
+---
+
+## Risk Management
+
+- **Risk:** Potential compatibility issues with future updates of third-party libraries.
+  - **Mitigation Strategy:** Regularly review and update the project dependencies, and refactor code to maintain compatibility.
+- **Risk:** Delays in addressing deprecated functions could lead to runtime errors.
+  - **Mitigation Strategy:** Implement automated tests to detect and alert for deprecated functions and methods.
+
+---
+
+## Retrospective
+
+- **What Went Well:** Successfully updated the script to use the new RMSE function, ensuring compatibility with the latest scikit-learn version.
+- **What Could Be Improved:** Better anticipation of deprecations and proactive updates to the codebase.
+- **Actionable Insights:** Regularly schedule time for codebase maintenance to keep up with evolving best practices and library updates.
+
+---

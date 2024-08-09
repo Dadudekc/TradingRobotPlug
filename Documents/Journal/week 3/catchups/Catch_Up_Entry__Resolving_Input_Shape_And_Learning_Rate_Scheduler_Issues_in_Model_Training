@@ -1,0 +1,154 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Resolving_Input_Shape_And_Learning_Rate_Scheduler_Issues_in_Model_Training**
+
+---
+
+## Work Completed
+
+### Objectives and Goals:
+- Address and resolve issues related to input shape mismatches during LSTM model training.
+- Fix learning rate scheduler errors causing training interruptions.
+- Ensure correct handling of file paths and logging during random forest model training.
+
+### Actions Taken:
+1. **Input Shape Error Fix:**
+   - Identified and resolved a shape mismatch error in LSTM model training by ensuring that the input data was reshaped correctly to match the expected dimensions.
+   - Updated the `_prepare_lstm_data` function to correctly flatten the data before feeding it into the model.
+
+2. **Learning Rate Scheduler Adjustment:**
+   - Resolved an error caused by the learning rate scheduler returning a value that was not explicitly a float. The `scheduler` function was updated to ensure it always returns a float value, preventing further interruptions during model training.
+
+3. **File Path Error in Random Forest Training:**
+   - Corrected a `TypeError` caused by the `Memory` object receiving a logger instead of a valid file path. This involved ensuring that the `cache_location` parameter was correctly passed as a string path and not mistakenly set to the logger object.
+
+### Challenges and Breakthroughs:
+- **Challenges:**
+   - The input shape mismatch was a subtle issue that required careful analysis of how data was being prepared and reshaped before being fed into the LSTM model.
+   - The learning rate scheduler issue was challenging because it involved understanding how the TensorFlow/Keras callbacks expected certain data types.
+
+- **Breakthroughs:**
+   - Successfully debugging and fixing these issues resulted in smoother and uninterrupted model training processes. This also reinforced the importance of carefully handling data types and shapes in deep learning workflows.
+
+### Results and Impact:
+- The issues were resolved, leading to successful model training sessions without errors. These fixes are crucial for ensuring that the machine learning models perform correctly and efficiently, which directly impacts the overall reliability and accuracy of the trading models being developed.
+
+---
+
+## Skills and Technologies Used
+- **Python Programming:** Essential for scripting and debugging the model training code.
+- **TensorFlow/Keras:** Utilized for constructing, training, and debugging neural network models, particularly with regard to learning rate scheduling and input shape handling.
+- **Data Handling:** Applied techniques to preprocess and reshape data correctly before model input.
+- **Error Handling:** Improved error handling and logging practices to better capture and address issues in real-time.
+- **Joblib (Memory):** Utilized for caching in random forest model training, ensuring efficient re-use of computed data.
+
+---
+
+## Lessons Learned
+
+### Learning Outcomes:
+- **Input Shape Management:** Gained deeper insights into managing input shapes for sequential models, ensuring compatibility between data preparation and model architecture.
+- **Learning Rate Scheduler Debugging:** Improved understanding of TensorFlow/Keras callbacks and the importance of returning correct data types, particularly in custom scheduler functions.
+
+### Unexpected Challenges:
+- Encountering a `TypeError` due to an incorrect argument being passed to the `Memory` object highlighted the importance of careful parameter handling and type checking.
+
+### Future Application:
+- These lessons will inform future work by reinforcing the need for thorough testing and validation of model input data and callback functions before initiating long training processes. Additionally, better error handling strategies will be implemented across the project to catch similar issues early.
+
+---
+
+## To-Do
+- **Complete Unit Tests:** Finalize unit tests for all model training scripts to ensure robustness.
+- **Refactor Code:** Continue refactoring code for readability and maintainability, especially in the data preprocessing pipeline.
+- **Feature Implementation:** Work on implementing more advanced caching mechanisms to optimize data retrieval and processing times.
+- **Documentation:** Update project documentation to reflect recent changes and ensure new team members can quickly understand the project's structure.
+
+---
+
+## Code Snippets and Context
+
+### Learning Rate Scheduler in Neural Network Training
+
+```python
+def scheduler(self, epoch, lr):
+    # Ensure the learning rate is a float
+    new_lr = lr if epoch < 10 else lr * tf.math.exp(-0.1)
+    return float(new_lr)
+```
+
+### Input Shape Preparation for LSTM
+
+```python
+def _prepare_lstm_data(self, data):
+    data = data.select_dtypes(include=[float, int]).fillna(0)
+    X, y, scaler = prepare_data(data, target_column='close', time_steps=10)
+    X = X.reshape((X.shape[0], X.shape[1], -1))
+    return X_train, X_val, y_train, y_val, scaler
+```
+
+### Corrected Memory Initialization in Random Forest Trainer
+
+```python
+self.memory = Memory(location=os.path.join(os.getcwd(), cache_location), verbose=0)
+```
+
+---
+
+## Additional Notes and Reflections
+
+### Brainstorming:
+- Consider adding automated data validation steps before model training to catch and resolve any input shape or data type issues early.
+
+### Reflections:
+- The project is steadily progressing with each resolved issue, reinforcing the importance of rigorous testing and debugging. The recent challenges have underscored the value of having a well-structured and thoroughly tested codebase.
+
+---
+
+## Project Milestones
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Data fetch module implementation - Completed
+- **Milestone 3:** Model training scripts validation and debugging - In Progress
+- **Milestone 4:** Final integration and deployment - Pending
+
+---
+
+## Resource Links
+- [TensorFlow/Keras Documentation](https://www.tensorflow.org/guide/keras)
+- [Python Joblib Documentation](https://joblib.readthedocs.io/)
+- [Python unittest Documentation](https://docs.python.org/3/library/unittest.html)
+
+---
+
+## Collaboration and Communication
+
+### Meetings and Discussions:
+- Discussed the recent model training errors and debugging strategies with the team. Agreed to adopt more rigorous unit testing practices to prevent similar issues in the future.
+
+### Action Items:
+- Assign a team member to focus on writing comprehensive unit tests for all model training scripts by [specific date].
+
+---
+
+## Risk Management
+
+### Risk:
+- **Issue:** Potential for further unexpected errors during model training.
+  - **Mitigation Strategy:** Implement thorough testing and validation at each stage of the data processing and model training pipeline to catch issues early.
+
+---
+
+## Retrospective
+
+### What Went Well:
+- Successfully resolved complex issues with input shape management and learning rate scheduling.
+
+### What Could Be Improved:
+- Need to focus on pre-emptive testing to catch potential issues before they disrupt the training process.
+
+### Actionable Insights:
+- Allocate time for team members to review and refactor existing code regularly, ensuring it remains maintainable and less prone to errors.
+
+---

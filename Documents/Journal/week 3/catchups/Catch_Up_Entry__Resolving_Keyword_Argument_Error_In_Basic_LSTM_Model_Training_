@@ -1,0 +1,144 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Resolving_Keyword_Argument_Error_In_Basic_LSTM_Model_Training_**
+
+---
+
+## Work Completed
+
+- **Objectives and Goals:** The primary objective was to resolve a `TypeError` that occurred during the training of a basic LSTM model, where an unexpected keyword argument `params` was passed to the `lstm_model()` function.
+
+- **Actions Taken:**
+  - Identified that the `basicLSTMModelConfig.lstm_model()` function was being called with a `params` argument, which it was not designed to accept.
+  - Removed the `params` argument from the function call to align with the function's actual signature.
+  - Reviewed the script to ensure that the `basicLSTMModelTrainer.create_sequences` method was correctly utilized to generate sequences for model training.
+
+- **Challenges and Breakthroughs:**
+  - The main challenge was diagnosing the source of the `TypeError` and determining whether the `params` argument was necessary. After reviewing the code, it was clear that the `params` argument was mistakenly included.
+  - A breakthrough was achieved when the error was resolved by removing the unnecessary `params` argument, allowing the script to execute without errors.
+
+- **Results and Impact:**
+  - The resolution of the error allowed the basic LSTM model training script to run successfully. This fix ensures that the model can be trained without interruptions, contributing to the project's progress by enabling accurate predictions in future trading scenarios.
+
+```python
+# Updated function call without the 'params' argument
+model_config = basicLSTMModelConfig.lstm_model(input_shape=(X_train.shape[1], X_train.shape[2]))
+```
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Used extensively for debugging and resolving the issue within the model training script.
+- **TensorFlow and Keras:** Utilized for defining and training the LSTM model.
+- **Logging:** Implemented to track the flow of the script and identify errors during execution.
+- **Debugging:** Applied effective debugging techniques to quickly identify and resolve the `TypeError`.
+
+---
+
+## Lessons Learned
+
+- **Learning Outcomes:** 
+  - Gained a deeper understanding of how TensorFlow and Keras handle model configuration and the importance of matching function signatures with expected arguments.
+  - Reinforced the importance of thorough code review, especially when integrating or modifying existing code.
+
+- **Unexpected Challenges:** 
+  - The unexpected inclusion of the `params` argument was an oversight that led to the error. This highlighted the need for careful attention to detail when adapting or expanding on existing code.
+
+- **Future Application:** 
+  - Moving forward, I will ensure that function signatures are carefully reviewed and matched with the actual function calls in the script. This will prevent similar issues and improve the robustness of the code.
+
+---
+
+## To-Do
+
+- **Refactor Code:** Further refactor the basic LSTM model training script to improve readability and maintainability.
+- **Enhance Error Handling:** Implement more comprehensive error handling to provide clearer diagnostics in case of future issues.
+- **Optimize Model Training:** Explore ways to optimize the LSTM model training process, such as tuning hyperparameters or experimenting with different network architectures.
+- **Documentation:** Update the project documentation to reflect the changes made to the basic LSTM model training script.
+
+---
+
+## Code Snippets and Context
+
+### Updated Basic LSTM Model Configuration
+
+```python
+class basicLSTMModelConfig:
+    @staticmethod
+    def lstm_model(input_shape):
+        model = Sequential()
+        model.add(LSTM(50, return_sequences=True, input_shape=input_shape))
+        model.add(Dropout(0.2))
+        model.add(LSTM(50, return_sequences=False))
+        model.add(Dropout(0.2))
+        model.add(Dense(1))
+        model.compile(optimizer='adam', loss='mean_squared_error')
+        return model
+```
+
+### Correction in the Main Script
+
+```python
+def train_basic_lstm_model(X_train, y_train, X_val, y_val):
+    """Train a basic LSTM model."""
+    logger.info("Training basic LSTM model...")
+    basic_lstm_trainer = basicLSTMModelTrainer(logger)
+    model_config = basicLSTMModelConfig.lstm_model(input_shape=(X_train.shape[1], X_train.shape[2]))
+    basic_lstm_trainer.train_lstm(X_train, y_train, X_val, y_val, model_config, epochs=50)
+    logger.info("Basic LSTM model training complete")
+```
+
+---
+
+## Additional Notes and Reflections
+
+- **Brainstorming:** Consider expanding the basic LSTM model with additional layers or alternative architectures to improve predictive accuracy.
+- **Improvements:** Enhance the flexibility of the LSTM model configuration by allowing users to specify different hyperparameters dynamically.
+- **Reflection:** This session underscored the importance of consistent code review and testing, especially when integrating new features or modifying existing functionality.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Data fetch module implementation - In Progress
+- **Milestone 3:** Unit testing and validation - Pending
+- **Milestone 4:** Final integration and deployment - Pending
+
+---
+
+## Resource Links
+
+- [TensorFlow Keras Documentation](https://www.tensorflow.org/guide/keras)
+- [Python Logging Documentation](https://docs.python.org/3/library/logging.html)
+- [Stack Overflow - Debugging Tips](https://stackoverflow.com/questions/tagged/debugging)
+
+---
+
+## Collaboration and Communication
+
+- **Meetings and Discussions:** N/A
+- **Decisions Made:** Decided to remove the `params` argument from the LSTM model configuration to align with the function signature.
+- **Action Items:** 
+  - Refactor and optimize the LSTM model training script by [specific date].
+  - Review and update project documentation to reflect changes made by [specific date].
+
+---
+
+## Risk Management
+
+- **Risk:** Potential for similar errors if function signatures are not carefully matched.
+  - **Mitigation Strategy:** Implement a more rigorous code review process and automated testing to catch these issues earlier in the development cycle.
+
+---
+
+## Retrospective
+
+- **What Went Well:** Successfully identified and resolved the `TypeError`, allowing the model training to proceed without issues.
+- **What Could Be Improved:** Better initial testing and review could have prevented the error from occurring.
+- **Actionable Insights:** Implement more thorough testing and code reviews to catch potential issues before they impact the development process.
+
+---

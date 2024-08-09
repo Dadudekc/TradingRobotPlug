@@ -1,0 +1,184 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Data_Handling_Improvement_and_Code_Refactoring**
+
+---
+
+## Work Completed
+
+- **Objectives and Goals:**  
+  The main objective was to troubleshoot and resolve issues related to importing modules and handling NaN or Inf values during model training. Additionally, the goal was to improve the script's resilience to data quality issues.
+
+- **Actions Taken:**  
+  - **Module Import Issue:** 
+    - Analyzed the directory structure and corrected import paths to ensure the script could locate and import necessary modules like `basiclstm` under `model_training.models`.
+    - Updated `sys.path` configuration in the script to ensure that the correct directories were added for module imports.
+  - **Data Quality Handling:** 
+    - Added a function to check for NaN or Inf values in the dataset and clean them before proceeding with model training.
+    - Integrated this function into the main workflow to automatically clean the data when such values are detected.
+  - **Script Execution:** 
+    - Successfully executed the script to detect and clean NaN/Inf values, followed by model training and predictions using the LSTM model.
+
+- **Challenges and Breakthroughs:**  
+  - **Challenges:** 
+    - Encountered repeated errors in importing modules due to incorrect paths and directory configurations. Resolved this by carefully mapping the directory structure and adjusting the import paths accordingly.
+    - Data quality issues with NaN and Inf values halted model training. This was mitigated by implementing a data cleaning step within the script.
+  - **Breakthroughs:** 
+    - Successfully resolved the import issues, enabling the script to run without module-related errors.
+    - Automated data cleaning significantly improved the script’s robustness, allowing it to handle real-world data more effectively.
+
+- **Results and Impact:**  
+  - The script now successfully handles module imports and data quality issues, leading to smoother execution and more reliable model training. This enhancement contributes to the overall stability and maintainability of the project, particularly in handling various datasets that might contain anomalies.
+
+**Example Code Snippet:**
+
+```python
+# Function to check for NaN or Inf values in the dataset and clean them
+def check_and_clean_data(data):
+    """Check for NaN or Inf values in the dataset and clean them."""
+    if np.isnan(data).any() or np.isinf(data).any():
+        print("Data contains NaN or Inf values. Cleaning the data...")
+        data = data.replace([np.inf, -np.inf], np.nan)
+        data = data.dropna()  # Optionally, you can use data.fillna(method='ffill') or another method
+    return data
+```
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:**  
+  - Utilized extensively for scripting, debugging, and implementing new features such as data cleaning.
+- **Data Handling:**  
+  - Employed data cleaning techniques to handle NaN and Inf values in financial datasets.
+- **TensorFlow/Keras:**  
+  - Integrated for loading and training LSTM models, as well as making predictions.
+- **Logging:**  
+  - Used logging to track script execution and record important milestones in data handling and model training.
+- **Path Management:**  
+  - Worked with Python’s `Pathlib` and `sys.path` to ensure correct module imports across different directories.
+
+---
+
+## Lessons Learned
+
+- **Learning Outcomes:**  
+  - Gained a deeper understanding of Python’s module import system and how directory structures impact it. Also learned about effective data cleaning techniques to handle common data quality issues like NaN and Inf values.
+  
+- **Unexpected Challenges:**  
+  - Initially underestimated the complexity of correctly configuring module imports in a deeply nested directory structure. Also, the presence of NaN/Inf values in financial data was a larger issue than anticipated, requiring robust handling mechanisms.
+  
+- **Future Application:**  
+  - The lessons learned will be applied to enhance future workflows, particularly in setting up projects with complex directory structures and ensuring data quality before model training. This will include setting up automated checks for data quality issues at the beginning of any data processing pipeline.
+
+---
+
+## To-Do
+
+- **Unit Tests:**  
+  - Develop unit tests for the `check_and_clean_data` function to ensure it handles various edge cases, such as datasets with all NaN or Inf values.
+  
+- **Documentation:**  
+  - Update the project documentation to include details on the new data cleaning functionality and instructions for resolving common module import issues.
+  
+- **Error Handling:**  
+  - Implement more detailed error handling throughout the script to catch and address other potential issues that could arise during data processing and model training.
+
+- **Feature Implementation:**  
+  - Explore adding more sophisticated data imputation techniques, such as filling NaN values using interpolation methods.
+
+---
+
+## Code Snippets and Context
+
+### Data Cleaning Function
+
+```python
+# Function to check for NaN or Inf values in the dataset and clean them
+def check_and_clean_data(data):
+    """Check for NaN or Inf values in the dataset and clean them."""
+    if np.isnan(data).any() or np.isinf(data).any():
+        print("Data contains NaN or Inf values. Cleaning the data...")
+        data = data.replace([np.inf, -np.inf], np.nan)
+        data = data.dropna()  # Optionally, you can use data.fillna(method='ffill') or another method
+    return data
+```
+
+### Updated Main Script
+
+```python
+# Adjusted import paths and integrated data cleaning
+from models.basiclstm import basicLSTMModelConfig, basicLSTMModelTrainer, prepare_data
+
+# Check and clean features before training
+features = check_and_clean_data(features)
+```
+
+---
+
+## Additional Notes and Reflections
+
+- **Feature Idea:**  
+  - Consider implementing more advanced data cleaning options, such as outlier detection and removal, to further enhance the robustness of the model training process.
+  
+- **Improvement:**  
+  - The script's modularity could be improved by breaking it down into smaller functions, each handling a specific task, which would make it easier to maintain and test.
+  
+- **Reflection:**  
+  - The project is progressing well, but consistent attention to data quality and proper modularization will be key in maintaining its scalability and robustness as it grows.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Module import troubleshooting and resolution - Completed
+- **Milestone 3:** Data cleaning function implementation - Completed
+- **Milestone 4:** Model training and prediction execution - Completed
+- **Milestone 5:** Unit testing for data cleaning - Pending
+
+---
+
+## Resource Links
+
+- [Python Pathlib Documentation](https://docs.python.org/3/library/pathlib.html)
+- [TensorFlow/Keras Documentation](https://www.tensorflow.org/guide/keras)
+- [Pandas Documentation](https://pandas.pydata.org/pandas-docs/stable/)
+
+---
+
+## Collaboration and Communication
+
+- **Meeting Summary:**  
+  - Discussed potential data quality issues and how to address them in the pipeline. Decided to implement an automated data cleaning step to handle NaN and Inf values.
+  
+- **Decision:**  
+  - Agreed on the need to prioritize data cleaning and error handling to ensure robust model training processes.
+  
+- **Action Items:**  
+  - Implement unit tests for the data cleaning function by [specific date].
+  - Update documentation to reflect the changes in data handling processes.
+
+---
+
+## Risk Management
+
+- **Risk:** Data quality issues could disrupt model training.
+  - **Mitigation Strategy:** Implement automated data cleaning and validation steps to catch and resolve these issues before they impact model training.
+
+---
+
+## Retrospective
+
+- **What Went Well:**  
+  - The resolution of module import issues and the implementation of data cleaning functions significantly improved the script's robustness and reliability.
+  
+- **What Could Be Improved:**  
+  - The process of debugging import issues could be streamlined by better documentation and clearer directory structuring from the outset.
+  
+- **Actionable Insights:**  
+  - Regularly review and update the project's directory structure and import paths as the project grows to avoid similar issues in the future.
+
+---

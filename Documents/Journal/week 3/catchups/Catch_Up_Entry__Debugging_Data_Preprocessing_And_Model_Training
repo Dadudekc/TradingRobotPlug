@@ -1,0 +1,171 @@
+---
+
+# Project Journal Entry
+
+**Catch_Up_Entry__Debugging_Data_Preprocessing_And_Model_Training**
+
+---
+
+## Work Completed
+
+### Objectives and Goals:
+- Integrate multiple utilities into the main LSTM model training script.
+- Debug issues related to file paths and data preprocessing.
+- Ensure the LSTM model is correctly configured and data is prepared for training.
+
+### Actions Taken:
+- **Integration:** Integrated `config_handling`, `data_store`, and `model_training_utils` into the main script for seamless operation and configuration handling.
+- **Path Correction:** Debugged and corrected the data directory path to ensure the script could locate the correct files within the project structure.
+- **Data Preprocessing:** Implemented a robust data preprocessing pipeline that included lag feature creation, rolling window features, and data scaling.
+- **Model Configuration:** Ensured the LSTM model was properly configured with the correct input shape, and handled the transition from DataFrame to NumPy arrays for compatibility with TensorFlow.
+- **Error Handling:** Added error handling to manage file not found issues and ensure the script exited gracefully when no valid file was selected.
+- **Debugging:** Implemented detailed debug print statements to trace issues with file paths and data handling, leading to the successful identification and resolution of path-related errors.
+
+### Challenges and Breakthroughs:
+- **Challenges:** 
+  - Initial errors with file path handling caused the script to fail in locating the correct data directory.
+  - Encountered issues with reshaping DataFrames directly, leading to an `AttributeError`.
+- **Breakthroughs:** 
+  - Successfully corrected the file path issues by resetting the project root path and adding detailed debug print statements to trace the error.
+  - Resolved the reshaping issue by converting DataFrames to NumPy arrays before attempting to reshape them for model input.
+
+### Results and Impact:
+- The script now correctly locates data files within the specified directory and preprocesses the data as intended.
+- The LSTM model is correctly configured and ready for training, with data properly shaped and scaled.
+- The improvements in error handling and debugging have made the script more robust and user-friendly.
+
+---
+
+## Skills and Technologies Used
+
+- **Python Programming:** Used for scripting, data manipulation, and integrating multiple utilities into a cohesive workflow.
+- **TensorFlow:** Employed for constructing and training the LSTM model.
+- **Debugging:** Applied advanced debugging techniques to identify and resolve issues with file paths and data preprocessing.
+- **Pandas and NumPy:** Utilized for data manipulation, preprocessing, and reshaping to prepare the data for model training.
+- **Pathlib and OS:** Used for handling file paths and ensuring the script can navigate the project directory structure correctly.
+
+---
+
+## Lessons Learned
+
+### Learning Outcomes:
+- **File Path Management:** Learned the importance of correctly handling file paths within a large project structure and the benefits of using `Pathlib` for cross-platform compatibility.
+- **Data Preprocessing:** Gained insights into the critical steps required for data preprocessing, including feature creation and handling non-numeric data.
+- **Error Handling and Debugging:** Improved debugging techniques by adding strategic print statements, leading to faster identification of issues.
+
+### Unexpected Challenges:
+- The necessity to convert DataFrames to NumPy arrays before reshaping was an unexpected challenge but provided a deeper understanding of the differences between these data structures in Python.
+
+### Future Application:
+- **Improved Error Handling:** Plan to implement more comprehensive error handling throughout the project to ensure all potential issues are caught early.
+- **Documentation:** Will document the directory structure and file handling processes more thoroughly to avoid similar issues in future development.
+
+---
+
+## To-Do
+
+- **Model Training:** Proceed with the full training of the LSTM model using the preprocessed data.
+- **Model Validation:** Implement validation checks to ensure model predictions are reasonable and align with expectations.
+- **Performance Tuning:** Explore hyperparameter tuning to optimize the LSTM model's performance.
+- **Expand Data Handling:** Add functionality to handle more complex data structures and multiple input features.
+
+---
+
+## Code Snippets and Context
+
+### Path Correction and Debugging
+
+```python
+# Ensure correct data directory path
+data_dir = Path("C:/TheTradingRobotPlug/data/alpha_vantage")
+print(f"DEBUG: Data directory path: {data_dir}")
+
+selected_file = select_csv_file(data_dir)
+if not selected_file:
+    sys.exit("No valid file selected. Exiting.")
+```
+
+### Data Preprocessing
+
+```python
+# Data preprocessing
+X_train_seq, X_val_seq, y_train_seq, y_val_seq = data_preprocessor.preprocess_data(data)
+
+# Convert to NumPy array and reshape
+X_train_seq = X_train_seq.to_numpy().reshape((X_train_seq.shape[0], X_train_seq.shape[1], 1))
+X_val_seq = X_val_seq.to_numpy().reshape((X_val_seq.shape[0], X_val_seq.shape[1], 1))
+```
+
+### Model Configuration and Training
+
+```python
+# Ensure the LSTM model is correctly configured
+try:
+    model_config = basicLSTMModelConfig.lstm_model(input_shape=(X_train_seq.shape[1], X_train_seq.shape[2]))
+except (IndexError, ValueError) as e:
+    logger.error(f"Error in model configuration: {e}")
+    raise
+
+# Train the LSTM model
+model, history = lstm_trainer.train_lstm(X_train_seq, y_train_seq, X_val_seq, y_val_seq, model_config, epochs=50)
+```
+
+---
+
+## Additional Notes and Reflections
+
+- **Feature Enhancement:** Consider adding more sophisticated feature engineering steps, such as interaction terms or polynomial features, to capture more complex patterns in the data.
+- **Debugging Tools:** Reflecting on the debugging process, it may be beneficial to integrate more advanced debugging tools, such as `pdb` or `ipdb`, for interactive debugging sessions.
+- **Feedback:** Positive feedback on the improved error handling and directory management from peers, which will inform the approach in future projects.
+
+---
+
+## Project Milestones
+
+- **Milestone 1:** Data directory management and file selection - Completed
+- **Milestone 2:** LSTM model configuration and preprocessing integration - Completed
+- **Milestone 3:** Model training and validation - In Progress
+- **Milestone 4:** Hyperparameter tuning and optimization - Pending
+
+---
+
+## Resource Links
+
+- [TensorFlow LSTM Documentation](https://www.tensorflow.org/api_docs/python/tf/keras/layers/LSTM)
+- [Pathlib Documentation](https://docs.python.org/3/library/pathlib.html)
+- [NumPy Documentation](https://numpy.org/doc/stable/)
+
+---
+
+## Collaboration and Communication
+
+- **Meeting Summary:** Discussed the integration of `config_handling` and `data_store` modules with team members. Decided to prioritize robust error handling in future development phases.
+- **Decision:** Agreed to maintain a consistent directory structure across all team members' environments to avoid path-related issues.
+- **Action Items:** 
+  - Team members to ensure their local environments mirror the project's directory structure.
+  - Schedule a code review session to assess the recent changes and identify any further improvements.
+
+---
+
+## Risk Management
+
+- **Risk:** Potential issues with model convergence during training.
+  - **Mitigation Strategy:** Implement early stopping and regularization techniques to prevent overfitting and ensure model convergence.
+
+---
+
+## Retrospective
+
+### What Went Well:
+- The integration of various utilities into the LSTM training script was successful and improved the script's functionality.
+- Detailed debugging led to the quick resolution of path-related errors, which previously caused the script to fail.
+
+### What Could Be Improved:
+- The initial oversight in handling DataFrame reshaping should have been caught earlier with more comprehensive tests.
+- More thorough documentation of the directory structure could have prevented the initial file path issues.
+
+### Actionable Insights:
+- Continue to use detailed debug statements during development to quickly identify and resolve issues.
+- Prioritize clear and consistent directory management across all team members' environments to avoid similar issues in the future.
+
+---

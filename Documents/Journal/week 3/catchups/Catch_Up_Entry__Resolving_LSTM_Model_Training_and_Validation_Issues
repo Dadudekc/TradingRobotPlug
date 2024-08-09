@@ -1,0 +1,231 @@
+---
+
+# Project Journal Entry Template
+
+**Catch_Up_Entry__Resolving_LSTM_Model_Training_and_Validation_Issues**
+
+---
+
+## Work Completed
+**Objectives and Goals:**
+- Resolve the mismatch between the length of validation targets (`y_val`) and the predicted values (`y_pred_val`) in the LSTM model training.
+- Ensure the LSTM model training process is robust and error-free.
+- Enhance logging to debug the shapes of datasets and predictions during model training.
+
+**Actions Taken:**
+1. **Enhanced Logging:**
+   - Added logging to track the shapes of `X_train`, `X_val`, `y_train`, `y_val`, and predictions to identify where the shape mismatch occurs.
+   - Implemented additional logs to monitor the training process and data preprocessing steps.
+
+2. **Reviewed and Adjusted Data Preparation:**
+   - Checked the data sequence creation to ensure consistent shapes between input data and target variables.
+   - Ensured the model's output layer and reshaping operations are correctly implemented.
+
+3. **Model Training Adjustments:**
+   - Revised the model configuration to ensure the final layer has a single unit.
+   - Added more robust error handling and logging during the training phase to capture any issues promptly.
+
+**Challenges and Breakthroughs:**
+- **Challenges:** 
+  - Encountered a persistent issue with inconsistent numbers of samples between `y_val` and `y_pred_val`.
+  - Debugging the model configuration and data preparation processes to identify the root cause of the shape mismatch.
+
+- **Breakthroughs:**
+  - Enhanced logging provided clear insights into where the shape mismatch was occurring, allowing for targeted debugging and resolution.
+  - Identified and corrected the sequence creation and model output configuration to ensure consistent shapes.
+
+**Results and Impact:**
+- Successfully resolved the shape mismatch issue between `y_val` and `y_pred_val`.
+- Improved the robustness and reliability of the LSTM model training process.
+- Enhanced logging and debugging processes for more efficient troubleshooting in future tasks.
+
+### Code Snippets:
+
+```python
+# Function to preprocess data by handling missing values and scaling
+def preprocess_data(self, X_train, X_val):
+    """Preprocess data by handling missing values and scaling."""
+    scaler = RobustScaler()
+    X_train_scaled = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
+    X_val_scaled = scaler.transform(X_val.reshape(-1, X_val.shape[-1])).reshape(X_val.shape)
+    joblib.dump(scaler, self.scaler_save_path)  # Save the scaler
+    return X_train_scaled, X_val_scaled
+```
+
+```python
+# Function to create sequences for model training
+@staticmethod
+def create_sequences(data, target, time_steps=10):
+    xs, ys = [], []
+    for i in range(len(data) - time_steps):
+        x = data[i:(i + time_steps)]
+        y = target[i + time_steps]  # Ensure correct indexing
+        xs.append(x)
+        ys.append(y)
+    return np.array(xs), np.array(ys)
+```
+
+---
+
+## Skills and Technologies Used
+- **Python Programming:** Utilized for scripting, data manipulation, and debugging.
+- **TensorFlow and Keras:** Employed for building and training the LSTM model.
+- **Logging:** Implemented comprehensive logging for effective debugging and monitoring.
+- **Optuna:** Used for hyperparameter optimization during model training.
+- **Data Preprocessing:** Applied techniques for scaling and handling missing values.
+- **Error Handling:** Enhanced error handling to capture and resolve issues during model training.
+
+---
+
+## Lessons Learned
+- **Learning Outcomes:**
+  - Gained a deeper understanding of how to troubleshoot and resolve shape mismatches in model training.
+  - Learned the importance of comprehensive logging for efficient debugging and monitoring.
+  - Improved skills in data preprocessing and sequence creation for time series data.
+
+- **Unexpected Challenges:**
+  - Encountered persistent issues with shape mismatches, which required detailed debugging and adjustments to data preparation processes.
+
+- **Future Application:**
+  - Apply enhanced logging and error handling techniques to future model training tasks.
+  - Use insights gained from resolving shape mismatches to improve data preprocessing methodologies in other projects.
+
+---
+
+## To-Do
+- **Complete Unit Tests:** Finalize the remaining unit tests for the LSTM model training script by the end of the week.
+- **Refactor Code:** Improve the structure and readability of the LSTM model training module to enhance maintainability.
+- **Documentation:** Update project documentation to reflect recent changes and improvements.
+- **Feature Implementation:** Start working on the caching mechanism for API responses.
+- **Model Evaluation:** Evaluate the trained LSTM model on test data to assess its performance and accuracy.
+
+---
+
+## Code Snippets and Context
+### Data Preprocessing
+
+```python
+# Function to preprocess data by handling missing values and scaling
+def preprocess_data(self, X_train, X_val):
+    """Preprocess data by handling missing values and scaling."""
+    scaler = RobustScaler()
+    X_train_scaled = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(X_train.shape)
+    X_val_scaled = scaler.transform(X_val.reshape(-1, X_val.shape[-1])).reshape(X_val.shape)
+    joblib.dump(scaler, self.scaler_save_path)  # Save the scaler
+    return X_train_scaled, X_val_scaled
+```
+
+### Sequence Creation
+
+```python
+@staticmethod
+def create_sequences(data, target, time_steps=10):
+    xs, ys = [], []
+    for i in range(len(data) - time_steps):
+        x = data[i:(i + time_steps)]
+        y = target[i + time_steps]  # Ensure correct indexing
+        xs.append(x)
+        ys.append(y)
+    return np.array(xs), np.array(ys)
+```
+
+### Model Training with Enhanced Logging
+
+```python
+def train_lstm(self, X_train, y_train, X_val, y_val, model, epochs=100):
+    """Train an LSTM model."""
+    self.logger.info("Starting LSTM model training...")
+    try:
+        # Preprocess data
+        X_train_scaled, X_val_scaled = self.preprocess_data(X_train, X_val)
+
+        # Define callbacks
+        early_stopping = EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
+        reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=2, min_lr=1e-6)
+        checkpoint = ModelCheckpoint(self.model_save_path, save_best_only=True, monitor='val_loss', mode='min')
+        lr_scheduler = LearningRateScheduler(lambda epoch: 1e-4 * 10 ** (epoch / 20.0))
+
+        # Check and log shapes of datasets before training
+        self.logger.info(f"X_train_scaled shape: {X_train_scaled.shape}")
+        self.logger.info(f"y_train shape: {y_train.shape}")
+        self.logger.info(f"X_val_scaled shape: {X_val_scaled.shape}")
+        self.logger.info(f"y_val shape: {y_val.shape}")
+
+        # Training the model
+        model.fit(X_train_scaled, y_train, validation_data=(X_val_scaled, y_val), epochs=epochs, batch_size=32,
+                callbacks=[early_stopping, reduce_lr, checkpoint, lr_scheduler])
+
+        y_pred_val = model.predict(X_val_scaled).flatten()
+        self.logger.info(f"Predicted y_val shape: {y_pred_val.shape}")
+        self.logger.info(f"True y_val shape: {y_val.shape}")
+        mse = mean_squared_error(y_val, y_pred_val)
+        rmse = np.sqrt(mse)
+        r2 = r2_score(y_val, y_pred_val)
+
+        self.logger.info(f"Validation MSE: {mse:.2f}, RMSE: {rmse:.2f}, R²: {r2:.2f}")
+
+        return model
+
+    except Exception as e:
+        self.logger.error(f"Error occurred during LSTM model training: {e}")
+        return None
+```
+
+---
+
+## Additional Notes and Reflections
+- **Feature Idea:** Consider adding a feature to cache API responses to reduce redundant data fetches and improve efficiency.
+- **Improvement:** Enhance error handling in the data fetch script to better manage API rate limits and provide more informative error messages.
+- **Reflection:** The project is progressing well, but regular team check-ins could further enhance collaboration and ensure alignment on goals.
+- **Feedback:** Positive feedback on the recent improvements to the data fetch script from team members.
+
+---
+
+## Project Milestones
+- **Milestone 1:** Initial setup and configuration - Completed
+- **Milestone 2:** Data fetch module implementation - Completed
+- **Milestone 3:** LSTM model training and validation - In Progress
+- **Milestone 4:** Unit testing and validation - Pending
+- **Milestone 5:** Final integration and deployment - Pending
+
+---
+
+## Resource Links
+- [Alpha Vantage API Documentation](https://www.alphavantage.co/documentation/)
+- [TensorFlow Documentation](https://www.tensorflow.org/api_docs)
+- [Optuna Documentation](https://optuna.readthedocs.io/en/stable/)
+- [GitHub Repository](https://github.com/user/repo)
+
+---
+
+## Collaboration and Communication
+- **Meetings and Discussions:**
+  - Discussed the shape mismatch issue and identified steps to resolve it.
+  - Agreed on enhancing logging and error handling for better debugging and monitoring.
+
+- **Decisions Made:**
+  - Decided to enhance logging to track dataset shapes and model predictions.
+  - Implemented more robust error handling and logging in the LSTM model training process.
+
+- **Action Items:**
+  - Alice to finalize unit tests for the LSTM model training script by the end of the week.
+  - Bob to review and update project documentation to reflect recent changes by the end of the week.
+
+---
+
+## Risk
+
+ Management
+- **Risk:** Potential delays in completing unit tests.
+  - **Mitigation Strategy:** Allocate additional resources to ensure tests are completed on time.
+- **Risk:** API rate limits could affect data retrieval.
+  - **Mitigation Strategy:** Implement caching to reduce the number of API calls.
+
+---
+
+## Retrospective
+- **What Went Well:** The issue with shape mismatches was identified and resolved, leading to more robust model training.
+- **What Could Be Improved:** Need to improve time management for unit testing.
+- **Actionable Insights:** Allocate specific time blocks for testing and debugging to ensure consistent progress.
+
+---
