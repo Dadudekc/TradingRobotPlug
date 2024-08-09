@@ -127,7 +127,7 @@ class DataPreprocessor:
             'MaxAbsScaler': MaxAbsScaler()
         }
 
-    def preprocess_data(self, data, target_column='close', feature_columns=None, test_size=0.2, random_state=42):
+    def preprocess_data(self, data, target_column='close', feature_columns=None, test_size=0.2, random_state=42, lag_sizes=None):
         """
         Preprocess the data using specified feature columns, handle date columns, create lag features,
         rolling window features, and scale the data.
@@ -151,10 +151,13 @@ class DataPreprocessor:
             else:
                 raise ValueError(f"Target column '{target_column}' not found in the DataFrame.")
 
-            # Optionally handle date columns, create lags, rolling features, etc. as necessary
-            # Example: Handle date if it's one of the features
+            # Handle date columns, if applicable
             if 'date' in X.columns:
                 X = self._handle_dates(X, 'date')
+
+            # Create lag features if lag_sizes is provided
+            if lag_sizes:
+                X = self._create_lag_features(X, target_column, lag_sizes)
 
             # Scale features
             if 'scaler_type' in self.config_manager.config:
@@ -169,53 +172,6 @@ class DataPreprocessor:
         except Exception as e:
             self.logger.error(f"Failed to preprocess data: {str(e)}", exc_info=True)
             return None, None, None, None
-
-
-    def _handle_dates(self, data, date_column):
-        if date_column in data.columns:
-            data[date_column] = pd.to_datetime(data[date_column])
-            reference_date = data[date_column].min()
-            data['days_since_reference'] = (data[date_column] - reference_date).dt.days
-            data.drop(columns=[date_column], inplace=True)
-        return data
-
-    def _create_lag_features(self, df, column_name, lag_sizes):
-        if column_name not in df.columns:
-            self.logger.log(f"Warning: Column '{column_name}' not found in DataFrame. Skipping lag feature creation.", "ERROR")
-            return df
-
-        for lag_days in lag_sizes:
-            df[f'{column_name}_lag_{lag_days}'] = df[column_name].shift(lag_days)
-
-        df.fillna(method='ffill', inplace=True)
-        df.fillna(method='bfill', inplace=True)
-
-        self.logger.log(f"Lag features created for column '{column_name}' with lag sizes {lag_sizes}.")
-        return df
-
-    def _create_rolling_window_features(self, data, column_name, windows):
-        for window in windows:
-            data[f'{column_name}_rolling_mean_{window}'] = data[column_name].rolling(window=window).mean()
-            data[f'{column_name}_rolling_std_{window}'] = data[column_name].rolling(window=window).std()
-
-            data.fillna(method='pad', inplace=True)
-
-        self.logger.log(f"Rolling window features created for column '{column_name}' with window sizes {windows}.")
-        return data
-
-    def _impute_and_scale(self, X, scaler_type):
-        imputer = SimpleImputer(strategy='mean')
-        X_imputed = imputer.fit_transform(X)
-
-        # Check if config_manager is provided and has the method get
-        if self.config_manager and hasattr(self.config_manager, 'get'):
-            scaler_type = scaler_type or self.config_manager.get('SCALING_DEFAULT_SCALER') or 'StandardScaler'
-        else:
-            scaler_type = scaler_type or 'StandardScaler'  # Default fallback
-
-        scaler = self.scalers.get(scaler_type, StandardScaler())
-        X_scaled = scaler.fit_transform(X_imputed)
-        return X_scaled
 
 
 class VisualizationHandler:

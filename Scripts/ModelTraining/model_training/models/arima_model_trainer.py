@@ -94,10 +94,9 @@ class ARIMAModelTrainer:
         self.display_message(f"Train data: {train.head()}", "DEBUG")
         self.display_message(f"Test data: {test.head()}", "DEBUG")
 
-        # Check if all columns are of the correct numeric type
-        if not all(test.dtypes.isin([np.float64, np.float32])):
-            for col in test.columns:
-                test[col] = pd.to_numeric(test[col], errors='coerce')
+        # Check if the test data is of the correct numeric type
+        if not (test.dtype in [np.float64, np.float32]):
+            test = pd.to_numeric(test, errors='coerce')
 
         # Scale the data
         scaler = StandardScaler()

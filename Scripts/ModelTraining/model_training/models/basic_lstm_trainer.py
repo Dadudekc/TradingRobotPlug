@@ -7,9 +7,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout, Input
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.model_selection import TimeSeriesSplit  # For cross-validation
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+from sklearn.model_selection import TimeSeriesSplit
+import optuna
 
 # Adjust import path based on your project structure
 script_dir = Path(__file__).resolve().parent
@@ -77,31 +79,49 @@ class basicLSTMModelTrainer:
         model = model_config
         
         self.logger.info("Starting model training...")
-        history = model.fit(X_train, y_train, epochs=epochs, batch_size=32, validation_data=(X_val, y_val))
+        early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+        reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, min_lr=1e-6)
+        history = model.fit(X_train, y_train, epochs=epochs, batch_size=32, validation_data=(X_val, y_val), 
+                            callbacks=[early_stopping, reduce_lr])
         self.logger.info("LSTM model training complete")
         
         return model, history
 
-def prepare_data(data, target_column='close', time_steps=10):
+def prepare_data(data, target_column='close', time_steps=10, split_ratio=0.8):
     if not isinstance(data, pd.DataFrame):
         raise ValueError("Input data must be a pandas DataFrame")
     
     if target_column not in data.columns:
         raise ValueError(f"Target column '{target_column}' not found in data")
     
-    data = data.copy()
+    # Check for NaN or infinite values and handle them
+    data = data.replace([np.inf, -np.inf], np.nan).dropna()
+
+    # Exclude non-numeric columns (e.g., date columns) from the feature set
+    features = data.drop(columns=[target_column])
+    numeric_features = features.select_dtypes(include=[np.number])
     
-    # Select all numeric columns
-    numeric_data = data.select_dtypes(include=[np.number])
+    # Scale numeric features and the target column separately
+    feature_scaler = MinMaxScaler()
+    target_scaler = MinMaxScaler()
+
+    scaled_features = feature_scaler.fit_transform(numeric_features)
+    scaled_target = target_scaler.fit_transform(data[[target_column]])
+
+    # Combine scaled features and scaled target
+    scaled_data = np.hstack((scaled_features, scaled_target))
+
+    # Create sequences
+    sequences, targets = basicLSTMModelTrainer.create_sequences(scaled_data, scaled_target.flatten(), time_steps)
     
-    # Scale data
-    scaler = MinMaxScaler()
-    scaled_data = scaler.fit_transform(numeric_data)
+    # Split the data into training and validation sets
+    split_index = int(len(sequences) * split_ratio)
+    X_train_seq = sequences[:split_index]
+    y_train_seq = targets[:split_index]
+    X_val_seq = sequences[split_index:]
+    y_val_seq = targets[split_index:]
     
-    target = data[target_column].values
-    sequences, targets = basicLSTMModelTrainer.create_sequences(scaled_data, target, time_steps)
-    
-    return sequences, targets, scaler
+    return X_train_seq, y_train_seq, X_val_seq, y_val_seq, target_scaler
 
 def plot_predictions(y_true, y_pred):
     plt.figure(figsize=(14, 7))
@@ -115,119 +135,72 @@ def plot_predictions(y_true, y_pred):
 
 def evaluate_model(y_true, y_pred):
     mse = mean_squared_error(y_true, y_pred)
+    mae = mean_absolute_error(y_true, y_pred)
     r2 = r2_score(y_true, y_pred)
     print(f"Mean Squared Error: {mse}")
+    print(f"Mean Absolute Error: {mae}")
     print(f"R² Score: {r2}")
 
 def cross_validate_lstm(data, target_column='close', time_steps=10, n_splits=5, epochs=50):
     tscv = TimeSeriesSplit(n_splits=n_splits)
     mse_scores = []
+    mae_scores = []
     r2_scores = []
     
-    for train_index, val_index in tscv.split(data):
-        X_train, X_val = data[train_index], data[val_index]
-        y_train, y_val = data[target_column].values[train_index], data[target_column].values[val_index]
+    numeric_data = data.drop(columns=['date', 'symbol']).select_dtypes(include=[np.number]).values
+    target_column_index = data.columns.get_loc(target_column)
+    target_data = numeric_data[:, target_column_index]
+
+    for i, (train_index, val_index) in enumerate(tscv.split(numeric_data)):
+        print(f"\n--- Cross-Validation Fold {i + 1} ---")
+
+        X_train, X_val = numeric_data[train_index], numeric_data[val_index]
+        y_train, y_val = target_data[train_index], target_data[val_index]
+
+        print("\nSample of X_train:")
+        print(pd.DataFrame(X_train).head(10))
+        
+        print("\nSample of y_train:")
+        print(pd.DataFrame(y_train).head(10))
+
+        if np.isnan(X_train).any() or np.isnan(y_train).any():
+            logger.error("Training data contains NaN values.")
+            print("Training data contains NaN values.")
+            print("NaN found in X_train:", np.isnan(X_train).any())
+            print("NaN found in y_train:", np.isnan(y_train).any())
+            return
+        if np.isnan(X_val).any() or np.isnan(y_val).any():
+            logger.error("Validation data contains NaN values.")
+            print("Validation data contains NaN values.")
+            print("NaN found in X_val:", np.isnan(X_val).any())
+            print("NaN found in y_val:", np.isnan(y_val).any())
+            return
         
         X_train_seq, y_train_seq = basicLSTMModelTrainer.create_sequences(X_train, y_train, time_steps)
         X_val_seq, y_val_seq = basicLSTMModelTrainer.create_sequences(X_val, y_val, time_steps)
         
-        model_config = basicLSTMModelConfig.lstm_model(input_shape=(X_train_seq.shape[1], X_train_seq.shape[2]))
         trainer = basicLSTMModelTrainer(logger)
-        model, _ = trainer.train_lstm(X_train_seq, y_train_seq, X_val_seq, y_val_seq, model_config, epochs)
+        model, _ = trainer.train_lstm(X_train_seq, y_train_seq, X_val_seq, y_val_seq, model_config=basicLSTMModelConfig.lstm_model(input_shape=(X_train_seq.shape[1], X_train_seq.shape[2])), epochs=epochs)
         
         predictions = model.predict(X_val_seq)
+        
+        if np.isnan(predictions).any():
+            logger.error("Model predictions contain NaN values.")
+            print("Model predictions contain NaN values.")
+            return
+
         mse_scores.append(mean_squared_error(y_val_seq, predictions))
+        mae_scores.append(mean_absolute_error(y_val_seq, predictions))
         r2_scores.append(r2_score(y_val_seq, predictions))
     
     print(f"Cross-Validation Mean Squared Error Scores: {mse_scores}")
+    print(f"Cross-Validation Mean Absolute Error Scores: {mae_scores}")
     print(f"Cross-Validation R² Scores: {r2_scores}")
     print(f"Mean Cross-Validation MSE: {np.mean(mse_scores)}")
+    print(f"Mean Cross-Validation MAE: {np.mean(mae_scores)}")
     print(f"Mean Cross-Validation R²: {np.mean(r2_scores)}")
 
 def list_csv_files(directory):
     """List all CSV files in a directory."""
     print(f"DEBUG: Checking for CSV files in directory: {directory}")
-    csv_files = [f for f in os.listdir(directory) if f.endswith('.csv')]
-    if not csv_files:
-        print("DEBUG: No CSV files found in the directory.")
-        return None
-    print("DEBUG: Available CSV files:")
-    for i, file in enumerate(csv_files, 1):
-        print(f"DEBUG: {i}: {file}")
-    return csv_files
-
-def select_csv_file(directory):
-    """Prompt the user to select a CSV file from a directory."""
-    csv_files = list_csv_files(directory)
-    if not csv_files:
-        return None
-    try:
-        choice = int(input("Enter the number of the file to use: "))
-        if 1 <= choice <= len(csv_files):
-            return os.path.join(directory, csv_files[choice - 1])
-        else:
-            print("DEBUG: Invalid choice.")
-            return None
-    except ValueError:
-        print("DEBUG: Please enter a valid number.")
-        return None
-
-if __name__ == "__main__":
-    logger = setup_logger("LSTM_Training")
-    logger_handler = LoggerHandler(logger=logger)
-    config_manager = ConfigManager()
-    data_loader = DataLoader(logger_handler)
-    data_preprocessor = DataPreprocessor(logger_handler, config_manager)
-
-    # Correct the data directory path
-    data_dir = Path("C:/TheTradingRobotPlug/data/alpha_vantage")
-    print(f"DEBUG: Data directory path: {data_dir}")
-    selected_file = select_csv_file(data_dir)
-    if not selected_file:
-        sys.exit("No valid file selected. Exiting.")
-    
-    # Load data
-    data = data_loader.load_data(selected_file)
-    if data is None:
-        sys.exit("Data loading failed. Exiting.")
-
-    # Data preprocessing
-    X_train_seq, y_train_seq, X_val_seq, y_val_seq, scaler = prepare_data(data)
-
-    # Ensure data shape is correct
-    logger.info(f"X_train_seq shape: {X_train_seq.shape}")
-    logger.info(f"y_train_seq shape: {y_train_seq.shape}")
-    logger.info(f"X_val_seq shape: {X_val_seq.shape}")
-    logger.info(f"y_val_seq shape: {y_val_seq.shape}")
-    
-    # Convert to NumPy array and reshape the data to add the third dimension
-    X_train_seq = X_train_seq.reshape((X_train_seq.shape[0], X_train_seq.shape[1], X_train_seq.shape[2]))
-    X_val_seq = X_val_seq.reshape((X_val_seq.shape[0], X_val_seq.shape[1], X_val_seq.shape[2]))
-
-    lstm_trainer = basicLSTMModelTrainer(logger)
-    
-    # Make sure the shape of X_train_seq is as expected
-    try:
-        model_config = basicLSTMModelConfig.lstm_model(input_shape=(X_train_seq.shape[1], X_train_seq.shape[2]))
-    except (IndexError, ValueError) as e:
-        logger.error(f"Error in model configuration: {e}")
-        raise
-    
-    # Train the model
-    model, history = lstm_trainer.train_lstm(X_train_seq, y_train_seq, X_val_seq, y_val_seq, model_config, epochs=50)
-    
-    # Make predictions
-    predictions = model.predict(X_val_seq)
-    
-    # Rescale predictions and actual values
-    y_val_seq_rescaled = scaler.inverse_transform(y_val_seq.reshape(-1, 1))
-    predictions_rescaled = scaler.inverse_transform(predictions)
-    
-    # Plot predictions vs actual values (unscaled)
-    plot_predictions(y_val_seq_rescaled, predictions_rescaled)
-    
-    # Evaluate model
-    evaluate_model(y_val_seq_rescaled, predictions_rescaled)
-    
-    # Cross-validation
-    cross_validate_lstm(data.values, target_column='close', time_steps=10, n_splits=5, epochs=50)
+    csv_files

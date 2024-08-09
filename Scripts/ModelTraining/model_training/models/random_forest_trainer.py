@@ -16,6 +16,7 @@ from sklearn.model_selection import TimeSeriesSplit, cross_val_score, train_test
 import optuna
 from optuna.samplers import TPESampler
 from typing import Optional, Tuple, Any, Dict
+import matplotlib.pyplot as plt
 
 # Set up project root and add 'Utilities' to sys.path
 script_dir = Path(__file__).resolve().parent
@@ -50,6 +51,7 @@ class RandomForestModel:
         self.logger = logger or logging.getLogger(__name__)
         self.best_rf_model = None
         self.best_params = {}
+        self.feature_names = []
 
     def feature_engineering(self, df: pd.DataFrame) -> pd.DataFrame:
         # Example feature engineering
@@ -88,7 +90,7 @@ class RandomForestModel:
         
         return mse
 
-    def train(self, X: np.ndarray, y: np.ndarray, test_size: float = 0.2, random_state: Optional[int] = None,
+    def train(self, X: np.ndarray, y: np.ndarray, feature_names: list, test_size: float = 0.2, random_state: Optional[int] = None,
               n_trials: int = 50, cv_folds: int = 5, cache_enabled: bool = True) -> Tuple[RandomForestRegressor, Dict[str, Any], float, float, float, float, float]:
         if not cache_enabled:
             self.memory.clear(warn=False)
@@ -97,6 +99,8 @@ class RandomForestModel:
             raise ValueError("X and y should be numpy arrays.")
         if X.shape[0] != y.shape[0]:
             raise ValueError("X and y should have the same number of samples.")
+        
+        self.feature_names = feature_names
 
         X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=test_size, random_state=random_state, shuffle=False)  # Avoid shuffling for time series
 
@@ -122,13 +126,24 @@ class RandomForestModel:
         # Feature importance
         if self.logger:
             feature_importances = self.best_rf_model.feature_importances_
-            self.logger.info(f"Feature importances: {feature_importances}")
+            self.logger.info("Feature importances:")
+            for name, importance in zip(self.feature_names, feature_importances):
+                self.logger.info(f"{name}: {importance:.4f}")
+
+            # Plot the feature importances
+            indices = np.argsort(feature_importances)[::-1]
+            plt.figure(figsize=(10, 8))
+            plt.title("Feature Importances")
+            plt.barh(range(len(indices)), feature_importances[indices], align="center")
+            plt.yticks(range(len(indices)), [self.feature_names[i] for i in indices])
+            plt.xlabel("Relative Importance")
+            plt.show()
 
         # SHAP values for interpretability
         explainer = shap.TreeExplainer(self.best_rf_model)
         shap_values = explainer.shap_values(X_val)
         if self.logger:
-            shap.summary_plot(shap_values, X_val, plot_type="bar")
+            shap.summary_plot(shap_values, X_val, feature_names=self.feature_names, plot_type="bar")
         
         return self.best_rf_model, self.best_params, mse, rmse, mae, mape, r2
 
@@ -169,8 +184,9 @@ if __name__ == "__main__":
     data = model.feature_engineering(data)
 
     # Prepare the features (X) and target (y)
+    feature_names = data.drop(columns=['close']).columns.tolist()  # Keep the feature names
     X = data.drop(columns=['close']).values  # Convert to NumPy array
     y = data['close'].values  # Convert to NumPy array
 
-    best_model, best_params, mse, rmse, mae, mape, r2 = model.train(X, y, random_state=42)
+    best_model, best_params, mse, rmse, mae, mape, r2 = model.train(X, y, feature_names=feature_names, random_state=42)
     logger.info(f"Best model: {best_model}")

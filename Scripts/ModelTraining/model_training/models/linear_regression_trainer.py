@@ -248,7 +248,6 @@ class LinearRegressionModel:
                     cluster_indices = np.where(cluster_labels == worst_cluster)[0]
                     index = cluster_indices[np.argmax(errors.iloc[cluster_indices])]  # Use iloc for positional indexing
 
-
                 else:
                     raise ValueError(f"Unknown strategy: {strategy}")
 
@@ -332,7 +331,6 @@ def main():
     X_train, X_val, y_train, y_val = data_preprocessor.preprocess_data(
         data, 
         target_column='close',  # Assuming 'close' is the target column
-        date_column='date',      # Assuming 'date' is the date column
         lag_sizes=[1, 2, 3, 5, 10], 
         window_sizes=[5, 10, 20],
         scaler_type='StandardScaler'
